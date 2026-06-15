@@ -1,0 +1,161 @@
+<div class="container mt-4">
+  <div class="card p-4 shadow mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3>Create Task</h3>
+        <p class="text-muted mb-0">Fill the form below to create a new task for your CRM workflow.</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="saveTask()" #taskForm="ngForm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="clientName">Client Name</label>
+          <input
+            id="clientName"
+            name="clientName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="task.clientName"
+            placeholder="Enter client name"
+            required
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="clientCategory">Client Category</label>
+          <select
+            id="clientCategory"
+            name="clientCategoryId"
+            class="form-select"
+            [(ngModel)]="task.clientCategoryId"
+          >
+          <option [ngValue]="0">Choose category</option>
+            <option *ngFor="let option of clientCategories" [ngValue]="option.id">{{ option.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="phoneNumber">Phone Number</label>
+          <input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            class="form-control"
+            [(ngModel)]="task.phoneNumber"
+            placeholder="Enter phone number"
+            required
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            class="form-control"
+            [(ngModel)]="task.email"
+            placeholder="Enter client email"
+            required
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="assignedTo">Assign To</label>
+          <select
+            id="assignedTo"
+            name="assignedToId"
+            class="form-select"
+            [(ngModel)]="task.assignedToId"
+          >
+            <option [ngValue]="0">Choose employee</option>
+            <option *ngFor="let user of users" [ngValue]="user.id">{{ user.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="status">Status</label>
+          <select
+            id="status"
+            name="statusId"
+            class="form-select"
+            [(ngModel)]="task.statusId"
+          >
+            <option [ngValue]="0">Choose status</option>
+            <option *ngFor="let option of statuses" [ngValue]="option.id">{{ option.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label" for="task_Description">Task Description</label>
+          <textarea
+            id="task_Description"
+            name="task_Description"
+            class="form-control"
+            [(ngModel)]="task.task_Description"
+            rows="4"
+            placeholder="Describe the task"
+            required
+          ></textarea>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="priority">Priority</label>
+          <select
+            id="priority"
+            name="priorityId"
+            class="form-select"
+            [(ngModel)]="task.priorityId"
+          >
+            <option [ngValue]="0">Choose priority</option>
+            <option *ngFor="let option of priorities" [ngValue]="option.id">{{ option.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="serviceCategory">Service Category</label>
+          <select
+            id="serviceCategory"
+            name="serviceCategoryId"
+            class="form-select"
+            [(ngModel)]="task.serviceCategoryId"
+          >
+            <option [ngValue]="0">Choose service category</option>
+            <option *ngFor="let option of serviceCategories" [ngValue]="option.id">{{ option.name }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="dueDate">Due Date</label>
+          <input
+            id="dueDate"
+            name="dueDate"
+            type="date"
+            class="form-control"
+            [(ngModel)]="task.dueDate"
+            required
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="createdOn">Created On</label>
+          <input
+            id="createdOn"
+            type="datetime-local"
+            class="form-control"
+            [value]="task.createdOn"
+            disabled
+          />
+        </div>
+
+        <input type="hidden" name="createdById" [(ngModel)]="task.createdById" />
+
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Create Task</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="resetTask()">Clear</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

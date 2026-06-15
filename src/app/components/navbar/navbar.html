@@ -1,0 +1,14 @@
+<nav class="header-nav">
+    <a routerLink="/main/dashboard">
+        Home
+    </a>
+    <a routerLink="/main/task-list">
+        Task List
+    </a>
+    <a routerLink="/main/create-task">
+        Create Task
+    </a>
+    <a *ngIf="role==='Admin'" routerLink="/main/employee-management" routerLinkActive="active">
+        Employee Management
+    </a>
+   </nav>

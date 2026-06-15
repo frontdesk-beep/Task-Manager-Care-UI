@@ -1,0 +1,12 @@
+<aside class="simple-sidebar">
+    <div class="sidebar-header">
+        <div class="sb-header">Menu</div>
+    </div>
+    <nav>
+        <a routerLink="/main/dashboard">Dashboard</a>
+        <a routerLink="/main/task-history">Task History</a>
+        <a routerLink="/main/clientlist">Client List</a>
+        <a routerLink="/main/create-task">Create Task</a>
+        <a *ngIf="role==='Admin'" routerLink="/main/employee-management" routerLinkActive="active">Employee Management</a>
+    </nav>
+</aside>

@@ -1,0 +1,63 @@
+/* Employee management table and modal styles */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-panel {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 520px;
+    max-width: calc(100% - 40px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 6px;
+    color: #9ca3af;
+}
+
+.sort-icon.asc::after {
+    content: '▲';
+    margin-left: 4px;
+    font-size: 0.7rem;
+}
+
+.sort-icon.desc::after {
+    content: '▼';
+    margin-left: 4px;
+    font-size: 0.7rem;
+}
+
+.sort-icon:hover {
+    color: #374151;
+}
+
+.card .form-label {
+    font-weight: 600;
+}
+
+.card .btn-outline-secondary {
+    min-width: 110px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+

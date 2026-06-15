@@ -1,0 +1,87 @@
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { TaskService } from '../../services/task.service';
+import {ToastrService} from 'ngx-toastr';
+
+@Component({
+  selector: 'app-header-top',
+  imports: [CommonModule, RouterLink],
+  templateUrl: './header-top.html',
+  styleUrl: './header-top.css',
+})
+export class HeaderTop implements OnInit, OnDestroy {
+  @Input() sidebarOpen = true;
+  @Output() sidebarToggle = new EventEmitter<void>();
+
+  name = '';
+  dropdownOpen = false;
+  notificationOpen = false;
+  notifications: any[] = [];
+  storeSubscription?: Subscription;
+
+  constructor(
+    private router: Router,
+    private taskService: TaskService,
+    private toastr: ToastrService
+  ) { }
+
+  ngOnInit(): void {
+    this.name = localStorage.getItem('name') || '';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = user?.id || 0;
+    if (userId) {
+      this.storeSubscription = this.taskService.GetNotifications(userId).subscribe({
+        next: (res: any) => {
+          const list = Array.isArray(res) ? res : (res?.data || []);
+          this.notifications = list
+        },
+        error: (err: any) => {
+          console.log('Notification load failed', err);
+          this.notifications = [];
+        }
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.storeSubscription?.unsubscribe();
+  }
+
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  get unreadCount(): number {
+    return this.notifications.filter(x => !x.isRead).length;
+  }
+
+  toggleNotifications() {
+    this.notificationOpen = !this.notificationOpen;
+    if (this.notificationOpen) {
+      const unread = this.notifications.filter(x => !x.isRead);
+
+      unread.forEach((n) => {
+
+        n.isRead = true;
+
+        this.taskService.MarkNotificationRead(n.id).subscribe({
+          error: (err) => {
+            console.log('Failed to mark notification read', err);
+            n.isRead = false;
+          }
+        });
+      });
+    }
+  }
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('name');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    localStorage.removeItem('isLoggedIn');
+    this.toastr.success('Logged out successfully!');
+    this.router.navigate(['/login']);
+  }
+}

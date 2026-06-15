@@ -1,0 +1,16 @@
+.page-content {
+    background: #F7F9FC;
+    min-height:
+        calc(100vh - 160px);
+    padding: 32px;
+    margin-left: 0;
+    transition: margin 0.2s ease;
+}
+
+.page-content.sidebar-open {
+    margin-left: 220px;
+}
+
+@media (max-width: 800px) {
+    .page-content, .page-content.sidebar-open { margin-left: 0; }
+}

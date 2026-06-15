@@ -1,0 +1,99 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+}
+:host {
+    display: block;
+    height: 100vh;
+}
+.auth-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+.left-panel {
+    flex: 1;
+    background:
+        linear-gradient(135deg,
+            #3d4ca7,
+            #5f78ff);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+}
+.left-panel h1 {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+.left-panel h3 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+.left-panel p {
+    font-size: 18px;
+    line-height: 1.7;
+    max-width: 450px;
+}
+
+/* Logo and brand adjustments */
+.logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.dashboard-illustration {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 0 10px 0;
+}
+
+.brand-title {
+    font-size: 35px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: white;
+}
+
+.lead {
+    font-size: 16px;
+    color: rgba(255,255,255,0.95);
+    max-width: 420px;
+    margin: 0 auto;
+    
+
+/* Ensure inner content is centered within the left panel */
+.left-panel > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.brand-title,
+.lead {
+    text-align: center;
+}
+}
+.right-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    background: #f8f9fc;
+    padding: 40px;
+}
+
+/* Quick variant to force white logo on dark backgrounds */
+.logo-white {
+    filter: brightness(0) invert(1);
+    -webkit-filter: brightness(0) invert(1);
+}

@@ -1,0 +1,98 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Auth } from '../../services/auth';
+import {ToastrService} from 'ngx-toastr';
+
+@Component({
+  selector: 'app-profile',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './profile.html',
+  styleUrl: './profile.css',
+})
+export class Profile {
+  id = 0;
+  name: string = '';
+  email: string = '';
+  role: string = '';
+  editMode: boolean = false;
+  private originalUser: any = null;
+
+  constructor(private auth: Auth, private router: Router, private toastr: ToastrService) {}
+
+  ngOnInit() {
+
+    const stored = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!stored.id) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.id = stored.id;
+    this.name = stored.name;
+    this.email = stored.email;
+    this.role = stored.role;
+    this.loadProfile();
+  }
+loadProfile() {
+    this.auth.getProfile(this.id).subscribe({
+      next: (res: any) => {
+        this.name = res.name;
+        this.email = res.email;
+        this.role = res.role;
+
+        this.originalUser = {
+          id: this.id,
+          name: res.name,
+          email: res.email,
+          role: res.role,
+        };
+      },
+      error: (err) => {
+        console.log(err);
+        this.toastr.error('Failed to load profile');
+      },
+    });
+}
+  edit() {
+    this.editMode = true;
+  }
+  back(){
+    this.router.navigate(['/main/dashboard']);
+  }
+
+  cancel() {
+    if (this.originalUser) {
+      this.name = this.originalUser.name;
+      this.email = this.originalUser.email;
+      this.role = this.originalUser.role;
+    }
+    this.editMode = false;
+  }
+
+  save() {
+    const data = {
+      name: this.name,
+      email: this.email,
+      role: this.role,
+    };
+
+    this.auth.updateProfile(this.id, data).subscribe({
+      next: (res: any) => {
+        this.originalUser = {
+          name: res.name,
+          email: res.email,
+          role: res.role,
+        };
+        this.toastr.success('Profile updated');
+        this.loadProfile();
+        this.editMode = false;
+      },
+      error: (err) => {
+        console.log(err);
+        this.toastr.error('Update failed');
+      },
+    });
+    this.editMode = false
+  }
+}

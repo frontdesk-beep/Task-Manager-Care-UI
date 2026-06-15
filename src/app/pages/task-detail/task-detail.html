@@ -1,0 +1,28 @@
+<div class="task-detail">
+  <div *ngIf="loading">Loading task details...</div>
+  <div *ngIf="loadError" class="error">Error: {{ loadError }}</div>
+  <div *ngIf="!loading && !loadError && !task">No task found.</div>
+  <div *ngIf="task">
+    <h2>{{ task.clientName }} - {{ task.task_Description }}</h2>
+    <div class="meta">
+      <div><strong>Assigned To:</strong> {{ task.assignedToName || task.assignedToId }}</div>
+      <div><strong>Created By:</strong> {{ task.createdByName || task.createdById }}</div>
+      <div><strong>Status:</strong> {{ task.statusName }}</div>
+      <div><strong>Due:</strong> {{ task.dueDate }}</div>
+    </div>
+
+    <div class="details">
+      <h3>Details</h3>
+      <p>{{ task.longDescription || task.task_Description }}</p>
+    </div>
+
+    <div class="actions">
+      <button (click)="openInEditor()">Edit Task</button>
+    </div>
+
+    <div class="comments-pane">
+      <h3>Comments</h3>
+      <app-comments [taskId]="taskId"></app-comments>
+    </div>
+  </div>
+</div>

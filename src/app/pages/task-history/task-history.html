@@ -1,0 +1,148 @@
+<section class="history-page">
+  <div class="history-header">
+    <!-- <h1>Task History</h1> -->
+    <!-- <div class="history-summary">
+      <span>Assigned completed: {{ getFilteredAndSortedAssignedTasks().length }}</span>
+      <span>Created completed: {{ getFilteredAndSortedCreatedTasks().length }}</span>
+    </div> -->
+  </div>
+
+  <div *ngIf="loading" class="loading-state">Loading completed task history...</div>
+  <div *ngIf="error" class="error-state">{{ error }}</div>
+
+  <div *ngIf="!loading && !error">
+    <div class="history-panel">
+      <h2>Assigned Tasks</h2>
+      
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label>
+            <span class="filter-icon">🔍</span>
+            <input type="text" [(ngModel)]="assignedClientNameSearch" (change)="onAssignedFilterChange()" class="filter-input" placeholder="Search client name...">
+          </label>
+        </div>
+        <div class="filter-group">
+          <label>
+            <select [(ngModel)]="assignedCreatedByFilter" (change)="onAssignedFilterChange()" class="filter-select">
+              <option [value]="null">All Created by</option>
+              <option *ngFor="let user of getUniqueCreatedByNames(completedAssigned)" [value]="user.id">{{ user.name }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn-clear-filters" (click)="clearAllFilters()">Clear All</button>
+          <button type="button" class="btn btn-outline-success" (click)="exportAssignedExcel()">Export Excel</button>
+          <button type="button" class="btn btn-outline-primary" (click)="exportAssignedPdf()">Export PDF</button>
+          <!-- <div class="filter-count">{{ getFilteredAndSortedAssignedTasks().length }} task{{ getFilteredAndSortedAssignedTasks().length === 1 ? '' : 's' }}</div> -->
+        </div>
+      </div>
+
+      <div *ngIf="getFilteredAndSortedAssignedTasks().length === 0" class="empty-state">No completed assigned tasks matching filters.</div>
+      <div *ngIf="getFilteredAndSortedAssignedTasks().length > 0" class="history-table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th (click)="toggleSort('assigned', 'createdByName')" class="sortable">
+                Created By <span class="sort-icon">{{ getSortIcon('assigned', 'createdByName') }}</span>
+              </th>
+              <th (click)="toggleSort('assigned', 'clientName')" class="sortable">
+                Client <span class="sort-icon">{{ getSortIcon('assigned', 'clientName') }}</span>
+              </th>
+              <th (click)="toggleSort('assigned', 'task_Description')" class="sortable">
+                Description <span class="sort-icon">{{ getSortIcon('assigned', 'task_Description') }}</span>
+              </th>
+              <th (click)="toggleSort('assigned', 'statusName')" class="sortable">
+                Status <span class="sort-icon">{{ getSortIcon('assigned', 'statusName') }}</span>
+              </th>
+              <th (click)="toggleSort('assigned', 'dueDate')" class="sortable">
+                Due <span class="sort-icon">{{ getSortIcon('assigned', 'dueDate') }}</span>
+              </th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of getPaginatedAssignedTasks()">
+              <td>{{ task.createdByName }}</td>
+              <td>{{ task.clientName }}</td>
+              <td>{{ task.task_Description }}</td>
+              <td>{{ task.statusName }}</td>
+              <td>{{ task.dueDate }}</td>
+              <td><button type="button" (click)="openTask(task.id)">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="getAssignedTotalPages() > 1">
+          <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage - 1)" [disabled]="assignedPage === 1">← Previous</button>
+          <span class="pagination-info">Page {{ assignedPage }} of {{ getAssignedTotalPages() }}</span>
+          <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage + 1)" [disabled]="assignedPage === getAssignedTotalPages()">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-panel">
+      <h2>Created Tasks</h2>
+      
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label>
+            <span class="filter-icon">🔍</span>
+            <input type="text" [(ngModel)]="createdClientNameSearch" (change)="onCreatedFilterChange()" class="filter-input" placeholder="Search client name...">
+          </label>
+        </div>
+        <div class="filter-group">
+          <label>
+            <select [(ngModel)]="createdCreatedByFilter" (change)="onCreatedFilterChange()" class="filter-select">
+              <option [value]="null">All Created by</option>
+              <option *ngFor="let user of getUniqueCreatedByNames(completedCreated)" [value]="user.id">{{ user.name }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn-clear-filters" (click)="clearAllFilters()">Clear All</button>
+          <button type="button" class="btn btn-outline-success" (click)="exportCreatedExcel()">Export Excel</button>
+          <button type="button" class="btn btn-outline-primary" (click)="exportCreatedPdf()">Export PDF</button>
+          <!-- <div class="filter-count">{{ getFilteredAndSortedCreatedTasks().length }} task{{ getFilteredAndSortedCreatedTasks().length === 1 ? '' : 's' }}</div> -->
+        </div>
+      </div>
+
+      <div *ngIf="getFilteredAndSortedCreatedTasks().length === 0" class="empty-state">No completed created tasks matching filters.</div>
+      <div *ngIf="getFilteredAndSortedCreatedTasks().length > 0" class="history-table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th (click)="toggleSort('created', 'clientName')" class="sortable">
+                Client <span class="sort-icon">{{ getSortIcon('created', 'clientName') }}</span>
+              </th>
+              <th (click)="toggleSort('created', 'task_Description')" class="sortable">
+                Description <span class="sort-icon">{{ getSortIcon('created', 'task_Description') }}</span>
+              </th>
+              <th (click)="toggleSort('created', 'statusName')" class="sortable">
+                Status <span class="sort-icon">{{ getSortIcon('created', 'statusName') }}</span>
+              </th>
+              <th (click)="toggleSort('created', 'dueDate')" class="sortable">
+                Due <span class="sort-icon">{{ getSortIcon('created', 'dueDate') }}</span>
+              </th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of getPaginatedCreatedTasks()">
+              <td>{{ task.clientName }}</td>
+              <td>{{ task.task_Description }}</td>
+              <td>{{ task.statusName }}</td>
+              <td>{{ task.dueDate }}</td>
+              <td><button type="button" (click)="openTask(task.id)">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="getCreatedTotalPages() > 1">
+          <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage - 1)" [disabled]="createdPage === 1">← Previous</button>
+          <span class="pagination-info">Page {{ createdPage }} of {{ getCreatedTotalPages() }}</span>
+          <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage + 1)" [disabled]="createdPage === getCreatedTotalPages()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

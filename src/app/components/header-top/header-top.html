@@ -1,0 +1,35 @@
+<header class="header-top" [class.sidebar-closed]="!sidebarOpen">
+    <div class="left">
+        <button class="sidebar-button" 
+        type="button" 
+        (click)="sidebarToggle.emit()" 
+        aria-label="Toggle sidebar">
+            ☰
+        </button>
+        </div>
+        <div class="right">
+        <div class="notification" (click)="toggleNotifications()">
+            🔔
+            <span class="badge" *ngIf="unreadCount > 0">
+                {{ unreadCount }}
+            </span>
+            <div class="notification-menu" *ngIf="notificationOpen">
+                <h4>Notifications</h4>
+                <div class="notification-empty" *ngIf="notifications.length === 0">
+                    No new notifications.
+                </div>
+                <ul *ngIf="notifications.length > 0">
+                    <li *ngFor="let notification of notifications">{{ notification.message }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="profile" (click)="toggleDropdown()">
+            👤
+            {{name}}
+            <div class="dropdown" *ngIf="dropdownOpen">
+                <a routerLink="/main/profile" (click)="dropdownOpen = false">View Profile</a>
+                <a (click)="logout()">Logout</a>
+            </div>
+        </div>
+    </div>
+</header>

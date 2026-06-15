@@ -1,0 +1,4 @@
+.task-detail { padding: 12px; }
+.task-detail .meta { display:flex; gap:16px; margin-bottom:12px; }
+.task-detail .details { background:#fff; padding:12px; border-radius:6px; margin-bottom:12px; }
+.comments-pane { margin-top:18px; }

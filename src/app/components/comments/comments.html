@@ -1,0 +1,13 @@
+<div class="comments-root">
+  <div class="messages">
+    <div *ngFor="let m of messages" class="message">
+      <div class="meta"><strong>{{ m.authorName || m.user || 'User' }}</strong> <span class="ts">{{ m.createdOn || m.createdAt || '' }}</span></div>
+      <div class="body">{{ m.text || m.message }}</div>
+    </div>
+  </div>
+
+  <div class="composer">
+    <textarea [(ngModel)]="newText" placeholder="Write a comment..."></textarea>
+    <button (click)="send()">Send</button>
+  </div>
+</div>
