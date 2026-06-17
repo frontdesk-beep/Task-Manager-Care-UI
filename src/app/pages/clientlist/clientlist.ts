@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { ClientService } from '../../services/client.service';
 import { ToastrService } from 'ngx-toastr';
 import { Export } from '../../services/export';
+import { ChangeDetectorRef } from '@angular/core';
+import { forkJoin } from 'rxjs';
 
 
 @Component({
@@ -38,15 +40,21 @@ export class Clientlist implements OnInit, OnDestroy {
   private subs = new Subscription();
   uniqueCategories: any[] = [];
 
+  filteredClients: any[] = [];
+  paginatedClients: any[] = [];
+  categoryMap: { [key: number]: string } = {};
+  loading: boolean = true;
+
   constructor(
     private clientService: ClientService,
     private toastr: ToastrService,
-    private exportService: Export
+    private exportService: Export,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.loadClients();
-    this.loadClientCategories();
+    // this.loadClientCategories();
   }
 
   ngOnDestroy() {
@@ -64,11 +72,16 @@ export class Clientlist implements OnInit, OnDestroy {
             Array.isArray(res)
               ? res
               : (res?.data || []);
+              this.loadClientCategories();
           this.buildCategories();
+          this.refreshGrid();
+          this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClients error:', err);
           this.clients = [];
+          this.loading = false;
         }
       })
     );
@@ -77,10 +90,17 @@ export class Clientlist implements OnInit, OnDestroy {
     this.subs.add(
       this.clientService.getClientCategories().subscribe({
         next: (res: any) => {
-          this.clientCategories = Array.isArray(res) 
-          ? res 
-          : (res?.data || []);
+          this.clientCategories =
+           Array.isArray(res)
+            ? res
+            : (res?.data || []);
+
+            this.categoryMap = {};
+            this.clientCategories.forEach((c: any) => {
+              this.categoryMap[c.id] = c.clientType || c.name || '';
+            });
           this.buildCategories();
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClientCategories error:', err);
@@ -88,6 +108,60 @@ export class Clientlist implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+  refreshGrid() {
+    let filtered = [...this.clients];
+
+    if (this.filterCategoryId) {
+      filtered = filtered.filter(
+        x => x.clientCategoryId == this.filterCategoryId
+      );
+    }
+    // Name
+    if (this.searchClientName.trim()) {
+
+      const search =
+        this.searchClientName.toLowerCase();
+
+      filtered = filtered.filter(
+        x =>
+          (x.clientName || '')
+            .toLowerCase()
+            .includes(search)
+      );
+    }
+
+    // Date
+    if (this.selectedDate) {
+
+      filtered = filtered.filter(x => {
+
+        const date =
+          new Date(x.createdOn)
+            .toISOString()
+            .split('T')[0];
+
+        return date === this.selectedDate;
+      });
+    }
+
+    this.filteredClients = this.sortClients(filtered);
+
+    const start =
+      (this.currentPage - 1) * this.itemsPerPage;
+
+    this.paginatedClients =
+      this.filteredClients.slice(
+        start,
+        start + this.itemsPerPage
+      );
+  }
+  trackByClientId(
+    index: number,
+    client: any
+  ) {
+    return client.clientId;
   }
   buildCategories() {
     const unique = new Map<number, string>();
@@ -120,7 +194,7 @@ export class Clientlist implements OnInit, OnDestroy {
       this.sortDir = 'asc';
     }
     this.currentPage = 1;
-    // this.cdr.detectChanges();
+    this.refreshGrid();
   }
 
   getSortIcon(key: string): string {
@@ -204,6 +278,7 @@ export class Clientlist implements OnInit, OnDestroy {
     const total = this.getTotalPages();
     if (page >= 1 && page <= total) {
       this.currentPage = page;
+      this.refreshGrid();
     }
   }
   //when edit button is clicked
@@ -221,28 +296,38 @@ export class Clientlist implements OnInit, OnDestroy {
       alert('Client not found');
     }
   }
-  updateClient() {
+  updateClient(clientId: number) {
     if (!this.selectedClient) return;
 
     this.clientService
-        .updateClient(
-          this.selectedClient.clientId, 
-          this.selectedClient
-        ).subscribe({
-      next: () => {
-        this.toastr.success(
-          'Client updated successfully'
-        );
-        this.loadClients();
-        //once the client is updated it will close the pop-up and reset the selected client and edit mode
-        this.selectedClient = null;
-        this.isEditMode = false;
-      },
-      error: (err: any) => {
-        console.error('UpdateClient error:', err);
-        this.toastr.error('Failed to update client');
-      }
-    });
+      .updateClient(
+        this.selectedClient.clientId,
+        this.selectedClient
+      ).subscribe({
+        next: () => {
+          this.toastr.success(
+            'Client updated successfully'
+          );
+          const index =
+            this.clients.findIndex(
+              x => x.clientId ==
+                this.selectedClient.clientId
+            );
+
+          this.clients[index] =
+          {
+            ...this.selectedClient
+          };
+
+          this.refreshGrid();        //once the client is updated it will close the pop-up and reset the selected client and edit mode
+          this.selectedClient = null;
+          this.isEditMode = false;
+        },
+        error: (err: any) => {
+          console.error('UpdateClient error:', err);
+          this.toastr.error('Failed to update client');
+        }
+      });
   }
 
   //delete pop-up will open when delete button is clicked - both
@@ -260,12 +345,18 @@ export class Clientlist implements OnInit, OnDestroy {
   }
   deleteClient() {
     if (!this.selectedClient) return;
-      this.subs.add(
-        this.clientService.
+    this.subs.add(
+      this.clientService.
         deleteClient(this.selectedClient.clientId)
         .subscribe({
           next: () => {
-            this.loadClients();
+            const index =
+              this.clients.filter(
+                x => x.clientId !==
+                  this.selectedClient.clientId
+              );
+           
+            this.refreshGrid();
             this.selectedClient = null;
             this.isDeleteMode = false;
             this.toastr.success(
@@ -278,10 +369,10 @@ export class Clientlist implements OnInit, OnDestroy {
 
           }
         })
-      );
-    }
-  
-//when cancel button is clicked in pop-up
+    );
+  }
+
+  //when cancel button is clicked in pop-up
   cancelEdit() {
     this.selectedClient = null;
     this.isEditMode = false;
@@ -295,6 +386,7 @@ export class Clientlist implements OnInit, OnDestroy {
     this.filterCategoryId = null;
     this.currentPage = 1;
     this.selectedDate = '';
+    this.refreshGrid();
   }
 
   exportAssignedExcel() {

@@ -7,10 +7,13 @@
       </div>
     </div>
 
+    <!-- ngform is for resetting evrthing- it checks if form is valid, were touched, dirty, reset and get all form values -->
     <form (ngSubmit)="saveTask()" #taskForm="ngForm">
       <div class="row g-3">
         <div class="col-md-6">
-          <label class="form-label" for="clientName">Client Name</label>
+          <label class="form-label" for="clientName">
+            Client Name <span class="required" style="color: red;">*</span>
+          </label>
           <input
             id="clientName"
             name="clientName"
@@ -23,7 +26,10 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label" for="clientCategory">Client Category</label>
+          <label class="form-label" for="clientCategory">
+            Client Category
+            <span class="required" style="color: red;">*</span>
+          </label>
           <select
             id="clientCategory"
             name="clientCategoryId"
@@ -36,33 +42,36 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label" for="phoneNumber">Phone Number</label>
+          <label class="form-label" for="phoneNumber">Phone Number 
+            <span class="required" style="color: red;">*</span></label>
           <input
             id="phoneNumber"
             name="phoneNumber"
             type="tel"
             class="form-control"
             [(ngModel)]="task.phoneNumber"
-            placeholder="Enter phone number"
+            placeholder="111-222-3333"
             required
           />
         </div>
 
         <div class="col-md-6">
-          <label class="form-label" for="email">Email</label>
+          <label class="form-label" for="email">Email
+            <span class="required" style="color: red;">*</span></label>
           <input
             id="email"
             name="email"
             type="email"
             class="form-control"
             [(ngModel)]="task.email"
-            placeholder="Enter client email"
+            placeholder="example@gmail.com"
             required
           />
         </div>
 
         <div class="col-md-6">
-          <label class="form-label" for="assignedTo">Assign To</label>
+          <label class="form-label" for="assignedTo">
+            Assign To <span class="required" style="color: red;">*</span></label>
           <select
             id="assignedTo"
             name="assignedToId"
@@ -75,7 +84,8 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label" for="status">Status</label>
+          <label class="form-label" for="status">Status
+            <span class="required" style="color: red;">*</span></label>
           <select
             id="status"
             name="statusId"
@@ -88,7 +98,8 @@
         </div>
 
         <div class="col-12">
-          <label class="form-label" for="task_Description">Task Description</label>
+          <label class="form-label" for="task_Description">Task Description
+            <span class="required" style="color: red;">*</span></label>
           <textarea
             id="task_Description"
             name="task_Description"
@@ -101,7 +112,8 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label" for="priority">Priority</label>
+          <label class="form-label" for="priority">Priority
+            <span class="required" style="color: red;">*</span></label>
           <select
             id="priority"
             name="priorityId"
@@ -114,7 +126,9 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label" for="serviceCategory">Service Category</label>
+          <label class="form-label" for="serviceCategory">Service Category
+            <span class="required" style="color: red;">*</span>
+          </label>
           <select
             id="serviceCategory"
             name="serviceCategoryId"
@@ -127,7 +141,9 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label" for="dueDate">Due Date</label>
+          <label class="form-label" for="dueDate">Due Date
+            <span class="required" style="color: red;">*</span>
+          </label>
           <input
             id="dueDate"
             name="dueDate"
@@ -139,7 +155,9 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label" for="createdOn">Created On</label>
+          <label class="form-label" for="createdOn">Created On
+            <span class="required" style="color: red;">*</span></label>
+          <!-- </label> -->
           <input
             id="createdOn"
             type="datetime-local"

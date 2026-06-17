@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of getPaginatedClients()">
+          <tr *ngFor="let client of paginatedClients; trackBy: trackByClientId">
             <td>{{ client.clientName }}</td>
             <td>{{ getCategoryName(client.clientCategoryId) }}</td>
             <td>{{ client.companyName || '-' }}</td>
@@ -106,7 +106,7 @@
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="getTotalPages() > 1" class="pagination">
+    <div class="pagination">
       <button class="btn btn-sm" (click)="goToPage(1)" [disabled]="currentPage === 1">
         First
       </button>
@@ -182,11 +182,11 @@
       </select>
     </div>
     <div class="modal-actions">
-      <!-- <button
+      <button
         class="btn btn-primary"
         (click)="updateClient(selectedClient.clientId)">
         Save
-      </button> -->
+      </button>
       <button
         class="btn btn-danger"
         (click)="cancelEdit()">

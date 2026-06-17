@@ -1,14 +1,13 @@
 import {
   Component,
-  OnInit,
-  ChangeDetectorRef
-} from '@angular/core';
-
+  OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { TaskService } from '../../services/task.service';
-import { Router } from '@angular/router';
+// import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
+import { ViewChild } from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 
 interface DropdownItem {
@@ -39,6 +38,9 @@ interface TaskItem {
   styleUrl: './createtask.css',
 })
 export class Createtask implements OnInit {
+
+  @ViewChild('taskForm')taskForm!: NgForm;
+
   task: TaskItem = this.createEmptyTask();
 
   clientCategories: DropdownItem[] = [];
@@ -46,14 +48,14 @@ export class Createtask implements OnInit {
   priorities: DropdownItem[] = [];
   serviceCategories: DropdownItem[] = [];
   users: DropdownItem[] = [];
+  clientCategoryId=0;
 
   currentUserId = 0;
-
   constructor(
     private taskService: TaskService,
     private auth: Auth,
-    private router: Router,
-    private cdr: ChangeDetectorRef,
+    // private router: Router,
+    // private cdr: ChangeDetectorRef,
     private toastr: ToastrService
   ) {}
 
@@ -64,24 +66,26 @@ export class Createtask implements OnInit {
     this.loadStatuses();
     this.loadPriorities();
     this.loadServiceCategories();
+    
   }
-
+// craete a brand new empty task object-instead of writing this.task ={clientname:'',phonenumber:''}
+// instead of writing evry field empty again and again create one seperate object which you can call.
   createEmptyTask(): TaskItem {
     const now = new Date();
 
     return {
       clientName: '',
-      clientCategoryId: 1,
+      clientCategoryId: 0,
       phoneNumber: '',
       email: '',
       assignedToId: 0,
       createdOn: now.toISOString().slice(0, 16),
-      statusId: 1,
+      statusId: 0,
       task_Description: '',
-      priorityId: 2,
+      priorityId: 0,
       dueDate: now.toISOString().slice(0, 10),
       createdById: 0,
-      serviceCategoryId: 1
+      serviceCategoryId: 0
     };
   }
 
@@ -119,7 +123,7 @@ export class Createtask implements OnInit {
           name: item.name || item.categoryName || item.type || ''
         }));
 
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading client categories:', error);
@@ -138,7 +142,7 @@ export class Createtask implements OnInit {
           name: item.statusName || item.name || ''
         }));
 
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading statuses:', error);
@@ -157,7 +161,7 @@ export class Createtask implements OnInit {
           name: item.priorityName || item.name || item.level || ''
         }));
 
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading priorities:', error);
@@ -175,7 +179,7 @@ export class Createtask implements OnInit {
           name: item.serviceName || item.name || item.categoryName || ''
         }));
 
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading service categories:', error);
@@ -193,7 +197,7 @@ export class Createtask implements OnInit {
           name: user.name || user.email || `User ${user.id}`
         }));
 
-        this.cdr.detectChanges();
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading users for task assignment:', error);
@@ -228,10 +232,14 @@ export class Createtask implements OnInit {
     };
 
     this.taskService.CreateTask(payload).subscribe({
-      next: (response: any) => {
+      next: () => {
         this.toastr.success('Task created successfully!');
-        this.resetTask();
-        this.cdr.detectChanges();
+        console.log("before reset: ");
+        setTimeout(() => {
+            this.resetTask();
+        },0);
+        console.log("After reset: ");
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Full Error:', error);
@@ -247,8 +255,27 @@ export class Createtask implements OnInit {
   }
 
   resetTask() {
-    this.task = this.createEmptyTask();
-    this.task.createdById = this.currentUserId;
-    this.cdr.detectChanges();
+    const now = new Date();
+
+    this.taskForm.resetForm({
+    clientName: '',
+    clientCategoryId: 0,
+    phoneNumber: '',
+    email: '',
+    assignedToId: 0,
+    statusId: 0,
+    task_Description: '',
+    priorityId: 0,
+    serviceCategoryId: 0,
+    dueDate: now.toISOString().slice(0, 10),
+    createdOn: now.toISOString().slice(0, 16),
+    createdById: this.currentUserId
+    })
+    // console.log('Before reset: ', this.task);
+    // becoz of this the after clicking on the save btn it was pointing below method that's why the the clear was not woking perfectly so we craeteed seperate one for reset.
+    // which we can use in the save task() also now.
+    // this.task = this.createEmptyTask();
+    // this.task.createdById = this.currentUserId;
+    // this.cdr.detectChanges();
   }
 }

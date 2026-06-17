@@ -11,23 +11,23 @@
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label for="id" class="form-label">Id</label>
+                <label for="id" class="form-label">Id </label>
                 <input type="text" id="id" class="form-control" [(ngModel)]="employee.id" placeholder="Employee ID" disabled>
             </div>
             <div class="col-md-6">
-                <label for="name" class="form-label">Name</label>
+                <label for="name" class="form-label">Name <span class="required" style="color: red;">*</span></label>
                 <input type="text" id="name" class="form-control" [(ngModel)]="employee.name" placeholder="Employee name" required>
             </div>
             <div class="col-md-6">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label">Email <span class="required" style="color: red;">*</span></label>
                 <input type="email" id="email" class="form-control" [(ngModel)]="employee.email" placeholder="Employee email" required>
             </div>
             <div class="col-md-6">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">Password <span class="required" style="color: red;">*</span></label>
                 <input type="password" id="password" class="form-control" [(ngModel)]="employee.password" placeholder="Employee password" required>
             </div>
             <div class="col-md-6">
-                <label for="Date" class="form-label">Date</label>
+                <label for="Date" class="form-label">Date <span class="required" style="color: red;">*</span></label>
                 <input name = "Date" type="date" id="Date" class="form-control" [(ngModel)]="employee.createdAt" placeholder="Employee date" required>
             </div>
 
@@ -107,7 +107,7 @@
     <div class="modal-backdrop" *ngIf="employeeToDelete">
         <div class="modal-panel">
             <h5 class="mb-3">Confirm delete</h5>
-            <p>Do you want to remove <strong>{{ employeeToDelete?.name }}</strong> from the employee list?</p>
+            <p>Do you want to remove <strong>{{ employeeToDelete.name }}</strong> from the employee list?</p>
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <button type="button" class="btn btn-outline-secondary" (click)="cancelDelete()">No</button>
                 <button type="button" class="btn btn-danger" (click)="deleteEmployee()">Yes, delete</button>
