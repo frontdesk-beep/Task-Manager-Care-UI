@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -18,28 +18,38 @@ export class HeaderTop implements OnInit, OnDestroy {
   name = '';
   dropdownOpen = false;
   notificationOpen = false;
+
   notifications: any[] = [];
   storeSubscription?: Subscription;
+  unreadCount=0;
 
   constructor(
     private router: Router,
     private taskService: TaskService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private cdr:ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    this.name = localStorage.getItem('name') || '';
+    // this.name = localStorage.getItem('name') || '';
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.name=user?.name || '';
     const userId = user?.id || 0;
     if (userId) {
-      this.storeSubscription = this.taskService.GetNotifications(userId).subscribe({
+      this.storeSubscription = 
+      this.taskService.GetNotifications(userId).subscribe({
         next: (res: any) => {
-          const list = Array.isArray(res) ? res : (res?.data || []);
-          this.notifications = list
+          const list = Array.isArray(res)
+          ? res : (res?.data || []);
+          this.notifications = list;
+          this.unreadCount=
+                list.filter((x:any) => !x.isRead).length;
+                this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.log('Notification load failed', err);
           this.notifications = [];
+          this.unreadCount=0;
         }
       });
     }
@@ -51,10 +61,6 @@ export class HeaderTop implements OnInit, OnDestroy {
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
-  }
-
-  get unreadCount(): number {
-    return this.notifications.filter(x => !x.isRead).length;
   }
 
   toggleNotifications() {
@@ -70,6 +76,7 @@ export class HeaderTop implements OnInit, OnDestroy {
           error: (err) => {
             console.log('Failed to mark notification read', err);
             n.isRead = false;
+            this.unreadCount++;
           }
         });
       });

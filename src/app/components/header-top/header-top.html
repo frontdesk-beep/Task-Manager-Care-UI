@@ -13,15 +13,6 @@
             <span class="badge" *ngIf="unreadCount > 0">
                 {{ unreadCount }}
             </span>
-            <!-- <div class="notification-menu" *ngIf="notificationOpen">
-                <h4>Notifications</h4>
-                <div class="notification-empty" *ngIf="notifications.length === 0">
-                    No new notifications.
-                </div>
-                <ul *ngIf="notifications.length > 0">
-                    <li *ngFor="let notification of notifications">{{ notification.message }}</li>
-                </ul>
-            </div> -->
         </div>
         <div class="profile" (click)="toggleDropdown()">
             👤

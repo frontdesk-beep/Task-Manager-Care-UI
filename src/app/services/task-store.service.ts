@@ -31,6 +31,8 @@ export class TaskStore {
 
     console.log('Loading dashboard data');
     this.loadAll();
+    this.startPolling();
+    this.startRealtime();
   }
 
   private loadAll() {

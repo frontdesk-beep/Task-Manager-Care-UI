@@ -16,8 +16,10 @@ name='';
   constructor(private router: Router) {}
 
   ngOnInit() {
-    this.name = localStorage.getItem('name') || '';
-    this.role = localStorage.getItem('role') || '';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    this.name = user?.name || '';
+    this.role = user?.role || '';
     console.log('Navbar initialized, role=', this.role);
   }
   
