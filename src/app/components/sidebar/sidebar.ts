@@ -12,15 +12,14 @@ import { RouterLink } from '@angular/router';
 export class Sidebar {
   role = '';
   dropdownOpen = false;
+  name='';
 
 ngOnInit() {
 
-  const user =
-    JSON.parse(
-      localStorage.getItem('user') || '{}'
-    );
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  this.role = user.role || '';
+this.name = user?.name || '';
+this.role = user?.role || '';
 }
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;

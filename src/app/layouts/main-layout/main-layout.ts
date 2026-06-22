@@ -17,9 +17,10 @@ export class MainLayout {
   showSidebar = true;
 
   ngOnInit() {
-    this.name = localStorage.getItem('name') || '';
-    this.role = localStorage.getItem('role') || '';
-  }
+if (typeof window !== 'undefined') {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  this.role = user?.role || '';
+}}
 
   toggleSidebar() {
     this.showSidebar = !this.showSidebar;

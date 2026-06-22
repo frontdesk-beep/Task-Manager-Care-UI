@@ -101,12 +101,13 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.loadUsers();
 
-    this.taskStore.forceRefresh(this.currentUserId);
+    this.taskStore.initForUser(this.currentUserId);
   }
 
   ngOnDestroy() {
     console.log('Dashboard ngOnDestroy called');
     this.storeSubs.unsubscribe();
+    this.taskStore.destroy();
   }
 
   loadUsers() {
@@ -206,10 +207,11 @@ export class Dashboard implements OnInit, OnDestroy {
     ).length;
 
     this.completedCount = this.assignedTasks.filter((task: any) =>
-      this.isCompletedStatus(task.statusName) || this.isCompletedStatusId(task.statusId)
+      this.isCompletedStatus(task.statusName) || 
+    this.isCompletedStatusId(task.statusId)
     ).length;
 
-    this.cdr.detectChanges();
+    // this.cdr.detectChanges();
   }
 
   openTask(id: number) {
@@ -336,6 +338,7 @@ console.log(
 
   // Filtering methods
   getFilteredAndSortedAssignedTasks(): any[] {
+    console.log('called');
     let filtered = this.assignedTasks;
 
     // Filter by Created by (user)
@@ -404,7 +407,7 @@ console.log(
     const totalPages = this.getAssignedTotalPages();
     if (page >= 1 && page <= totalPages) {
       this.assignedPage = page;
-      this.cdr.detectChanges();
+      // this.cdr.detectChanges();
     }
   }
 
@@ -412,7 +415,7 @@ console.log(
     const totalPages = this.getCreatedTotalPages();
     if (page >= 1 && page <= totalPages) {
       this.createdPage = page;
-      this.cdr.detectChanges();
+      // this.cdr.detectChanges();
     }
   }
 
@@ -424,7 +427,7 @@ console.log(
     this.searchClientNameCreated = '';
     this.assignedPage = 1;
     this.createdPage = 1;
-    this.cdr.detectChanges();
+    // this.cdr.detectChanges();
   }
 
   getUniqueCreatedBy(): any[] {
