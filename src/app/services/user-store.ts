@@ -20,6 +20,8 @@ export class UserStore {
           {
             // access the updated data.-next method
             this.userSubject.next(user);
+            // also update localstorage when user loads
+            localStorage.setItem('user', JSON.stringify(user));
           }
         });
   }
@@ -29,9 +31,15 @@ export class UserStore {
   }
   setUser(user:any){
     this.userSubject.next(user);
+    localStorage.setItem('user',JSON.stringify(user));
   }
   clearUser()
   {
     this.userSubject.next(null);
+    localStorage.removeItem('user');
+  }
+  updateUser(id: number, data:any)
+  {
+    return this.auth.updateProfile(id, data);
   }
 }
