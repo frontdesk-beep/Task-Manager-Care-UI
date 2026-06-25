@@ -11,7 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class Navbar {
 name='';
-  role='';
+role='';
 
   constructor(private router: Router) {}
 
