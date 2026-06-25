@@ -17,7 +17,13 @@
     max-width: calc(100% - 40px);
     box-shadow: 0 12px 30px rgba(0,0,0,0.2);
 }
+.text-success {
+    font-weight: 600;
+}
 
+.text-danger {
+    font-weight: 600;
+}
 .table td, .table th {
     vertical-align: middle;
 }

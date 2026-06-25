@@ -8,7 +8,8 @@ import { Export } from '../../services/export';
 import { NgForm } from '@angular/forms';
 import { ViewChild } from '@angular/core';
 import { email } from '@angular/forms/signals';
-import {ChangeDetectorRef} from '@angular/core'
+import { ChangeDetectorRef } from '@angular/core'
+import { isActive } from '@angular/router';
 interface Employee {
   id: number;
   name: string;
@@ -16,9 +17,10 @@ interface Employee {
   password: string;
   role: string;
   createdAt: string;
+  isActive: boolean;
 }
 // for edit employee which does not send the pwd and date fields
-interface EditEmployee  {
+interface EditEmployee {
   id: number;
   name: string;
   email: string;
@@ -62,6 +64,8 @@ export class Addemployee implements OnInit, AfterViewInit {
   displayedEmployees: Employee[] = [];
   paginatedEmployees: Employee[] = [];
   totalPages = 1;
+  activeFilter = '';
+  showInactive = false;
 
 
   constructor(
@@ -84,7 +88,8 @@ export class Addemployee implements OnInit, AfterViewInit {
       email: '',
       password: '',
       role: 'Employee',
-      createdAt: new Date().toISOString().split('T')[0]
+      createdAt: new Date().toISOString().split('T')[0],
+      isActive: true
     };
   }
 
@@ -117,11 +122,12 @@ export class Addemployee implements OnInit, AfterViewInit {
           role: employee.role || 'Employee',
           createdAt: employee.createdAt
             ? employee.createdAt.split('T')[0]
-            : ''
+            : '',
+          isActive: employee.isActive
         }));
-          this.updateEmployeeView();
-        
-         this.cdr.detectChanges();
+        this.updateEmployeeView();
+
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading employees:', error);
@@ -146,9 +152,10 @@ export class Addemployee implements OnInit, AfterViewInit {
       email: this.employee.email,
       password: this.employee.password,
       role: this.employee.role,
-      createdAt: this.employee.createdAt
+      createdAt: this.employee.createdAt,
+      isActive: true
     };
-        this.auth.CreateUser(payload).subscribe({
+    this.auth.CreateUser(payload).subscribe({
       next: () => {
         this.toastr.success('Employee created successfully!');
         console.log('loading employees..: ');
@@ -195,6 +202,7 @@ export class Addemployee implements OnInit, AfterViewInit {
           email: user.email || '',
           role: user.role || 'Employee',
         };
+        this.cdr.detectChanges();
         console.log('employeeToEdit:', this.employeeToEdit);
         //  this.cdr.detectChanges();
       },
@@ -205,52 +213,47 @@ export class Addemployee implements OnInit, AfterViewInit {
     });
   }
 
-  updateEmployee()
-  {
+  updateEmployee() {
     console.log('updating the data...')
-    if(!this.employeeToEdit)
-    {
+    if (!this.employeeToEdit) {
       return;
     }
-    const payload={
+    const payload = {
       name: this.employeeToEdit.name,
-      email:this.employeeToEdit.email,
-      role:this.employeeToEdit.role,
+      email: this.employeeToEdit.email,
+      role: this.employeeToEdit.role,
     };
     this.auth.UpdateUser(
-      this.employeeToEdit.id,payload
+      this.employeeToEdit.id, payload
     ).subscribe({
-      next:() => {
-      this.toastr.success('Employee updated successfully');
-        this.employeeToEdit=null
+      next: () => {
+        // this.toastr.success('Employee updated successfully');
+        this.employeeToEdit = null
         this.loadEmployees();
         this.toastr.success('Employee updated successfully');
         console.log('going to close popup');
         //close popup
       },
-      error:(error) =>
-      {
+      error: (error) => {
         this.toastr.error("failed to update employee");
       }
     })
   }
   cancelEdit() {
-      this.employeeToEdit=null
+    this.employeeToEdit = null
   }
-// closing popup of DELETE
+  // closing popup of DELETE
   confirmDelete(employee: Employee) {
     console.log('closing popup');
     this.employeeToDelete = employee;
   }
 
   // prevent logged-in user from deleting themselves
-  canDeleteEmployee(employee: Employee):boolean
-  {
-  return employee.id!=this.currentUserId;
+  canDeleteEmployee(employee: Employee): boolean {
+    return employee.id != this.currentUserId;
   }
-  cancelDelete()
-  {
-    this.employeeToDelete=null;
+  cancelDelete() {
+    this.employeeToDelete = null;
   }
 
   deleteEmployee() {
@@ -260,10 +263,11 @@ export class Addemployee implements OnInit, AfterViewInit {
 
     this.auth.DeleteUser(this.employeeToDelete.id).subscribe({
       next: () => {
-         this.employeeToDelete=null;
-          this.loadEmployees();
-        this.toastr.success('Employee deleted successfully!');
-        
+        //  this.employeeToDelete=null;
+        this.cancelDelete();
+        this.loadEmployees();
+        this.toastr.success('Employee deactivated successfully!');
+
       },
       error: (error) => {
         console.error('Error deleting employee:', error);
@@ -273,94 +277,100 @@ export class Addemployee implements OnInit, AfterViewInit {
   }
 
   // Sorting
-sortBy(field: keyof Employee) {
-  if (this.sortField === field) {
-    this.sortDirection = -this.sortDirection;
-  } else {
-    this.sortField = field;
-    this.sortDirection = 1;
-  }
-
-  this.updateEmployeeView();
-}
-
-sortClass(field: string) {
-  if (this.sortField !== field) {
-    return '';
-  }
-
-  return this.sortDirection === 1 ? 'asc' : 'desc';
-}
-
-// Filtering
-onFilterChange() {
-  this.currentPage = 1;
-  this.updateEmployeeView();
-}
-
-clearFilters() {
-  this.searchText = '';
-  this.roleFilter = '';
-  this.currentPage = 1;
-  this.updateEmployeeView();
-}
-
-// Main method for filtering, sorting and pagination
-updateEmployeeView() {
-  const filter = this.searchText.trim().toLowerCase();
-
-  this.filteredEmployees = this.employees.filter(employee => {
-
-    const text =
-      `${employee.name} ${employee.email} ${employee.role}`.toLowerCase();
-
-    const matchesSearch =
-      !filter || text.includes(filter);
-
-    const matchesRole =
-      !this.roleFilter ||
-      employee.role === this.roleFilter;
-
-    return matchesSearch && matchesRole;
-  });
-
-  this.displayedEmployees = [...this.filteredEmployees].sort((a, b) => {
-
-    const aValue = a[this.sortField];
-    const bValue = b[this.sortField];
-
-    if (
-      typeof aValue === 'number' &&
-      typeof bValue === 'number'
-    ) {
-      return (aValue - bValue) * this.sortDirection;
+  sortBy(field: keyof Employee) {
+    if (this.sortField === field) {
+      this.sortDirection = -this.sortDirection;
+    } else {
+      this.sortField = field;
+      this.sortDirection = 1;
     }
 
-    return String(aValue)
-      .localeCompare(String(bValue))
-      * this.sortDirection;
-  });
+    this.updateEmployeeView();
+  }
 
-  this.totalPages = Math.max(
-    1,
-    Math.ceil(this.filteredEmployees.length / this.pageSize)
-  );
+  sortClass(field: string) {
+    if (this.sortField !== field) {
+      return '';
+    }
 
-  const start =
-    (this.currentPage - 1) * this.pageSize;
+    return this.sortDirection === 1 ? 'asc' : 'desc';
+  }
 
-  this.paginatedEmployees =
-    this.displayedEmployees.slice(
-      start,
-      start + this.pageSize
+  // Filtering
+  onFilterChange() {
+    this.currentPage = 1;
+    this.updateEmployeeView();
+  }
+
+  clearFilters() {
+    this.searchText = '';
+    this.roleFilter = '';
+    this.showInactive = false;
+    this.currentPage = 1;
+    this.updateEmployeeView();
+  }
+
+  // Main method for filtering, sorting and pagination
+  updateEmployeeView() {
+    const filter = this.searchText.trim().toLowerCase();
+
+    this.filteredEmployees = this.employees.filter(employee => {
+
+      const text =
+        `${employee.name} ${employee.email} ${employee.role}`.toLowerCase();
+
+      const matchesSearch =
+        !filter || text.includes(filter);
+
+      const matchesRole =
+        !this.roleFilter ||
+        employee.role === this.roleFilter;
+
+      const matchesStatus =
+        this.showInactive
+          ? true
+          : employee.isActive;
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    this.displayedEmployees = [...this.filteredEmployees].sort((a, b) => {
+
+      const aValue = a[this.sortField];
+      const bValue = b[this.sortField];
+
+      if (
+        typeof aValue === 'number' &&
+        typeof bValue === 'number'
+      ) {
+        return (aValue - bValue) * this.sortDirection;
+      }
+
+      return String(aValue)
+        .localeCompare(String(bValue))
+        * this.sortDirection;
+    });
+
+    this.totalPages = Math.max(
+      1,
+      Math.ceil(this.filteredEmployees.length / this.pageSize)
     );
-}
 
-// Pagination
-goToPage(page: number) {
-  this.currentPage = page;
-  this.updateEmployeeView();
-}
+    const start =
+      (this.currentPage - 1) * this.pageSize;
+
+    this.paginatedEmployees =
+      this.displayedEmployees.slice(
+        start,
+        start + this.pageSize
+      );
+  }
+
+  // Pagination
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.updateEmployeeView();
+  }
   trackByEmployeeId(index: number, employee: Employee) {
     return employee.id;
   }
@@ -379,4 +389,16 @@ goToPage(page: number) {
     );
   }
 
+  reactivateEmployee(employee: Employee) {
+    this.auth.ReactivateUser(employee.id)
+      .subscribe({
+        next: () => {
+          this.toastr.success('Employee reactivated successfully');
+          this.loadEmployees();
+        },
+        error: () => {
+          this.toastr.error('unable to reactivate employee');
+        }
+      })
+  }
 }

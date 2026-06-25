@@ -57,4 +57,15 @@ export class Auth {
     {
       return this.http.delete(`${this.usersurl}/${id}`);
     }
+    DeactivateUser(id:number){
+      return this.http.delete(
+        `${this.usersurl}/${id}`
+      );
+    }
+    ReactivateUser(id: number){
+      return this.http.put(
+        `${this.usersurl}/reactivate/${id}`,
+        {}
+      );
+    }
 }
