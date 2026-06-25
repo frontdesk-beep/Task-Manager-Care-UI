@@ -40,10 +40,24 @@ export class Login {
           res.token ? localStorage.setItem('isLoggedIn', 'true') : localStorage.setItem('isLoggedIn', 'false');
           this.router.navigate(['/main/dashboard']);
           console.log(res);
+
         },
         error: (error) => {
-          console.error(error);
-          this.toastr.error('Invalid credentials. Please check your email and password and try again.');
+          if(error.status === 403){
+            this.toastr.error(
+              'This account has been deactivated. Contact admin.'
+            );
+            return;
+          }
+          if(error.status === 401)
+          {
+            this.toastr.error(
+              'Invalid email or password.'
+            );
+            return;
+          }
+          this.toastr.error('Something went wrong.');
+          
         }
       });
   }

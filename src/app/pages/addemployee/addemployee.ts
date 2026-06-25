@@ -47,6 +47,8 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   searchText = '';
   roleFilter = '';
+  // for inactive and deactive users
+  statusFilter = 'Active';
 
   sortField: keyof Employee = 'id';
   sortDirection = 1;
@@ -305,7 +307,7 @@ export class Addemployee implements OnInit, AfterViewInit {
   clearFilters() {
     this.searchText = '';
     this.roleFilter = '';
-    this.showInactive = false;
+    this.statusFilter = 'Active';
     this.currentPage = 1;
     this.updateEmployeeView();
   }
@@ -327,9 +329,11 @@ export class Addemployee implements OnInit, AfterViewInit {
         employee.role === this.roleFilter;
 
       const matchesStatus =
-        this.showInactive
+        this.statusFilter === 'All'
           ? true
-          : employee.isActive;
+          : this.statusFilter === 'Active'
+          ? employee.isActive
+          : !employee.isActive;
 
       return matchesSearch && matchesRole && matchesStatus;
     });

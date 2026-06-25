@@ -1,6 +1,6 @@
 <div class="page client-list-page">
   <div class="client-card">
-    <h2>Clients</h2>
+    <h3>Client Records</h3>
 
     <!-- Filters -->
     <div class="filters-section">
@@ -29,24 +29,15 @@
 
       <div class="filters-right">
 
-        <button class="btn btn-clear" (click)="clearFilters()">
-
+        <button class="btn btn-outline-secondary" (click)="clearFilters()">
           Clear All
-
         </button>
-
-        <button class="btn btn-excel" (click)="exportCreatedExcel()">
-
+        <button class="btn btn-outline-success" (click)="exportCreatedExcel()">
           Export Excel
-
         </button>
-
-        <button class="btn btn-pdf" (click)="exportCreatedPdf()">
-
+        <button class="btn btn-outline-primary" (click)="exportCreatedPdf()">
           Export PDF
-
         </button>
-
       </div>
 
     </div>
