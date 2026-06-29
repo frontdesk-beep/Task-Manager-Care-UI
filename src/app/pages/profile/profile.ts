@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
 import {ToastrService} from 'ngx-toastr';
+import { UserStore } from '../../services/user-store';
 
 @Component({
   selector: 'app-profile',
@@ -19,7 +20,11 @@ export class Profile {
   editMode: boolean = false;
   private originalUser: any = null;
 
-  constructor(private auth: Auth, private router: Router, private toastr: ToastrService) {}
+  constructor(
+    private auth: Auth, 
+    private router: Router, 
+    private toastr: ToastrService,
+    private userStore: UserStore) {}
 
   ngOnInit() {
 
@@ -77,15 +82,11 @@ loadProfile() {
       role: this.role,
     };
 
-    this.auth.updateProfile(this.id, data).subscribe({
-      next: (res: any) => {
-        this.originalUser = {
-          name: res.name,
-          email: res.email,
-          role: res.role,
-        };
+    this.userStore.updateUser(this.id, data)
+    .subscribe({
+      next: () => {
+        this.userStore.loadUser(this.id);
         this.toastr.success('Profile updated');
-        this.loadProfile();
         this.editMode = false;
       },
       error: (err) => {
@@ -93,6 +94,5 @@ loadProfile() {
         this.toastr.error('Update failed');
       },
     });
-    this.editMode = false
   }
 }

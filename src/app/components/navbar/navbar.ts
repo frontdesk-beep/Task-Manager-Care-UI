@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { UserStore } from '../../services/user-store';
 
 @Component({
   selector: 'app-navbar',
@@ -13,14 +14,19 @@ export class Navbar {
 name='';
 role='';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private userStore: UserStore
+  ) {}
 
   ngOnInit() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-    this.name = user?.name || '';
-    this.role = user?.role || '';
     console.log('Navbar initialized, role=', this.role);
+    this.userStore.user$.subscribe(user=>{
+      if(!user)
+        return;
+      this.name=user.name;
+      this.role=user.role;
+    });
   }
   
 

@@ -1,4 +1,4 @@
-<section class="dashboard-overview">
+<!-- <section class="dashboard-overview">
   <div class="dashboard-grid">
     <div class="card">
       <h3>Assigned to me</h3>
@@ -21,9 +21,8 @@
 <section class="tasks-grid">
   <div class="task-panel">
     <div class="panel-header">
-      <div>
-        <h2>Assigned to me</h2>
-        <!-- <p class="panel-meta">Tasks assigned to you for follow-up or execution.</p> -->
+      <div> -->
+        <!-- <h2>Assigned to me</h2>
       </div>
       <div class="panel-count">{{ getFilteredAndSortedAssignedTasks().length }} items</div>
     </div>
@@ -34,10 +33,9 @@
           <span class="filter-icon">🔍</span>
           <input type="text" [(ngModel)]="searchClientNameAssigned" (change)="cdr.detectChanges()" class="filter-input" placeholder="Search client name...">
         </label>
-      </div>
-      <div class="filter-group">
+      </div> -->
+      <!-- <div class="filter-group">
         <label>
-          <!-- <span class="filter-icon">⊙</span> -->
           <select [(ngModel)]="assignedByFilter" (change)="cdr.detectChanges()" class="filter-select">
             <option [value]="null">All Created by</option>
             <option *ngFor="let user of getUniqueCreatedBy()" [value]="user.id">{{ user.name }}</option>
@@ -81,8 +79,8 @@
               <select [(ngModel)]="task.statusId">
                 <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
               </select>
-              <!-- <button type="button" (click)="UpdateTask(task, task.statusId)">Save</button> -->
-              <!-- <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()" class="open-link">Open</a> -->
+             <button type="button" (click)="UpdateTask(task, task.statusId)">Save</button> 
+               <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()" class="open-link">Open</a> 
             </td>
           </tr>
         </tbody>
@@ -100,7 +98,6 @@
     <div class="panel-header">
       <div>
         <h2>Created by me</h2>
-        <!-- <p class="panel-meta">Tasks you created and now track across the team.</p> -->
       </div>
       <div class="panel-count">{{ getFilteredAndSortedCreatedTasks().length }} items</div>
     </div>
@@ -114,7 +111,6 @@
       </div>
       <div class="filter-group">
         <label>
-          <!-- <span class="filter-icon">⊙</span> -->
           <select [(ngModel)]="createdStatusFilter" (change)="cdr.detectChanges()" class="filter-select">
             <option [value]="null">All Status</option>
             <option *ngFor="let status of getCreatedStatusOptions()" [value]="status.id">{{ status.name || status.statusName }}</option>
@@ -123,7 +119,6 @@
       </div>
       <div class="filter-group">
         <label>
-          <!-- <span class="filter-icon">⊙</span> -->
           <select [(ngModel)]="createdToFilter" (change)="cdr.detectChanges()" class="filter-select">
             <option [value]="null">All Assigned to</option>
             <option *ngFor="let user of getUniqueAssignedTo()" [value]="user.id">{{ user.name }}</option>
@@ -173,4 +168,4 @@
       </div>
     </div>
   </div>
-</section>
+</section> -->
