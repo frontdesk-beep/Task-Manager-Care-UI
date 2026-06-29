@@ -4,6 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import {ToastrService} from 'ngx-toastr';
+import { UserStore } from '../../services/user-store';
 
 @Component({
   selector: 'app-header-top',
@@ -27,24 +28,32 @@ export class HeaderTop implements OnInit, OnDestroy {
     private router: Router,
     private taskService: TaskService,
     private toastr: ToastrService,
-    private cdr:ChangeDetectorRef
+    private cdr:ChangeDetectorRef,
+    private userStore:UserStore
   ) { }
 
   ngOnInit(): void {
-    // this.name = localStorage.getItem('name') || '';
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.name=user?.name || '';
-    const userId = user?.id || 0;
-    if (userId) {
+
+    let userId=0;
+    this.userStore.user$.subscribe(user=>{
+      if(!user) return;
+      this.name=user.name;
+      userId=user.id;
+      this.loadNotifications(userId);
+    });
+  }
+    loadNotifications (userId:number) {
       this.storeSubscription = 
       this.taskService.GetNotifications(userId).subscribe({
         next: (res: any) => {
           const list = Array.isArray(res)
-          ? res : (res?.data || []);
+          ? res
+          : (res?.data || []);
+
           this.notifications = list;
           this.unreadCount=
                 list.filter((x:any) => !x.isRead).length;
-                this.cdr.detectChanges();
+                // this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.log('Notification load failed', err);
@@ -53,7 +62,7 @@ export class HeaderTop implements OnInit, OnDestroy {
         }
       });
     }
-  }
+  
 
   ngOnDestroy(): void {
     this.storeSubscription?.unsubscribe();

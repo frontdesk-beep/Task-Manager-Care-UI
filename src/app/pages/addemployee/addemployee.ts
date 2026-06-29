@@ -9,7 +9,7 @@ import { NgForm } from '@angular/forms';
 import { ViewChild } from '@angular/core';
 import { email } from '@angular/forms/signals';
 import { ChangeDetectorRef } from '@angular/core'
-import { isActive } from '@angular/router';
+
 interface Employee {
   id: number;
   name: string;
@@ -72,8 +72,6 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   constructor(
     private auth: Auth,
-    // private router: Router,
-    // private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private toastr: ToastrService,
     private exportService: Export
@@ -189,7 +187,6 @@ export class Addemployee implements OnInit, AfterViewInit {
       createdAt: new Date().toISOString().split('T')[0]
     });
     this.employeeToDelete = null;
-    // this.cdr.detectChanges();
   }
 
   // edit employee
@@ -206,7 +203,6 @@ export class Addemployee implements OnInit, AfterViewInit {
         };
         this.cdr.detectChanges();
         console.log('employeeToEdit:', this.employeeToEdit);
-        //  this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading employee profile:', error);
@@ -265,7 +261,6 @@ export class Addemployee implements OnInit, AfterViewInit {
 
     this.auth.DeleteUser(this.employeeToDelete.id).subscribe({
       next: () => {
-        //  this.employeeToDelete=null;
         this.cancelDelete();
         this.loadEmployees();
         this.toastr.success('Employee deactivated successfully!');

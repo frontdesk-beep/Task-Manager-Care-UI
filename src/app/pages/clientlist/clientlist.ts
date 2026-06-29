@@ -6,7 +6,7 @@ import { ClientService } from '../../services/client.service';
 import { ToastrService } from 'ngx-toastr';
 import { Export } from '../../services/export';
 import { ChangeDetectorRef } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { UserStore } from '../../services/user-store';
 
 
 @Component({
@@ -49,12 +49,12 @@ export class Clientlist implements OnInit, OnDestroy {
     private clientService: ClientService,
     private toastr: ToastrService,
     private exportService: Export,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private userStore: UserStore
   ) { }
 
   ngOnInit() {
     this.loadClients();
-    // this.loadClientCategories();
   }
 
   ngOnDestroy() {
@@ -319,7 +319,7 @@ export class Clientlist implements OnInit, OnDestroy {
             ...this.selectedClient
           };
 
-          this.refreshGrid();        //once the client is updated it will close the pop-up and reset the selected client and edit mode
+          this.refreshGrid();  //once the client is updated it will close the pop-up and reset the selected client and edit mode
           this.selectedClient = null;
           this.isEditMode = false;
         },

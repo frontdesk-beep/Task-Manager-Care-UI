@@ -9,6 +9,7 @@ import { TaskService } from '../../services/task.service';
 import { NgForm } from '@angular/forms';
 import { ViewChild } from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
+import { UserStore } from '../../services/user-store';
 
 interface DropdownItem {
   id: number;
@@ -54,9 +55,8 @@ export class Createtask implements OnInit {
   constructor(
     private taskService: TaskService,
     private auth: Auth,
-    // private router: Router,
-    // private cdr: ChangeDetectorRef,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private userStore: UserStore
   ) {}
 
   ngOnInit() {
@@ -90,23 +90,12 @@ export class Createtask implements OnInit {
   }
 
   private loadCurrentUser() {
-    const userData = localStorage.getItem('user');
-
-    if (!userData) {
-      return;
-    }
-
-    try {
-      const user = JSON.parse(userData);
-
-      this.currentUserId = Number(user?.id || 0);
-      this.task.createdById = this.currentUserId;
-    } catch {
-      this.currentUserId = 0;
-      this.task.createdById = 0;
-    }
+    this.userStore.user$.subscribe(user => {
+      if(!user) return;
+      this.currentUserId=user.id;
+      this.task.createdById=user.id;
+    });
   }
-
   private extractArray(response: any): any[] {
     return Array.isArray(response)
       ? response
@@ -123,7 +112,6 @@ export class Createtask implements OnInit {
           name: item.name || item.categoryName || item.type || ''
         }));
 
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading client categories:', error);
@@ -142,7 +130,6 @@ export class Createtask implements OnInit {
           name: item.statusName || item.name || ''
         }));
 
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading statuses:', error);
@@ -161,7 +148,6 @@ export class Createtask implements OnInit {
           name: item.priorityName || item.name || item.level || ''
         }));
 
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading priorities:', error);
@@ -179,7 +165,6 @@ export class Createtask implements OnInit {
           name: item.serviceName || item.name || item.categoryName || ''
         }));
 
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading service categories:', error);
@@ -197,7 +182,6 @@ export class Createtask implements OnInit {
           name: user.name || user.email || `User ${user.id}`
         }));
 
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading users for task assignment:', error);
@@ -239,7 +223,6 @@ export class Createtask implements OnInit {
             this.resetTask();
         },0);
         console.log("After reset: ");
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Full Error:', error);

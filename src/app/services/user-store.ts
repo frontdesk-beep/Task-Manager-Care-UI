@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class UserStore {
 
-  //behaviour subject means storres data and notifies everyone when data changes.
+  //behaviour subject means stores data and notifies everyone when data changes.
   private userSubject = new BehaviorSubject<any>(null);
   user$ = this.userSubject.asObservable();
   
