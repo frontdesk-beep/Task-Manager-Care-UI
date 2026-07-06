@@ -169,3 +169,79 @@
     </div>
   </div>
 </section> -->
+<div class="dashboard-container">
+
+  <h2>Dashboard</h2>
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>Total Clients</h3>
+      <h1>{{dashboardSummary?.totalClients}}</h1>
+    </div>
+
+    <div class="card">
+      <h3>Total Employees</h3>
+      <h1>{{dashboardSummary?.totalEmployees}}</h1>
+    </div>
+
+    <div class="card">
+      <h3>Open Tasks</h3>
+      <h1>{{dashboardSummary?.openTasks}}</h1>
+    </div>
+
+    <div class="card">
+      <h3>Completed Tasks</h3>
+      <h1>{{dashboardSummary?.completedTasks}}</h1>
+    </div>
+
+    <div class="card">
+      <h3>Overdue Tasks</h3>
+      <h1>{{dashboardSummary?.overDueTasks}}</h1>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <h3>Recent Tasks</h3>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>Client</th>
+        <th>Assigned To</th>
+        <th>Status</th>
+        <th>Priority</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let task of recentTasks">
+
+        <td>{{task.clientName}}</td>
+        <td>{{task.assignedTo}}</td>
+        <td>{{task.status}}</td>
+        <td>{{task.priority}}</td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <hr>
+
+  <h3>Notifications</h3>
+
+  <div *ngFor="let notification of notifications">
+
+    <p>{{notification.message}}</p>
+
+  </div>
+
+</div>

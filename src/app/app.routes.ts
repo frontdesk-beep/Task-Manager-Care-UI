@@ -11,6 +11,9 @@ import { Createtask } from './pages/createtask/createtask';
 import { TaskDetail } from './pages/task-detail/task-detail';
 import { TaskHistory } from './pages/task-history/task-history';
 import {Clientlist} from './pages/clientlist/clientlist';
+import { TaskManagement } from './pages/task-management/task-management';
+import { Reports } from './pages/reports/reports';
+import { Settings } from './pages/settings/settings';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -21,6 +24,9 @@ export const routes: Routes = [
   },
   { path: 'main', component: MainLayout, children: [
       { path: 'dashboard', component: Dashboard },
+      { path: 'task-management', component: TaskManagement},
+      { path: 'reports', component: Reports},
+      { path: 'settings', component: Settings},
       { path: 'profile', component: Profile },
       { path: 'create-task', component: Createtask },
       { path: 'task/:id', component: TaskDetail },

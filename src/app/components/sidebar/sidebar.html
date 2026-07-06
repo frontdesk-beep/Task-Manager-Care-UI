@@ -4,9 +4,13 @@
     </div>
     <nav>
         <a routerLink="/main/dashboard">Dashboard</a>
-        <a routerLink="/main/task-history">Task History</a>
-        <a routerLink="/main/clientlist">Client List</a>
-        <a routerLink="/main/create-task">Create Task</a>
-        <a *ngIf="role==='Admin'" routerLink="/main/employee-management" routerLinkActive="active">Employee Management</a>
+        <a routerLink="/main/task-management">Task Management</a>
+        <!-- <a routerLink="/main/task-history">Task History</a> -->
+        <a routerLink="/main/clientlist">Clients</a>
+        <a *ngIf="role==='Admin'" routerLink="/main/employee-management" routerLinkActive="active">Employees</a>
+        <a *ngIf="role==='Admin'" routerLink="/main/reports">Reports</a>
+        <a routerLink="/main/profile">Profile</a>
+        <a *ngIf="role==='Admin'" routerLink="/main/settings">Settings</a>
+        <!-- <a routerLink="/main/create-task">Create Task</a> -->
     </nav>
 </aside>
