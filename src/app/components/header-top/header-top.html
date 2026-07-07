@@ -19,8 +19,14 @@
             👤
             {{name}}
             <div class="dropdown" *ngIf="dropdownOpen">
-                <a routerLink="/main/profile" (click)="dropdownOpen = false">View Profile</a>
-                <a (click)="logout()">Logout</a>
+                <a routerLink="/main/profile" (click)="dropdownOpen = false">
+                    <i class="bi bi-person-circle" gap="2"></i>
+                        View Profile
+                </a>
+                <a (click)="logout()">
+                    <i class="bi bi-box-arrow-right" gap="2"></i>
+                    Logout
+                </a>
             </div>
         </div>
     </div>

@@ -1,1 +1,146 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global app styling for consistent typography and controls */
+:root {
+  --app-font: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  --app-text: #111827;
+  --app-muted: #6b7280;
+  --app-border: #d1d5db;
+  --app-primary: #2563eb;
+  --app-primary-hover: #1d4ed8;
+  --app-radius: 8px;
+  --app-btn-padding: 8px 14px;
+  --app-btn-font-size: 0.95rem;
+  --app-form-font-size: 0.95rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--app-font);
+  color: var(--app-text);
+  background: #f8fafc;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--app-text);
+  font-weight: 600;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.08rem; }
+p { margin: 0; }
+
+label,
+input,
+select,
+textarea,
+button,
+.form-label,
+.form-control,
+.form-select,
+.form-text,
+.card,
+.container {
+  font-family: var(--app-font);
+  font-size: var(--app-form-font-size);
+}
+
+input,
+select,
+textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: #ffffff;
+  color: var(--app-text);
+  font-size: var(--app-form-font-size);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+button,
+.btn {
+  padding: var(--app-btn-padding);
+  border-radius: var(--app-radius);
+  font-size: var(--app-btn-font-size);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover,
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary,
+button.primary,
+button[type="submit"] {
+  background: var(--app-primary);
+  color: #ffffff;
+  border: 1px solid var(--app-primary);
+}
+
+.btn-primary:hover,
+button.primary:hover,
+button[type="submit"]:hover {
+  background: var(--app-primary-hover);
+  border-color: var(--app-primary-hover);
+}
+
+.btn-outline-primary {
+  background: #ffffff;
+  color: var(--app-primary);
+  border: 1px solid var(--app-primary);
+}
+
+.btn-outline-primary:hover {
+  background: #eff6ff;
+}
+
+.btn-outline-secondary,
+.btn-secondary {
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid var(--app-border);
+}
+
+.btn-outline-secondary:hover,
+.btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+.btn-outline-success {
+  background: #ffffff;
+  color: #15803d;
+  border: 1px solid #15803d;
+}
+
+.btn-outline-success:hover {
+  background: #dcfce7;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #ffffff;
+  border: 1px solid #ef4444;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+

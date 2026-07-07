@@ -13,41 +13,59 @@ export class TaskStore {
   loading$ = new BehaviorSubject<boolean>(false);
 
   private pollingId: any;
+  private refreshTimer: any;
   //subscription use for WebSocket subscriptions
   private socketSub?: Subscription;
   private currentUserId = 0;
+  private refreshInFlight = false;
+  private pendingRefresh = false;
+  private lastRefreshAt = 0;
 
   constructor(private taskService: TaskService) {}
 //called when dashboard loads.
   initForUser(userId: number) {
-    console.log('TaskStore initForUser called:', userId);
-
     if (!userId) {
-      console.log('No userId:', userId);
       return;
     }
 
     this.currentUserId = userId;
-
-    console.log('Loading dashboard data');
-    this.loadAll();
+    this.stopPolling();
+    this.loadAll(true);
     this.startPolling();
-    this.startRealtime();
   }
 
-  private loadAll() {
+  private loadAll(force = false) {
+
+        console.log('called');
+
     if (!this.currentUserId) {
-      console.log('Cannot load tasks because currentUserId is missing');
+      return;
+    }
+
+    if (!force && this.refreshInFlight) {
+      this.pendingRefresh = true;
+      return;
+    }
+
+    if (!force && Date.now() - this.lastRefreshAt < 4000) {
+      this.pendingRefresh = true;
       return;
     }
 
     const start = performance.now();
+    this.refreshInFlight = true;
+    this.lastRefreshAt = Date.now();
     this.loading$.next(true);
     let remaining = 3;
     const complete = () => {
       remaining -= 1;
       if (remaining === 0) {
+        this.refreshInFlight = false;
         this.loading$.next(false);
+        if (this.pendingRefresh) {
+          this.pendingRefresh = false;
+          this.loadAll(true);
+        }
         console.log('Dashboard data loaded in', Math.round(performance.now() - start), 'ms');
       }
     };
@@ -157,7 +175,7 @@ export class TaskStore {
   }
 
   refresh() {
-    this.loadAll();
+    this.scheduleRefresh();
   }
 
   forceRefresh(userId?: number) {
@@ -165,12 +183,27 @@ export class TaskStore {
       this.currentUserId = userId;
     }
 
-    this.loadAll();
+    this.loadAll(true);
+  }
+
+  private scheduleRefresh() {
+    if (!this.currentUserId) {
+      return;
+    }
+
+    if (this.refreshTimer) {
+      return;
+    }
+
+    this.refreshTimer = setTimeout(() => {
+      this.refreshTimer = null;
+      this.loadAll(true);
+    }, 250);
   }
 
   private startPolling() {
     this.stopPolling();
-    this.pollingId = setInterval(() => this.loadAll(), 8000);
+    this.pollingId = setInterval(() => this.scheduleRefresh(), 20000);
   }
 
   private stopPolling() {
@@ -178,28 +211,13 @@ export class TaskStore {
       clearInterval(this.pollingId);
       this.pollingId = null;
     }
+
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   }
 //Create WebSocket connection.
-  private startRealtime() {
-    this.socketSub = this.taskService
-      .connectTaskUpdates(this.currentUserId)
-      .subscribe({
-        next: (message: any) => {
-          if (!message) return;
-
-          if (
-            message.type === 'task-created' ||
-            message.type === 'task-updated'
-          ) {
-            this.loadAll();
-          }
-        },
-        error: (err) => {
-          console.log('TaskStore realtime error', err);
-        }
-      });
-  }
-
   destroy() {
     this.stopPolling();
 //remove websocket connection.
@@ -213,5 +231,7 @@ export class TaskStore {
     this.createdTasks$.next([]);
     this.statuses$.next([]);
     this.loading$.next(false);
+    this.refreshInFlight = false;
+    this.pendingRefresh = false;
   }
 }

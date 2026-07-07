@@ -1,15 +1,8 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ChangeDetectorRef
-} from '@angular/core';
-
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-
 import { TaskService } from '../../services/task.service';
 import { Auth } from '../../services/auth';
 import { TaskStore } from '../../services/task-store.service';
@@ -59,12 +52,27 @@ export class Dashboard implements OnInit, OnDestroy {
   createdPage: number = 1;
   itemsPerPage: number = 5;
 
+  //instead of calling methods into html created variables
+  filteredAssignedTasks: any[] = [];
+  paginatedAssignedTasks: any[] = [];
+
+  filteredCreatedTasks: any[] = [];
+  paginatedCreatedTasks: any[] = [];
+
+  assignedTotalPages: number = 1;
+  createdTotalPages: number = 1;
+
+  uniqueCreatedUsers: any[] = [];
+  uniqueAssignedUsers: any[] = [];
+
+  createdStatusOptions: any[] = [];
+
+
   constructor(
     private taskService: TaskService,
     private auth: Auth,
     private taskStore: TaskStore,
     private router: Router,
-    public cdr: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
@@ -111,6 +119,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   loadUsers() {
+    console.log('Loading users...');
     this.auth.GetUsers().subscribe({
       next: (res: any) => {
         this.users = Array.isArray(res)
@@ -207,10 +216,11 @@ export class Dashboard implements OnInit, OnDestroy {
     ).length;
 
     this.completedCount = this.assignedTasks.filter((task: any) =>
-      this.isCompletedStatus(task.statusName) || 
-    this.isCompletedStatusId(task.statusId)
+      this.isCompletedStatus(task.statusName) ||
+      this.isCompletedStatusId(task.statusId)
     ).length;
-
+    this.refreshAssignedView();
+    this.refreshCreatedView();
     // this.cdr.detectChanges();
   }
 
@@ -222,7 +232,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   UpdateTask(task: any, statusId: number) {
-    
+
     const nextStatusId = Number(statusId);
     console.log('Updating task', task.id, 'to status', nextStatusId);
 
@@ -232,7 +242,8 @@ export class Dashboard implements OnInit, OnDestroy {
     task.statusId = nextStatusId;
     task.statusName = this.getStatusName(nextStatusId);
 
-    this.addNames();
+    this.refreshAssignedView();
+    this.refreshCreatedView();
 
     const payload = {
       id: task.id,
@@ -249,16 +260,18 @@ export class Dashboard implements OnInit, OnDestroy {
       createdById: Number(task.createdById),
       serviceCategoryId: Number(task.serviceCategoryId)
     };
-//patch
-console.log(
-  'Payload sent to API:',
-  JSON.stringify(payload, null, 2)
-);
+    //patch
+    console.log(
+      'Payload sent to API:',
+      JSON.stringify(payload, null, 2)
+    );
     this.taskStore.UpdateTask(task.id, payload)
       .subscribe({
         next: (res: any) => {
           console.log('Task status saved successfully for', task.id, res);
-          this.taskStore.refresh();
+          this.addNames();
+          this.refreshAssignedView();
+          this.refreshCreatedView();
         },
         error: (err: any) => {
           console.log('Update failed, rolling back', err);
@@ -302,7 +315,12 @@ console.log(
         this.createdSortDir = 'asc';
       }
     }
-    this.cdr.detectChanges();
+    if (table === 'assigned') {
+      this.refreshAssignedView();
+    }
+    else {
+      this.refreshCreatedView();
+    }
   }
 
   getSortIcon(table: 'assigned' | 'created', key: string): string {
@@ -337,97 +355,101 @@ console.log(
   }
 
   // Filtering methods
-  getFilteredAndSortedAssignedTasks(): any[] {
-    console.log('called');
-    let filtered = this.assignedTasks;
+  // getFilteredAndSortedAssignedTasks(): any[] {
+  //   console.log('called');
+  //   let filtered = this.assignedTasks;
 
-    // Filter by Created by (user)
-    if (this.assignedByFilter !== null && this.assignedByFilter !== undefined) {
-      filtered = filtered.filter(t => Number(t.createdById) === Number(this.assignedByFilter));
-    }
+  //   // Filter by Created by (user)
+  //   if (this.assignedByFilter !== null && this.assignedByFilter !== undefined) {
+  //     filtered = filtered.filter(t => Number(t.createdById) === Number(this.assignedByFilter));
+  //   }
 
-    // Filter by Client Name (text search)
-    if (this.searchClientNameAssigned.trim()) {
-      const search = this.searchClientNameAssigned.trim().toLowerCase();
-      filtered = filtered.filter(t => 
-        (t.clientName || '').toLowerCase().includes(search)
-      );
-    }
+  //   // Filter by Client Name (text search)
+  //   if (this.searchClientNameAssigned.trim()) {
+  //     const search = this.searchClientNameAssigned.trim().toLowerCase();
+  //     filtered = filtered.filter(t =>
+  //       (t.clientName || '').toLowerCase().includes(search)
+  //     );
+  //   }
 
-    return this.sortTasks(filtered, 'assigned');
-  }
+  //   return this.sortTasks(filtered, 'assigned');
+  // }
 
-  getFilteredAndSortedCreatedTasks(): any[] {
-    let filtered = this.createdTasks;
+  // getFilteredAndSortedCreatedTasks(): any[] {
+  //   let filtered = this.createdTasks;
 
-    // Filter by Status
-    if (this.createdStatusFilter !== null && this.createdStatusFilter !== undefined) {
-      filtered = filtered.filter(t => Number(t.statusId) === Number(this.createdStatusFilter));
-    }
+  //   // Filter by Status
+  //   if (this.createdStatusFilter !== null && this.createdStatusFilter !== undefined) {
+  //     filtered = filtered.filter(t => Number(t.statusId) === Number(this.createdStatusFilter));
+  //   }
 
-    // Filter by Assigned to (user)
-    if (this.createdToFilter !== null && this.createdToFilter !== undefined) {
-      filtered = filtered.filter(t => Number(t.assignedToId) === Number(this.createdToFilter));
-    }
+  //   // Filter by Assigned to (user)
+  //   if (this.createdToFilter !== null && this.createdToFilter !== undefined) {
+  //     filtered = filtered.filter(t => Number(t.assignedToId) === Number(this.createdToFilter));
+  //   }
 
-    // Filter by Client Name (text search)
-    if (this.searchClientNameCreated.trim()) {
-      const search = this.searchClientNameCreated.trim().toLowerCase();
-      filtered = filtered.filter(t => 
-        (t.clientName || '').toLowerCase().includes(search)
-      );
-    }
+  //   // Filter by Client Name (text search)
+  //   if (this.searchClientNameCreated.trim()) {
+  //     const search = this.searchClientNameCreated.trim().toLowerCase();
+  //     filtered = filtered.filter(t =>
+  //       (t.clientName || '').toLowerCase().includes(search)
+  //     );
+  //   }
 
-    return this.sortTasks(filtered, 'created');
-  }
+  //   return this.sortTasks(filtered, 'created');
+  // }
 
-  getPaginatedAssignedTasks(): any[] {
-    const filtered = this.getFilteredAndSortedAssignedTasks();
-    const start = (this.assignedPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return filtered.slice(start, end);
-  }
+  // getPaginatedAssignedTasks(): any[] {
+  //   const filtered = this.getFilteredAndSortedAssignedTasks();
+  //   const start = (this.assignedPage - 1) * this.itemsPerPage;
+  //   const end = start + this.itemsPerPage;
+  //   return filtered.slice(start, end);
+  // }
 
-  getPaginatedCreatedTasks(): any[] {
-    const filtered = this.getFilteredAndSortedCreatedTasks();
-    const start = (this.createdPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return filtered.slice(start, end);
-  }
+  // getPaginatedCreatedTasks(): any[] {
+  //   const filtered = this.getFilteredAndSortedCreatedTasks();
+  //   const start = (this.createdPage - 1) * this.itemsPerPage;
+  //   const end = start + this.itemsPerPage;
+  //   return filtered.slice(start, end);
+  // }
 
-  getAssignedTotalPages(): number {
-    return Math.ceil(this.getFilteredAndSortedAssignedTasks().length / this.itemsPerPage);
-  }
+  // getAssignedTotalPages(): number {
+  //   return Math.ceil(this.getFilteredAndSortedAssignedTasks().length / this.itemsPerPage);
+  // }
 
-  getCreatedTotalPages(): number {
-    return Math.ceil(this.getFilteredAndSortedCreatedTasks().length / this.itemsPerPage);
-  }
+  // getCreatedTotalPages(): number {
+  //   return Math.ceil(this.getFilteredAndSortedCreatedTasks().length / this.itemsPerPage);
+  // }
 
   goToAssignedPage(page: number) {
-    const totalPages = this.getAssignedTotalPages();
-    if (page >= 1 && page <= totalPages) {
-      this.assignedPage = page;
-      // this.cdr.detectChanges();
+    if (page < 1 || page > this.assignedTotalPages) {
+      return;
     }
+    this.assignedPage = page;
+    this.refreshAssignedView();
   }
 
   goToCreatedPage(page: number) {
-    const totalPages = this.getCreatedTotalPages();
-    if (page >= 1 && page <= totalPages) {
-      this.createdPage = page;
-      // this.cdr.detectChanges();
+    if (page < 1 || page > this.createdTotalPages) {
+      return;
     }
+    this.createdPage = page;
+    this.refreshCreatedView();
   }
 
   clearAllFilters() {
     this.assignedByFilter = null;
     this.searchClientNameAssigned = '';
+
     this.createdStatusFilter = null;
     this.createdToFilter = null;
     this.searchClientNameCreated = '';
+
     this.assignedPage = 1;
     this.createdPage = 1;
-    // this.cdr.detectChanges();
+
+    this.refreshAssignedView();
+    this.refreshCreatedView();
   }
 
   getUniqueCreatedBy(): any[] {
@@ -457,6 +479,80 @@ console.log(
       const name = (status.name || status.statusName || '').toString().toLowerCase();
       return name === 'pending' || name === 'in progress' || name === 'in-progress';
     });
+  }
+
+  // for assigned tasks, we want to refresh the view whenever filters or sorting change
+  refreshAssignedView() {
+    let filtered = [...this.assignedTasks];
+    // Filter by Created By
+    if (this.assignedByFilter != null) {
+      filtered = filtered.filter(x =>
+        Number(x.createdById) === Number(this.assignedByFilter)
+      );
+    }
+    // Search
+    if (this.searchClientNameAssigned.trim()) {
+      const search =
+        this.searchClientNameAssigned.toLowerCase();
+      filtered = filtered.filter(x =>
+        (x.clientName || '').toLowerCase().includes(search)
+      );
+    }
+    // Sorting
+    filtered = this.sortTasks(filtered, 'assigned');
+    this.filteredAssignedTasks = filtered;
+    this.assignedTotalPages =
+      Math.max(1,
+        Math.ceil(filtered.length / this.itemsPerPage));
+
+    const start =
+      (this.assignedPage - 1) * this.itemsPerPage;
+    this.paginatedAssignedTasks =
+      filtered.slice(start, start + this.itemsPerPage);
+    this.uniqueCreatedUsers = this.getUniqueCreatedBy();
+  }
+
+
+  refreshCreatedView() {
+    let filtered = [...this.createdTasks];
+    // Filter by Status
+    if (this.createdStatusFilter != null) {
+      filtered = filtered.filter(task =>
+        Number(task.statusId) === Number(this.createdStatusFilter)
+      );
+    }
+    // Filter by Assigned To
+    if (this.createdToFilter != null) {
+      filtered = filtered.filter(task =>
+        Number(task.assignedToId) === Number(this.createdToFilter)
+      );
+    }
+    // Search by Client Name
+    if (this.searchClientNameCreated.trim()) {
+      const search = this.searchClientNameCreated
+        .trim()
+        .toLowerCase();
+      filtered = filtered.filter(task =>
+        (task.clientName || '')
+          .toLowerCase()
+          .includes(search)
+      );
+    }
+    // Sorting
+    filtered = this.sortTasks(filtered, 'created');
+    // Save filtered list
+    this.filteredCreatedTasks = filtered;
+    // Pagination
+    this.createdTotalPages =
+      Math.max(1, Math.ceil(filtered.length / this.itemsPerPage));
+    const start =
+      (this.createdPage - 1) * this.itemsPerPage;
+    this.paginatedCreatedTasks =
+      filtered.slice(start, start + this.itemsPerPage);
+    this.createdStatusOptions =
+      this.getCreatedStatusOptions();
+
+      this.uniqueAssignedUsers = this.getUniqueAssignedTo();
   }
 }
 

@@ -102,6 +102,25 @@ export class Createtask implements OnInit {
       : (response?.data || []);
   }
 
+  private isActiveUser(user: any): boolean {
+    const rawStatus = user?.isActive ?? user?.isactive ?? user?.active ?? user?.status;
+
+    if (typeof rawStatus === 'boolean') {
+      return rawStatus;
+    }
+
+    if (typeof rawStatus === 'number') {
+      return rawStatus === 1;
+    }
+
+    if (typeof rawStatus === 'string') {
+      const normalized = rawStatus.trim().toLowerCase();
+      return ['active', 'true', '1', 'yes', 'y', 'enabled', 'enable'].includes(normalized);
+    }
+
+    return true;
+  }
+
   loadClientCategories() {
     this.taskService.GetClientCategories().subscribe({
       next: (response: any) => {
@@ -175,7 +194,7 @@ export class Createtask implements OnInit {
   loadUsers() {
     this.auth.GetUsers().subscribe({
       next: (response: any) => {
-        const users = this.extractArray(response);
+        const users = this.extractArray(response).filter((user: any) => this.isActiveUser(user));
 
         this.users = users.map((user: any) => ({
           id: Number(user.id),
