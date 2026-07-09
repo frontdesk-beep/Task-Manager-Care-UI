@@ -18,14 +18,14 @@
         <div class="filter-group">
           <label>
             <span class="filter-icon">🔍</span>
-            <input type="text" [(ngModel)]="assignedClientNameSearch" (change)="onAssignedFilterChange()" class="filter-input" placeholder="Search client name...">
+            <input type="text" [(ngModel)]="assignedClientNameSearch" (ngModelChange)="onAssignedFilterChange()" class="filter-input" placeholder="Search client name...">
           </label>
         </div>
         <div class="filter-group">
           <label>
-            <select [(ngModel)]="assignedCreatedByFilter" (change)="onAssignedFilterChange()" class="filter-select">
+            <select [(ngModel)]="assignedCreatedByFilter" (ngModelChange)="onAssignedFilterChange()" class="filter-select">
               <option [value]="null">All Created by</option>
-              <option *ngFor="let user of getUniqueCreatedByNames(completedAssigned)" [value]="user.id">{{ user.name }}</option>
+              <option *ngFor="let user of getUniqueCreatedByNames(completedAssigned); trackBy: trackByUserId" [value]="user.id">{{ user.name }}</option>
             </select>
           </label>
         </div>
@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div  class="empty-state">No completed assigned tasks matching filters.</div>
+      <!-- <div  class="empty-state">No completed assigned tasks matching filters.</div> -->
       <div class="history-table-wrapper">
         <table class="history-table">
           <thead>
@@ -61,7 +61,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let task of getPaginatedAssignedTasks()">
+            <tr *ngFor="let task of getPaginatedAssignedTasks(); trackBy: trackByTaskId">
               <td>{{ task.createdByName }}</td>
               <td>{{ task.clientName }}</td>
               <td>{{ task.task_Description }}</td>
@@ -87,14 +87,14 @@
         <div class="filter-group">
           <label>
             <span class="filter-icon">🔍</span>
-            <input type="text" [(ngModel)]="createdClientNameSearch" (change)="onCreatedFilterChange()" class="filter-input" placeholder="Search client name...">
+            <input type="text" [(ngModel)]="createdClientNameSearch" (ngModelChange)="onCreatedFilterChange()" class="filter-input" placeholder="Search client name...">
           </label>
         </div>
         <div class="filter-group">
           <label>
-            <select [(ngModel)]="createdCreatedByFilter" (change)="onCreatedFilterChange()" class="filter-select">
+            <select [(ngModel)]="createdCreatedByFilter" (ngModelChange)="onCreatedFilterChange()" class="filter-select">
               <option [value]="null">All Created by</option>
-              <option *ngFor="let user of getUniqueCreatedByNames(completedCreated)" [value]="user.id">{{ user.name }}</option>
+              <option *ngFor="let user of getUniqueCreatedByNames(completedCreated); trackBy: trackByUserId" [value]="user.id">{{ user.name }}</option>
             </select>
           </label>
         </div>
@@ -127,7 +127,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let task of getPaginatedCreatedTasks()">
+            <tr *ngFor="let task of getPaginatedCreatedTasks(); trackBy: trackByTaskId">
               <td>{{ task.clientName }}</td>
               <td>{{ task.task_Description }}</td>
               <td>{{ task.statusName }}</td>
