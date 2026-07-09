@@ -1,6 +1,6 @@
 <div class="page client-list-page">
   <div class="client-card">
-    <h3>Client Records</h3>
+    <h1>Client Records</h1>
 
     <!-- Filters -->
     <div class="filters-section">
@@ -78,7 +78,7 @@
             <td>{{ client.phoneNumber || '-' }}</td>
             <td>{{ client.email || '-' }}</td>
             <td>{{ client.address || '-' }}</td>
-            <td>{{ client.createdOn ? (client.createdOn | slice: 0: 10) : '-' }}</td>
+            <td>{{ client.createdOn ? (client.createdOn | date:'dd MMM yyyy') : '-' }}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" 

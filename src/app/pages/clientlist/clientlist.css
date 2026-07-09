@@ -39,13 +39,13 @@
 }
 
 .filter-input {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #ffffff;
   color: #374151;
-  font-size: 0.9rem;
-  min-width: 220px;
+  font-size: 0.85rem;
+  min-width: 200px;
   transition: all 0.2s ease;
 }
 
@@ -64,12 +64,13 @@
 }
 
 .filter-select {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 10px;
+  border-radius: 8px;
   background: white;
   color: #374151;
-  min-width: 200px;
+  min-width: 180px;
+  font-size: 0.85rem;
   cursor: pointer;
 }
 
@@ -81,9 +82,9 @@
 
 /* BUTTONS */
 .btn {
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: 0.2s ease;
@@ -131,7 +132,15 @@
 /* Table Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
+}
+
+.action-buttons .btn {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-width: 62px;
+  border-radius: 8px;
 }
 
 .btn-primary {
@@ -174,37 +183,146 @@
 /* TABLE */
 .table-wrapper {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 70vh;
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
-  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: 1000px;
 }
 
 .table thead {
   background: #f8fafc;
 }
 
-.table th,
-.table td {
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fafc;
   padding: 14px 16px;
   text-align: left;
+  vertical-align: middle;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #111827;
+  white-space: nowrap;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.table th {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #111827;
+.table thead th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.table thead th.sortable .sort-icon {
+  margin-left: 6px;
+  color: #64748b;
+  font-size: 0.78rem;
+  display: inline-block;
+  min-width: 12px;
+}
+
+.table thead th:first-child {
+  padding-left: 18px;
+}
+
+.table thead th:last-child {
+  padding-right: 18px;
+  text-align: center;
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.table td {
+  color: #374151;
+  line-height: 1.35;
+  font-size: 0.95rem;
 }
 
 .table tbody tr:hover {
   background: #f9fafb;
+}
+
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 14%;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 12%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 14%;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 12%;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 18%;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 16%;
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 10%;
+}
+
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  width: 150px;
 }
 
 /* SORTING */
@@ -222,8 +340,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pagination .btn {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-width: 64px;
 }
 
 .page-info {

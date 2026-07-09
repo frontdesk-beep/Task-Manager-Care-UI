@@ -1,0 +1,24 @@
+.profile-page-card {
+  font-size: 1rem;
+}
+
+.profile-page-title {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.profile-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.profile-field-label {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.profile-field-input {
+  font-size: 1rem;
+  padding: 0.7rem 0.8rem;
+}

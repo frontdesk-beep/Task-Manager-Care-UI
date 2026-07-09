@@ -2,8 +2,8 @@
   <div class="card p-4 shadow mb-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h3>Create Task</h3>
-        <p class="text-muted mb-0">Fill the form below to create a new task for your CRM workflow.</p>
+        <h1>Create Task</h1>
+        <!-- <p class="text-muted mb-0">Fill the form below to create a new task for your CRM workflow.</p> -->
       </div>
     </div>
 
@@ -141,6 +141,7 @@
         </div>
 
         <div class="col-md-4">
+          
           <label class="form-label" for="dueDate">Due Date
             <span class="required" style="color: red;">*</span>
           </label>
@@ -160,9 +161,9 @@
           <!-- </label> -->
           <input
             id="createdOn"
-            type="datetime-local"
+            type="date-local"
             class="form-control"
-            [value]="task.createdOn"
+            [value]="task.createdOn | date:'yyyy-MM-dd'"
             disabled
           />
         </div>
