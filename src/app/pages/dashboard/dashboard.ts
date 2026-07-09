@@ -265,6 +265,7 @@ export class Dashboard implements OnInit, OnDestroy {
       'Payload sent to API:',
       JSON.stringify(payload, null, 2)
     );
+    
     this.taskStore.UpdateTask(task.id, payload)
       .subscribe({
         next: (res: any) => {
@@ -353,73 +354,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
     return sorted;
   }
-
-  // Filtering methods
-  // getFilteredAndSortedAssignedTasks(): any[] {
-  //   console.log('called');
-  //   let filtered = this.assignedTasks;
-
-  //   // Filter by Created by (user)
-  //   if (this.assignedByFilter !== null && this.assignedByFilter !== undefined) {
-  //     filtered = filtered.filter(t => Number(t.createdById) === Number(this.assignedByFilter));
-  //   }
-
-  //   // Filter by Client Name (text search)
-  //   if (this.searchClientNameAssigned.trim()) {
-  //     const search = this.searchClientNameAssigned.trim().toLowerCase();
-  //     filtered = filtered.filter(t =>
-  //       (t.clientName || '').toLowerCase().includes(search)
-  //     );
-  //   }
-
-  //   return this.sortTasks(filtered, 'assigned');
-  // }
-
-  // getFilteredAndSortedCreatedTasks(): any[] {
-  //   let filtered = this.createdTasks;
-
-  //   // Filter by Status
-  //   if (this.createdStatusFilter !== null && this.createdStatusFilter !== undefined) {
-  //     filtered = filtered.filter(t => Number(t.statusId) === Number(this.createdStatusFilter));
-  //   }
-
-  //   // Filter by Assigned to (user)
-  //   if (this.createdToFilter !== null && this.createdToFilter !== undefined) {
-  //     filtered = filtered.filter(t => Number(t.assignedToId) === Number(this.createdToFilter));
-  //   }
-
-  //   // Filter by Client Name (text search)
-  //   if (this.searchClientNameCreated.trim()) {
-  //     const search = this.searchClientNameCreated.trim().toLowerCase();
-  //     filtered = filtered.filter(t =>
-  //       (t.clientName || '').toLowerCase().includes(search)
-  //     );
-  //   }
-
-  //   return this.sortTasks(filtered, 'created');
-  // }
-
-  // getPaginatedAssignedTasks(): any[] {
-  //   const filtered = this.getFilteredAndSortedAssignedTasks();
-  //   const start = (this.assignedPage - 1) * this.itemsPerPage;
-  //   const end = start + this.itemsPerPage;
-  //   return filtered.slice(start, end);
-  // }
-
-  // getPaginatedCreatedTasks(): any[] {
-  //   const filtered = this.getFilteredAndSortedCreatedTasks();
-  //   const start = (this.createdPage - 1) * this.itemsPerPage;
-  //   const end = start + this.itemsPerPage;
-  //   return filtered.slice(start, end);
-  // }
-
-  // getAssignedTotalPages(): number {
-  //   return Math.ceil(this.getFilteredAndSortedAssignedTasks().length / this.itemsPerPage);
-  // }
-
-  // getCreatedTotalPages(): number {
-  //   return Math.ceil(this.getFilteredAndSortedCreatedTasks().length / this.itemsPerPage);
-  // }
 
   goToAssignedPage(page: number) {
     if (page < 1 || page > this.assignedTotalPages) {

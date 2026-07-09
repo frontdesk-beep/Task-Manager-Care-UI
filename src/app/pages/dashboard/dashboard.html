@@ -23,7 +23,6 @@
     <div class="panel-header">
       <div>
         <h2>Assigned to me</h2>
-        <!-- <p class="panel-meta">Work that needs your next action</p> -->
       </div>
       <div class="panel-count">{{ filteredAssignedTasks.length }} items</div>
     </div>
@@ -68,6 +67,7 @@
             <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
           </select>
           <button type="button" (click)="UpdateTask(task, task.statusId)">Save</button>
+          <!-- <button type="button" (click)="testClick('CLICK')">Save</button> -->
           <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()" class="open-link">Open</a>
         </div>
       </article>
@@ -75,8 +75,8 @@
 
     <div class="pagination" *ngIf="assignedTotalPages > 1">
       <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage - 1)" [disabled]="assignedPage === 1">← Previous</button>
-      <span class="pagination-info">Page {{ assignedPage }} of {{ getAssignedTotalPages() }}</span>
-      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage + 1)" [disabled]="assignedPage === getAssignedTotalPages()">Next →</button>
+      <span class="pagination-info">Page {{ assignedPage }} of {{ assignedTotalPages }}</span>
+      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage + 1)" [disabled]="assignedPage === assignedTotalPages">Next →</button>
     </div>
   </div>
 
@@ -84,7 +84,6 @@
     <div class="panel-header">
       <div>
         <h2>Created by me</h2>
-        <!-- <p class="panel-meta">Tasks you assigned to others</p> -->
       </div>
       <div class="panel-count">{{ filteredCreatedTasks.length }} items</div>
     </div>
