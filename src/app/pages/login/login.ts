@@ -1,25 +1,60 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import {Router} from '@angular/router';
 import { Auth } from '../../services/auth';
 import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
   email: string = '';
   password: string = '';
+  emailError: string = '';
+  passwordError: string = '';
 
   constructor(private auth: Auth, private router: Router, private toastr: ToastrService) {}
 
+  validateEmail() {
+    this.emailError = '';
+    if (!this.email.trim()) {
+      this.emailError = 'Email is required.';
+      return;
+    }
+    const emailRegex = /^[A-Za-z0-9._%+-]+@careinsurance\.ca$/;
+    if (!emailRegex.test(this.email)) {
+      this.emailError = 'Please use your @careinsurance.ca email';
+      return;
+    }
+  }
+
+  validatePassword() {
+    this.passwordError = '';
+    if (!this.password.trim()) {
+      this.passwordError = 'Password is required.';
+      return;
+    }
+    if (this.password.length < 8) {
+      this.passwordError = 'Password must be at least 8 characters.';
+      return;
+    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!passwordRegex.test(this.password)) {
+      this.passwordError = 'Invalid password format.';
+      return;
+    }
+  }
+
   onSubmit() {
-    if (!this.email.trim() || !this.password.trim()) {
-      this.toastr.warning('Please enter both email and password.');
+    this.validateEmail();
+    this.validatePassword();
+    
+    if (this.emailError || this.passwordError) {
       return;
     }
 

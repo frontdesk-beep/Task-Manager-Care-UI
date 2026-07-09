@@ -67,7 +67,6 @@
             <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
           </select>
           <button type="button" (click)="UpdateTask(task, task.statusId)">Save</button>
-          <!-- <button type="button" (click)="testClick('CLICK')">Save</button> -->
           <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()" class="open-link">Open</a>
         </div>
       </article>

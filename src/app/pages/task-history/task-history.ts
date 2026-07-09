@@ -6,6 +6,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TaskService } from '../../services/task.service';
 import { Export } from '../../services/export';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-task-history',
@@ -43,7 +44,8 @@ export class TaskHistory implements OnInit {
     private taskService: TaskService,
     private router: Router,
     // public cdr: ChangeDetectorRef,
-    private exportService: Export
+    private exportService: Export,
+    private cdr: ChangeDetectorRef
     
   ) {}
 
@@ -100,6 +102,7 @@ export class TaskHistory implements OnInit {
   }
 
   private loadHistory() {
+    console.log('called loadHistory');
     this.loading = true;
     this.error = null;
 
@@ -111,6 +114,7 @@ export class TaskHistory implements OnInit {
       next: ({ statuses, assigned, created }) => {
         const statusList = this.extractArray(statuses);
         this.statuses = statusList;
+        console.log('statuses:');
         const statusMap = new Map<number, string>(
           statusList.map((status: any) => [
             Number(status.id),
@@ -119,12 +123,14 @@ export class TaskHistory implements OnInit {
         );
         const completedStatusIds = this.createCompletedStatusSet(statusList);
 
+        console.log('assigned tasks:')
         this.completedAssigned = this.extractArray(assigned)
           .map((task: any) => this.normalizeTask(task, statusMap))
           .filter((task: any) =>
             completedStatusIds.has(task.statusId) || this.isCompletedStatus(task.statusName)
           );
 
+        console.log('created tasks:');
         this.completedCreated = this.extractArray(created)
           .map((task: any) => this.normalizeTask(task, statusMap))
           .filter((task: any) =>
@@ -138,7 +144,7 @@ export class TaskHistory implements OnInit {
         console.error('Failed to load task history', err);
         this.error = 'Failed to load task history. Please try again.';
         this.loading = false;
-        // this.cdr.detectChanges();
+         this.cdr.detectChanges();
       }
     });
   }
@@ -315,5 +321,13 @@ export class TaskHistory implements OnInit {
   exportAssignedPdf() {
     const tasks = this.getFilteredAndSortedAssignedTasks();
     this.exportService.exportPdf(tasks, 'Completed_Assigned_Tasks_Export');
+  }
+
+  trackByUserId(index: number, item: any): any {
+    return item.id;
+  }
+
+  trackByTaskId(index: number, item: any): any {
+    return item.id;
   }
 }

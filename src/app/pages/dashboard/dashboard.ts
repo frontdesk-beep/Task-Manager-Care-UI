@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import { Auth } from '../../services/auth';
 import { TaskStore } from '../../services/task-store.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -73,6 +74,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private auth: Auth,
     private taskStore: TaskStore,
     private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
@@ -92,7 +94,6 @@ export class Dashboard implements OnInit, OnDestroy {
         this.addNames();
       })
     );
-
     this.storeSubs.add(
       this.taskStore.createdTasks$.subscribe((list: any[]) => {
         this.createdTasks = Array.isArray(list) ? list : [];
@@ -109,6 +110,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.loadUsers();
 
+    // important - starts here
     this.taskStore.initForUser(this.currentUserId);
   }
 
@@ -127,7 +129,6 @@ export class Dashboard implements OnInit, OnDestroy {
           : (res?.data || []);
 
         console.log('Users count:', this.users.length);
-
         this.addNames();
       },
       error: (err) => {
@@ -221,7 +222,7 @@ export class Dashboard implements OnInit, OnDestroy {
     ).length;
     this.refreshAssignedView();
     this.refreshCreatedView();
-    // this.cdr.detectChanges();
+     this.cdr.detectChanges();
   }
 
   openTask(id: number) {
@@ -296,6 +297,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   trackByTaskId(index: number, task: any) {
+    console.log('Dashboard clicked...')
     return task.id;
   }
 
@@ -444,6 +446,9 @@ export class Dashboard implements OnInit, OnDestroy {
     this.paginatedAssignedTasks =
       filtered.slice(start, start + this.itemsPerPage);
     this.uniqueCreatedUsers = this.getUniqueCreatedBy();
+    console.log("assignedTasks:", this.assignedTasks.length);
+console.log("filteredAssignedTasks:", this.filteredAssignedTasks.length);
+console.log("paginatedAssignedTasks:", this.paginatedAssignedTasks.length);
   }
 
 
