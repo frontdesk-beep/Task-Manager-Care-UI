@@ -6,9 +6,6 @@
         <div class="mb-3 profile-field-group">
             <label for="name" class="form-label profile-field-label">Name</label>
             <input type="text" id="name" class="form-control profile-field-input" [(ngModel)]="name" [disabled]="!editMode">
-            <!-- <div class="text-danger" *ngIf="name.touched && name.errors?.['name']">
-                Enter a valid Name
-            </div> -->
         </div>
         
         <div class="mb-3 profile-field-group">
@@ -20,7 +17,7 @@
             <input type="text" id="role" class="form-control profile-field-input" [(ngModel)]="role" [disabled]="true">
         </div>
         <div class="d-flex gap-2">
-            <button *ngIf="!editMode" type="button" class="btn btn-secondary" (click)="edit()">Edit</button>
+            <button *ngIf="!editMode" type="button" class="btn btn-primary" (click)="edit()">Edit</button>
             <button *ngIf="editMode" type="button" class="btn btn-primary" (click)="save()">Save</button>
             <button *ngIf="!editMode" type="button" class="btn btn-outline-secondary" (click)="back()">Back</button>
             <button *ngIf="editMode" type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>

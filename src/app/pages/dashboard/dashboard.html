@@ -1,19 +1,19 @@
 <section class="dashboard-overview">
   <div class="dashboard-grid">
     <div class="card">
-      <h3>Assigned to me</h3>
-      <p>{{ assignedTasks.length }}</p>
-      <span class="card-note">Tasks waiting for your action</span>
+      <h3>Assigned</h3>
+      <p>{{ assignedCount }}</p>
+      <span class="card-note">Open Tasks</span>
     </div>
     <div class="card">
       <h3>Pending</h3>
       <p>{{ pendingCount }}</p>
-      <span class="card-note">Tasks not yet started</span>
+      <span class="card-note">Waiting to start</span>
     </div>
     <div class="card">
-      <h3>Completed</h3>
-      <p>{{ completedCount }}</p>
-      <span class="card-note">Tasks you have completed</span>
+      <h3>Overdue</h3>
+      <p>{{ overdueCount }}</p>
+      <span class="card-note">Need attention</span>
     </div>
   </div>
 </section>
@@ -31,7 +31,8 @@
       <div class="filter-group">
         <label>
           <span class="filter-icon">🔍</span>
-          <input type="text" [(ngModel)]="searchClientNameAssigned" (input)="refreshAssignedView()" class="filter-input" placeholder="Search client name...">
+          <input type="text" [(ngModel)]="searchClientNameAssigned" (input)="refreshAssignedView()" class="filter-input"
+            placeholder="Search client name...">
         </label>
       </div>
       <div class="filter-group">
@@ -59,7 +60,12 @@
 
         <div class="task-card-meta">
           <span><strong>Created by:</strong> {{ task.createdByName }}</span>
-          <span><strong>Due:</strong> {{ task.dueDate | date:'dd MMM yyyy' }}</span>
+          <span><strong>Due:</strong>
+            {{ task.dueDate | date:'dd MMM yyyy' }}
+              <span class="overdue-badge" *ngIf="isOverdue(task)">
+                ⚠ Overdue
+              </span>
+          </span>
         </div>
 
         <div class="task-card-actions">
@@ -67,15 +73,18 @@
             <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
           </select>
           <button type="button" (click)="UpdateTask(task, task.statusId)">Save</button>
-          <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()" class="open-link">Open</a>
+          <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()"
+            class="open-link">Open</a>
         </div>
       </article>
     </div>
 
     <div class="pagination" *ngIf="assignedTotalPages > 1">
-      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage - 1)" [disabled]="assignedPage === 1">← Previous</button>
+      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage - 1)"
+        [disabled]="assignedPage === 1">← Previous</button>
       <span class="pagination-info">Page {{ assignedPage }} of {{ assignedTotalPages }}</span>
-      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage + 1)" [disabled]="assignedPage === assignedTotalPages">Next →</button>
+      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage + 1)"
+        [disabled]="assignedPage === assignedTotalPages">Next →</button>
     </div>
   </div>
 
@@ -91,14 +100,16 @@
       <div class="filter-group">
         <label>
           <span class="filter-icon">🔍</span>
-          <input type="text" [(ngModel)]="searchClientNameCreated" (input)="refreshCreatedView()" class="filter-input" placeholder="Search client name...">
+          <input type="text" [(ngModel)]="searchClientNameCreated" (input)="refreshCreatedView()" class="filter-input"
+            placeholder="Search client name...">
         </label>
       </div>
       <div class="filter-group">
         <label>
           <select [(ngModel)]="createdStatusFilter" (input)="refreshCreatedView()" class="filter-select">
             <option [value]="null">All Status</option>
-            <option *ngFor="let status of createdStatusOptions" [value]="status.id">{{ status.name || status.statusName }}</option>
+            <option *ngFor="let status of createdStatusOptions" [value]="status.id">{{ status.name || status.statusName
+              }}</option>
           </select>
         </label>
       </div>
@@ -131,15 +142,18 @@
         </div>
 
         <div class="task-card-actions">
-          <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()" class="open-link">Open</a>
+          <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()"
+            class="open-link">Open</a>
         </div>
       </article>
     </div>
 
     <div class="pagination" *ngIf="createdTotalPages > 1">
-      <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage - 1)" [disabled]="createdPage === 1">← Previous</button>
+      <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage - 1)"
+        [disabled]="createdPage === 1">← Previous</button>
       <span class="pagination-info">Page {{ createdPage }} of {{ createdTotalPages }}</span>
-      <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage + 1)" [disabled]="createdPage === createdTotalPages">Next →</button>
+      <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage + 1)"
+        [disabled]="createdPage === createdTotalPages">Next →</button>
     </div>
   </div>
 </section>

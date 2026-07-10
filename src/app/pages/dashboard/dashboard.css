@@ -41,6 +41,34 @@
   font-size: 0.9rem;
 }
 
+.overdue {
+  border-left: 6px solid #dc2626;
+}
+
+.overdue p {
+
+  color: #dc2626;
+
+}
+
+.overdue-badge {
+
+  margin-left: 8px;
+
+  background: #dc2626;
+
+  color: white;
+
+  padding: 3px 8px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+}
+
 .tasks-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -413,4 +441,3 @@
     grid-template-columns: 1fr;
   }
 }
-
