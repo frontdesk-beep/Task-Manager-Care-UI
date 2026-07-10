@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy,ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy,ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,6 +23,7 @@ export class HeaderTop implements OnInit, OnDestroy {
   notifications: any[] = [];
   storeSubscription?: Subscription;
   unreadCount=0;
+  private userSubscription?: Subscription;
 
   constructor(
     private router: Router,
@@ -35,12 +36,14 @@ export class HeaderTop implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     let userId=0;
-    this.userStore.user$.subscribe(user=>{
+    this.userSubscription = this.userStore.user$.
+      subscribe(user=>{
       if(!user) return;
       this.name=user.name;
       userId=user.id;
       this.loadNotifications(userId);
     });
+    
   }
     loadNotifications (userId:number) {
       this.storeSubscription = 
@@ -66,6 +69,7 @@ export class HeaderTop implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.storeSubscription?.unsubscribe();
+    this.userSubscription?.unsubscribe();
   }
 
   toggleDropdown() {
@@ -76,11 +80,8 @@ export class HeaderTop implements OnInit, OnDestroy {
     this.notificationOpen = !this.notificationOpen;
     if (this.notificationOpen) {
       const unread = this.notifications.filter(x => !x.isRead);
-
       unread.forEach((n) => {
-
         n.isRead = true;
-
         this.taskService.MarkNotificationRead(n.id).subscribe({
           error: (err) => {
             console.log('Failed to mark notification read', err);
@@ -90,6 +91,11 @@ export class HeaderTop implements OnInit, OnDestroy {
         });
       });
     }
+  }
+  @HostListener('document:click')
+  closeDropDown()
+  {
+    this.dropdownOpen=false;
   }
   logout() {
     localStorage.removeItem('token');

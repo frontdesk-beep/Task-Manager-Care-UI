@@ -27,11 +27,13 @@ export class Dashboard implements OnInit, OnDestroy {
   createdTasks: any[] = [];
   users: any[] = [];
   statuses: any[] = [];
+  summary: any = {};
 
   storeSubs = new Subscription();
-
+  assignedCount = 0;
   pendingCount = 0;
   completedCount = 0;
+  overdueCount = 0;
 
   // Sorting state
   assignedSortKey: string = '';
@@ -112,6 +114,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     // important - starts here
     this.taskStore.initForUser(this.currentUserId);
+    this.loadSummary();
   }
 
   ngOnDestroy() {
@@ -136,7 +139,23 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
   }
+  loadSummary() {
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+      this.taskService.GetMySummary()
+        .subscribe((res: any) => {
+          console.log("Dashboard getsummary", res);
+          this.assignedCount = res.openTasks;
+          this.pendingCount = res.pendingTasks;
+          this.completedCount = res.completedTasks;
+          this.overdueCount = res.overDueTasks;
+          console.log(this.assignedCount);
+          console.log(this.pendingCount);
+          console.log(this.completedCount);
+          console.log(this.overdueCount);
+        });
+  }
   private isCompletedStatus(statusName: string | undefined): boolean {
     const normalized = String(statusName || '').toLowerCase();
     return normalized.includes('complete') ||
@@ -212,17 +231,17 @@ export class Dashboard implements OnInit, OnDestroy {
         !this.isCompletedStatusId(task.statusId)
       );
 
-    this.pendingCount = this.assignedTasks.filter((task: any) =>
-      (task.statusName || '').toLowerCase().includes('pending')
-    ).length;
+    // this.pendingCount = this.assignedTasks.filter((task: any) =>
+    //   (task.statusName || '').toLowerCase().includes('pending')
+    // ).length;
 
-    this.completedCount = this.assignedTasks.filter((task: any) =>
-      this.isCompletedStatus(task.statusName) ||
-      this.isCompletedStatusId(task.statusId)
-    ).length;
+    // this.completedCount = this.assignedTasks.filter((task: any) =>
+    //   this.isCompletedStatus(task.statusName) ||
+    //   this.isCompletedStatusId(task.statusId)
+    // ).length;
     this.refreshAssignedView();
     this.refreshCreatedView();
-     this.cdr.detectChanges();
+    this.cdr.detectChanges();
   }
 
   openTask(id: number) {
@@ -266,7 +285,7 @@ export class Dashboard implements OnInit, OnDestroy {
       'Payload sent to API:',
       JSON.stringify(payload, null, 2)
     );
-    
+
     this.taskStore.UpdateTask(task.id, payload)
       .subscribe({
         next: (res: any) => {
@@ -274,6 +293,7 @@ export class Dashboard implements OnInit, OnDestroy {
           this.addNames();
           this.refreshAssignedView();
           this.refreshCreatedView();
+          this.loadSummary(); //refresh dashboard cards
         },
         error: (err: any) => {
           console.log('Update failed, rolling back', err);
@@ -296,6 +316,16 @@ export class Dashboard implements OnInit, OnDestroy {
     return status ? status.name : 'Unknown';
   }
 
+  today = new Date();
+
+  isOverdue(task: any): boolean {
+    if (!task.dueDate) {
+      return false;
+    }
+
+    return new Date(task.dueDate) < this.today &&
+      !this.isCompletedStatus(task.statusName);
+  }
   trackByTaskId(index: number, task: any) {
     console.log('Dashboard clicked...')
     return task.id;
@@ -447,8 +477,8 @@ export class Dashboard implements OnInit, OnDestroy {
       filtered.slice(start, start + this.itemsPerPage);
     this.uniqueCreatedUsers = this.getUniqueCreatedBy();
     console.log("assignedTasks:", this.assignedTasks.length);
-console.log("filteredAssignedTasks:", this.filteredAssignedTasks.length);
-console.log("paginatedAssignedTasks:", this.paginatedAssignedTasks.length);
+    console.log("filteredAssignedTasks:", this.filteredAssignedTasks.length);
+    console.log("paginatedAssignedTasks:", this.paginatedAssignedTasks.length);
   }
 
 
@@ -491,7 +521,7 @@ console.log("paginatedAssignedTasks:", this.paginatedAssignedTasks.length);
     this.createdStatusOptions =
       this.getCreatedStatusOptions();
 
-      this.uniqueAssignedUsers = this.getUniqueAssignedTo();
+    this.uniqueAssignedUsers = this.getUniqueAssignedTo();
   }
 }
 

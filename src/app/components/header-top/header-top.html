@@ -15,7 +15,7 @@
                 {{ unreadCount }}
             </span>
         </div> -->
-        <div class="profile" (click)="toggleDropdown()">
+        <div class="profile" (click)="toggleDropdown(); $event.stopPropagation()">
             👤
             {{name}}
             <div class="dropdown" *ngIf="dropdownOpen">

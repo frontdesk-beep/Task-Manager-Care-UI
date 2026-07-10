@@ -168,4 +168,13 @@ export class TaskService {
     this.socket$?.complete();
     this.socket$ = null;
   }
+
+  GetMySummary()
+  {
+    return this.http.get(`${this.baseUrl}/dashboard/my-summary`, { headers: this.getAuthHeaders() });
+  }
+  GetSummary()
+  {
+    return this.http.get(`${this.baseUrl}/dashboard/summary`, { headers: this.getAuthHeaders() });
+  }
 }

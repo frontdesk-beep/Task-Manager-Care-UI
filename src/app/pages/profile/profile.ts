@@ -40,6 +40,7 @@ export class Profile {
     this.loadProfile();
   }
 loadProfile() {
+  console.log('Loading profile...');
     this.auth.getProfile(this.id).subscribe({
       next: (res: any) => {
         this.name = res.name;
@@ -60,13 +61,16 @@ loadProfile() {
     });
 }
   edit() {
+    console.log('edit clicked...');
     this.editMode = true;
   }
   back(){
+    console.log('back clicked...');
     this.router.navigate(['/main/dashboard']);
   }
 
   cancel() {
+    console.log('cancel clicked...');
     if (this.originalUser) {
       this.name = this.originalUser.name;
       this.email = this.originalUser.email;
@@ -76,6 +80,7 @@ loadProfile() {
   }
 
   save() {
+    console.log('save clicked...');
     const data = {
       name: this.name,
       email: this.email,
@@ -85,9 +90,12 @@ loadProfile() {
     this.userStore.updateUser(this.id, data)
     .subscribe({
       next: () => {
+
         this.userStore.loadUser(this.id);
+
         this.toastr.success('Profile updated');
-        this.editMode = false;
+                        this.editMode = false;
+
       },
       error: (err) => {
         console.log(err);
