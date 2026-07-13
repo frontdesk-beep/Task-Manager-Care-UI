@@ -1,6 +1,6 @@
 <div class="page client-list-page">
   <div class="client-card">
-    <h1>Client Records</h1>
+    <h1>Client List</h1>
 
     <!-- Filters -->
     <div class="filters-section">
@@ -8,20 +8,22 @@
       <div class="filters-left">
 
         <div class="filter-group">
-          <input type="text" [(ngModel)]="searchClientName" placeholder="Search client name..." class="filter-input">
+          <input type="text" [(ngModel)]="searchClientName" (ngModelChange)="refreshGrid()" placeholder="Search client name..." class="filter-input">
         </div>
         <div class="filter-group">
-          <input type="date" [(ngModel)]="selectedDate" class="filter-input">
+          <input type="date" [(ngModel)]="selectedDate" class="filter-input" (ngModelChange)="refreshGrid()">
         </div>
         <div class="filter-group">
-          <select [(ngModel)]="filterCategoryId" class="filter-select">
-            <option [ngValue]="null">
+          <select [(ngModel)]="filterCategoryId" 
+          class="filter-select" (ngModelChange)="currentPage=1; refreshGrid()">
+           
+          <option [ngValue]="null">
               All Categories
-            </option>
-            <option *ngFor="let cat of uniqueCategories" [value]="cat.id">
+          </option>
+          <option *ngFor="let cat of uniqueCategories" 
+          [ngValue]="cat.id">
               {{ cat.name }}
-            </option>
-
+          </option>
           </select>
         </div>
 
@@ -167,18 +169,20 @@
         placeholder="Address">
       <select [(ngModel)]="selectedClient.clientCategoryId">
         <option *ngFor="let cat of clientCategories"
-                [value]="cat.id">
+                [ngValue]="cat.id">
           {{ cat.clientType || cat.name }}
         </option>
       </select>
     </div>
     <div class="modal-actions">
       <button
+        type="button"
         class="btn btn-primary"
         (click)="updateClient(selectedClient.clientId)">
         Save
       </button>
       <button
+        type="button"
         class="btn btn-danger"
         (click)="cancelEdit()">
         Cancel

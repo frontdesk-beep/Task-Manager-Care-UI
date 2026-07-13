@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
 import { Comments } from '../../components/comments/comments';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-task-detail',
@@ -21,7 +22,8 @@ export class TaskDetail implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -39,6 +41,7 @@ export class TaskDetail implements OnInit {
       next: (res: any) => {
         this.task = res?.data ?? res;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading task', err);

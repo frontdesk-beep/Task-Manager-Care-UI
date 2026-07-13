@@ -43,7 +43,6 @@ export class TaskHistory implements OnInit {
   constructor(
     private taskService: TaskService,
     private router: Router,
-    // public cdr: ChangeDetectorRef,
     private exportService: Export,
     private cdr: ChangeDetectorRef
     
@@ -138,7 +137,7 @@ export class TaskHistory implements OnInit {
           );
 
         this.loading = false;
-        // this.cdr.detectChanges();
+         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);

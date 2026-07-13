@@ -24,7 +24,6 @@ export class Clientlist implements OnInit, OnDestroy {
   //for pop-up
   isEditMode: boolean = false;
   isDeleteMode: boolean = false;
-  SearchClientName: string = '';
   filterCategoryId: number | null = null;
   selectedDate: string = '';
   // Sorting
@@ -72,8 +71,8 @@ export class Clientlist implements OnInit, OnDestroy {
             Array.isArray(res)
               ? res
               : (res?.data || []);
-              this.loadClientCategories();
-          this.buildCategories();
+          this.loadClientCategories();
+          // this.buildCategories();
           this.refreshGrid();
           this.loading = false;
           this.cdr.detectChanges();
@@ -91,15 +90,16 @@ export class Clientlist implements OnInit, OnDestroy {
       this.clientService.getClientCategories().subscribe({
         next: (res: any) => {
           this.clientCategories =
-           Array.isArray(res)
-            ? res
-            : (res?.data || []);
+            Array.isArray(res)
+              ? res
+              : (res?.data || []);
 
-            this.categoryMap = {};
-            this.clientCategories.forEach((c: any) => {
-              this.categoryMap[c.id] = c.clientType || c.name || '';
-            });
+          this.categoryMap = {};
+          this.clientCategories.forEach((c: any) => {
+            this.categoryMap[c.id] = c.clientType || c.name || '';
+          });
           this.buildCategories();
+          this.refreshGrid();
           this.cdr.detectChanges();
         },
         error: (err: any) => {
@@ -111,6 +111,7 @@ export class Clientlist implements OnInit, OnDestroy {
   }
 
   refreshGrid() {
+    // this.currentPage=1;
     let filtered = [...this.clients];
 
     if (this.filterCategoryId) {
@@ -137,10 +138,13 @@ export class Clientlist implements OnInit, OnDestroy {
 
       filtered = filtered.filter(x => {
 
+        const d =
+          new Date(x.createdOn);
         const date =
-          new Date(x.createdOn)
-            .toISOString()
-            .split('T')[0];
+          `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')
+          }-${d.getDate().toString().padStart(2, '0')
+          }`;
+
 
         return date === this.selectedDate;
       });
@@ -187,6 +191,7 @@ export class Clientlist implements OnInit, OnDestroy {
   }
 
   toggleSort(key: string) {
+    this.currentPage = 1;
     if (this.sortKey === key) {
       this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
     } else {
@@ -220,58 +225,22 @@ export class Clientlist implements OnInit, OnDestroy {
     return sorted;
   }
 
-  getFilteredAndSortedClients(): any[] {
-    let filtered = this.clients;
-
-    // Filter by category
-    if (this.filterCategoryId !== null &&
-      this.filterCategoryId !== undefined) {
-      filtered = filtered.filter(
-        (c: any) =>
-          Number(c.clientCategoryId) ===
-          Number(this.filterCategoryId)
-      );
-    }
-
-    // Filter by client name
-    if (this.searchClientName.trim()) {
-      const search =
-        this.searchClientName
-          .trim()
-          .toLowerCase();
-      filtered = filtered.filter((c: any) =>
-        (c.clientName || '')
-          .toLowerCase()
-          .includes(search)
-      );
-    }
-    // Created Date Filter
-    if (this.selectedDate) {
-
-      filtered = filtered.filter(
-        (c: any) => {
-
-          const clientDate =
-            new Date(c.createdOn)
-              .toISOString()
-              .split('T')[0];
-          return clientDate === this.selectedDate;
-
-        });
-    }
-    return this.sortClients(filtered);
-
-  }
 
   getPaginatedClients(): any[] {
-    const filtered = this.getFilteredAndSortedClients();
+    const filtered = this.filteredClients;
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
     return filtered.slice(start, end);
   }
 
-  getTotalPages(): number {
-    return Math.ceil(this.getFilteredAndSortedClients().length / this.itemsPerPage);
+  getTotalPages() {
+    return Math.max(
+      1,
+      Math.ceil(
+        this.filteredClients.length /
+        this.itemsPerPage
+      )
+    );
   }
 
   goToPage(page: number) {
@@ -305,23 +274,23 @@ export class Clientlist implements OnInit, OnDestroy {
         this.selectedClient
       ).subscribe({
         next: () => {
-          this.toastr.success(
-            'Client updated successfully'
+          const updatedClient = { ...this.selectedClient };
+
+          const index = this.clients.findIndex(
+            x => x.clientId === updatedClient.clientId
           );
-          const index =
-            this.clients.findIndex(
-              x => x.clientId ==
-                this.selectedClient.clientId
-            );
 
-          this.clients[index] =
-          {
-            ...this.selectedClient
-          };
+          if (index !== -1) {
+            this.clients[index] = updatedClient;
+          }
 
-          this.refreshGrid();  //once the client is updated it will close the pop-up and reset the selected client and edit mode
-          this.selectedClient = null;
           this.isEditMode = false;
+          this.selectedClient = null;
+
+          this.refreshGrid();
+          this.cdr.detectChanges();
+
+          this.toastr.success('Client updated successfully');
         },
         error: (err: any) => {
           console.error('UpdateClient error:', err);
@@ -350,12 +319,12 @@ export class Clientlist implements OnInit, OnDestroy {
         deleteClient(this.selectedClient.clientId)
         .subscribe({
           next: () => {
-            const index =
+            this.clients =
               this.clients.filter(
-                x => x.clientId !==
+                x =>
+                  x.clientId !==
                   this.selectedClient.clientId
               );
-           
             this.refreshGrid();
             this.selectedClient = null;
             this.isDeleteMode = false;
@@ -382,6 +351,7 @@ export class Clientlist implements OnInit, OnDestroy {
     this.isDeleteMode = false;
   }
   clearFilters() {
+    this.currentPage = 1;
     this.searchClientName = '';
     this.filterCategoryId = null;
     this.currentPage = 1;
@@ -390,18 +360,18 @@ export class Clientlist implements OnInit, OnDestroy {
   }
 
   exportAssignedExcel() {
-    const tasks = this.getFilteredAndSortedClients();
+    const tasks = this.filteredClients;
     this.exportService.exportExcel(tasks, 'Completed_Assigned_Tasks_Export');
   }
 
   exportCreatedExcel() {
-    const tasks = this.getFilteredAndSortedClients();
+    const tasks = this.filteredClients;
     this.exportService.exportExcel(tasks, 'Completed_Created_Tasks_Export');
   }
   exportCreatedPdf() {
 
     const clients =
-      this.getFilteredAndSortedClients();
+      this.filteredClients;
 
     this.exportService.exportPdf(
       clients,

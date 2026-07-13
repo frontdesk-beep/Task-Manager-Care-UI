@@ -155,6 +155,7 @@ export class Dashboard implements OnInit, OnDestroy {
           console.log(this.completedCount);
           console.log(this.overdueCount);
         });
+        this.cdr.detectChanges();
   }
   private isCompletedStatus(statusName: string | undefined): boolean {
     const normalized = String(statusName || '').toLowerCase();
