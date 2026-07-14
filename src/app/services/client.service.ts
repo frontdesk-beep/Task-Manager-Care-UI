@@ -33,4 +33,8 @@ export class ClientService {
   getClientCategories() {
     return this.http.get(this.categoryApi);
   }
+  getExistingClients()
+  {
+    return this.http.get(`${this.api}/existing`);
+  }
 }

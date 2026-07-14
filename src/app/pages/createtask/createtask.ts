@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit} from '@angular/core';
+  OnInit
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
@@ -8,8 +9,9 @@ import { TaskService } from '../../services/task.service';
 // import { Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
 import { ViewChild } from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { UserStore } from '../../services/user-store';
+import { ClientService } from '../../services/client.service';
 
 interface DropdownItem {
   id: number;
@@ -17,6 +19,7 @@ interface DropdownItem {
 }
 
 interface TaskItem {
+  clientId: number | null;
   clientName: string;
   clientCategoryId: number;
   phoneNumber: string;
@@ -40,40 +43,47 @@ interface TaskItem {
 })
 export class Createtask implements OnInit {
 
-  @ViewChild('taskForm')taskForm!: NgForm;
+  @ViewChild('taskForm') taskForm!: NgForm;
 
   task: TaskItem = this.createEmptyTask();
 
-  clientCategories: DropdownItem[] = [];
   statuses: DropdownItem[] = [];
   priorities: DropdownItem[] = [];
   serviceCategories: DropdownItem[] = [];
   users: DropdownItem[] = [];
-  clientCategoryId=0;
+  clientCategoryId = 0;
+
+  //for the clients dropdown
+  clients: any[] = [];
+  selectedClientId = 0;
+  isExistingClient = false;
+  clientTypes: DropdownItem[] = [];
 
   currentUserId = 0;
   constructor(
     private taskService: TaskService,
     private auth: Auth,
     private toastr: ToastrService,
-    private userStore: UserStore
-  ) {}
+    private userStore: UserStore,
+    private clientService: ClientService
+  ) { }
 
   ngOnInit() {
     this.loadCurrentUser();
     this.loadUsers();
-    this.loadClientCategories();
+    this.loadClientTypes();
     this.loadStatuses();
     this.loadPriorities();
     this.loadServiceCategories();
-    
+    this.loadClients();
   }
-// craete a brand new empty task object-instead of writing this.task ={clientname:'',phonenumber:''}
-// instead of writing evry field empty again and again create one seperate object which you can call.
+  // craete a brand new empty task object-instead of writing this.task ={clientname:'',phonenumber:''}
+  // instead of writing evry field empty again and again create one seperate object which you can call.
   createEmptyTask(): TaskItem {
     const now = new Date();
 
     return {
+      clientId: null,
       clientName: '',
       clientCategoryId: 0,
       phoneNumber: '',
@@ -91,9 +101,9 @@ export class Createtask implements OnInit {
 
   private loadCurrentUser() {
     this.userStore.user$.subscribe(user => {
-      if(!user) return;
-      this.currentUserId=user.id;
-      this.task.createdById=user.id;
+      if (!user) return;
+      this.currentUserId = user.id;
+      this.task.createdById = user.id;
     });
   }
   private extractArray(response: any): any[] {
@@ -119,24 +129,6 @@ export class Createtask implements OnInit {
     }
 
     return true;
-  }
-
-  loadClientCategories() {
-    this.taskService.GetClientCategories().subscribe({
-      next: (response: any) => {
-        const data = this.extractArray(response);
-
-        this.clientCategories = data.map((item: any) => ({
-          id: Number(item.id),
-          name: item.name || item.categoryName || item.type || ''
-        }));
-
-      },
-      error: (error) => {
-        console.error('Error loading client categories:', error);
-        this.toastr.error('Error loading client categories. Please try again.');
-      }
-    });
   }
 
   loadStatuses() {
@@ -207,6 +199,17 @@ export class Createtask implements OnInit {
       }
     });
   }
+  loadClients() {
+    this.clientService.getExistingClients().subscribe({
+      next: (response: any) => {
+        console.log("API Response:", response);
+        this.clients = this.extractArray(response);
+      },
+      error: (error) => {
+        console.error('Error loading clients:', error);
+      }
+    });
+  }
 
   saveTask() {
     if (
@@ -220,6 +223,7 @@ export class Createtask implements OnInit {
     }
 
     const payload = {
+      clientId: this.selectedClientId == 0 ? null : this.selectedClientId,
       clientName: this.task.clientName,
       clientCategoryId: Number(this.task.clientCategoryId),
       phoneNumber: this.task.phoneNumber,
@@ -239,8 +243,8 @@ export class Createtask implements OnInit {
         this.toastr.success('Task created successfully!');
         console.log("before reset: ");
         setTimeout(() => {
-            this.resetTask();
-        },0);
+          this.resetTask();
+        }, 0);
         console.log("After reset: ");
       },
       error: (error) => {
@@ -257,21 +261,23 @@ export class Createtask implements OnInit {
   }
 
   resetTask() {
+    this.selectedClientId = 0;
+    this.isExistingClient = false;
     const now = new Date();
 
     this.taskForm.resetForm({
-    clientName: '',
-    clientCategoryId: 0,
-    phoneNumber: '',
-    email: '',
-    assignedToId: 0,
-    statusId: 0,
-    task_Description: '',
-    priorityId: 0,
-    serviceCategoryId: 0,
-    dueDate: now.toISOString().slice(0, 10),
-    createdOn: now.toISOString().slice(0, 16),
-    createdById: this.currentUserId
+      clientName: '',
+      clientCategoryId: 0,
+      phoneNumber: '',
+      email: '',
+      assignedToId: 0,
+      statusId: 0,
+      task_Description: '',
+      priorityId: 0,
+      serviceCategoryId: 0,
+      dueDate: now.toISOString().slice(0, 10),
+      createdOn: now.toISOString().slice(0, 16),
+      createdById: this.currentUserId
     })
     // console.log('Before reset: ', this.task);
     // becoz of this the after clicking on the save btn it was pointing below method that's why the the clear was not woking perfectly so we craeteed seperate one for reset.
@@ -280,4 +286,50 @@ export class Createtask implements OnInit {
     // this.task.createdById = this.currentUserId;
     // this.cdr.detectChanges();
   }
-}
+  onClientChange() {
+
+    if (this.selectedClientId == 0) {
+      this.isExistingClient = false;
+      this.task = this.createEmptyTask();
+      this.task.createdById = this.currentUserId;
+      return;
+    }
+    this.isExistingClient = true;
+    this.clientService
+      .getClient(this.selectedClientId)
+      .subscribe((client: any) => {
+        this.task.clientId = client.clientId;
+        this.task.clientName = client.clientName;
+        this.task.phoneNumber = client.phoneNumber;
+        this.task.email = client.email;
+        this.task.clientCategoryId = client.clientCategoryId;
+      });
+  }
+  loadClientTypes() {
+    this.taskService.GetClientCategories().subscribe({
+      next: (response: any) => {
+        const data = this.extractArray(response);
+        this.clientTypes=data.map((item:any)=>({
+          id:Number(item.id),
+          name:item.name
+        }));
+      },
+      error:(error)=>{
+        console.error(error);
+      }
+    });
+  }
+
+  onClientTypeChange() {
+
+     if (this.task.clientCategoryId === 1) {
+        // New Client
+        this.isExistingClient = false;
+        this.selectedClientId = 0;
+    }
+    else if (this.task.clientCategoryId === 2) {
+        // Existing Client
+        this.isExistingClient = true;
+
+  }
+}}
