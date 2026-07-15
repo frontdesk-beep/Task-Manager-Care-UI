@@ -29,9 +29,21 @@ export class Auth {
     {
       return this.http.post(`${this.authurl}/register`,data);
     }
-    forgotpassword(data:any)
+    forgotpassword(email:string)
     {
-      return this.http.post(`${this.authurl}/forgot-password`,data);
+      return this.http.post(
+        `${this.authurl}/forgot-password`,
+        { email }
+      );
+    }
+    resetPassword(token:string,newPassword:string)
+    {
+      return this.http.post(
+        `${this.authurl}/reset-password`,
+        { token, newPassword }
+      )
+      
+      
     }
     getProfile(id:number)
     {

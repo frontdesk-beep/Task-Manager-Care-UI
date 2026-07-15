@@ -11,12 +11,14 @@ import { Createtask } from './pages/createtask/createtask';
 import { TaskDetail } from './pages/task-detail/task-detail';
 import { TaskHistory } from './pages/task-history/task-history';
 import {Clientlist} from './pages/clientlist/clientlist';
+import { Resetpassword } from './pages/resetpassword/resetpassword';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '', component: AuthLayout, children: [
       { path: 'login', component: Login },
-      { path: 'forgotpassword', component: Forgotpassword }
+      { path: 'forgotpassword', component: Forgotpassword },
+      { path: 'reset-password', component: Resetpassword }
     ]
   },
   { path: 'main', component: MainLayout, children: [
