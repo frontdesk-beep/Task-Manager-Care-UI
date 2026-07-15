@@ -10,7 +10,10 @@ import {ToastrService} from 'ngx-toastr';
   selector: 'app-login',
   imports: [RouterLink, FormsModule, CommonModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: [
+    './login.css',
+  '../../shared/styles/auth-card.css'
+]
 })
 export class Login {
   email: string = '';
@@ -26,11 +29,11 @@ export class Login {
       this.emailError = 'Email is required.';
       return;
     }
-    const emailRegex = /^[A-Za-z0-9._%+-]+@careinsurance\.ca$/;
-    if (!emailRegex.test(this.email)) {
-      this.emailError = 'Please use your @careinsurance.ca email';
-      return;
-    }
+    // const emailRegex = /^[A-Za-z0-9._%+-]+@careinsurance\.ca$/;
+    // if (!emailRegex.test(this.email)) {
+    //   this.emailError = 'Please use your @careinsurance.ca email';
+    //   return;
+    // }
   }
 
   validatePassword() {

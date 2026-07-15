@@ -10,30 +10,29 @@ import {ToastrService} from 'ngx-toastr';
   selector: 'app-forgotpassword',
   imports: [RouterLink, FormsModule],
   templateUrl: './forgotpassword.html',
-  styleUrl: './forgotpassword.css',
+  styleUrls: ['./forgotpassword.css', 
+    '../../shared/styles/auth-card.css']
 })
 export class Forgotpassword {
   email: string = '';
-  newPassword: string = '';
-  confirmPassword: string = '';
-
   constructor(private auth: Auth, private router: Router, private toastr: ToastrService) {}   
 
-  resetPassword() {
-    if (this.newPassword !== this.confirmPassword) {
-      this.toastr.warning('Passwords do not match!');
+  sendResetLink() {
+    if(!this.email) {
+      this.toastr.warning('Please enter your company email.');
       return;
     }
-    const data = { email: this.email, newPassword: this.newPassword, confirmPassword: this.confirmPassword };
-    this.auth.forgotpassword(data).subscribe(
-      response => {
-        this.toastr.success('Password reset successful! Please log in with your new password.');
-        this.router.navigate(['/login']);
-      },
-      error => {
-        console.log(error);
-        this.toastr.error(error?.error?.message || 'Error resetting password. Please try again.');
-      }
+this.auth.forgotpassword(this.email).subscribe({
+  next:() => {
+    this.toastr.success(
+    'A password reset link has been sent to your email.'
     );
-  }
-}
+    this.email='';
+  },
+      error : (error) => {
+        console.log(error);
+        this.toastr.error(
+          error?.error?.message || 'Unable to send reset link.');
+      }
+});
+  }}

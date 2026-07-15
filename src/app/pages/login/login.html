@@ -1,15 +1,57 @@
-<div class="card p-5 shadow">
-    <h1>Login</h1>
+<div class="auth-card">
+
+    <h2 class="auth-title">Login</h2>
+
+    <p class="auth-subtitle">
+        Welcome Back! Please Sign in to continue.
+    </p>
+
+    <!-- Email -->
     <div class="mb-3">
-        <input [(ngModel)]="email" (blur)="validateEmail()" class="form-control mt-3" placeholder="ex@careinsurance.ca" required>
-        <span class="error-message" *ngIf="emailError">{{ emailError }}</span>
+        <input
+            type="email"
+            class="form-control"
+            [(ngModel)]="email"
+            (blur)="validateEmail()"
+            placeholder="employee@careinsurance.ca"
+            required>
+<!-- 
+        <span class="error-message" *ngIf="emailError">
+            {{ emailError }}
+        </span> -->
     </div>
-    <div class="mb-3">
-        <input type="password" class="form-control mt-3" [(ngModel)]="password" (blur)="validatePassword()" placeholder="Password" required>
-        <span class="error-message" *ngIf="passwordError">{{ passwordError }}</span>
+
+    <!-- Password -->
+    <div class="mb-2">
+        <input
+            type="password"
+            class="form-control"
+            [(ngModel)]="password"
+            (blur)="validatePassword()"
+            placeholder="Password"
+            required>
+
+        <!-- <span class="error-message" *ngIf="passwordError">
+            {{ passwordError }}
+        </span> -->
     </div>
-    <button class="btn btn-primary mt-3" [style.background-color]="'#3d4ca7'" (click)="onSubmit()">Login</button>
-    <a routerLink="/forgotpassword" class="d-block mt-3" [style.color]="'#3d4ca7'" >
+
+    <!-- Login Button -->
+    <button
+        class="auth-btn"
+        (click)="onSubmit()">
+
+        Login
+
+    </button>
+
+    <!-- Forgot Password -->
+    <a
+        routerLink="/forgotpassword"
+        class="auth-link">
+
         Forgot Password?
+
     </a>
+
 </div>
