@@ -3,10 +3,10 @@
         <div class="sb-header">Menu</div>
     </div>
     <nav>
-            <a routerLink="/main/dashboard">
+        <a routerLink="/main/dashboard">
                 <i class="bi bi-speedometer2"></i>
                     Dashboard
-         </a>
+        </a>
         <a routerLink="/main/task-history">
             <i class="bi bi-bar-chart"></i>
             Reports</a>
@@ -14,11 +14,11 @@
             <i class="bi bi-people"></i>
             Client List
         </a>
-        <a routerLink="/main/create-task">
+        <a *ngIf="role==='Admin' || role==='Employee'" routerLink="/main/create-task">
             <i class="bi bi-plus-square"></i>
             Create Task
         </a>
-        <a *ngIf="role==='Admin'" routerLink="/main/employee-management" routerLinkActive="active">
+        <a *ngIf="role==='Admin' || role==='SuperAdmin'" routerLink="/main/employee-management" routerLinkActive="active">
             <i class="bi bi-person-badge"></i>
             Employee Management
         </a>

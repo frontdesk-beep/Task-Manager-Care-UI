@@ -39,10 +39,11 @@ export class Clientlist implements OnInit, OnDestroy {
   private subs = new Subscription();
   uniqueCategories: any[] = [];
 
-  filteredClients: any[] = [];
-  paginatedClients: any[] = [];
+  // filteredClients: any[] = [];
+  // paginatedClients: any[] = [];
   categoryMap: { [key: number]: string } = {};
   loading: boolean = true;
+  totalRecords = 0;
 
   constructor(
     private clientService: ClientService,
@@ -53,6 +54,7 @@ export class Clientlist implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    this.loadClientCategories();
     this.loadClients();
   }
 
@@ -61,21 +63,22 @@ export class Clientlist implements OnInit, OnDestroy {
   }
 
   loadClients() {
-    this.subs.add(
-      this.clientService.getClients().subscribe({
+    const query = {
+    Search: this.searchClientName,
+    CategoryId: this.filterCategoryId,
+    CreatedDate: this.selectedDate,
+    SortBy: this.sortKey,
+    SortOrder: this.sortDir,
+    Page: this.currentPage,
+    PageSize: this.itemsPerPage
+    }
+    this.clientService.getClients(query).subscribe({
         next: (res: any) => {
-          res = res.clientcategories
-            ? res.clientcategories
-            : res;
-          this.clients =
-            Array.isArray(res)
-              ? res
-              : (res?.data || []);
+          this.clients = res.data;
+          this.totalRecords = res.totalRecords;
           this.loadClientCategories();
-          // this.buildCategories();
-          this.refreshGrid();
           this.loading = false;
-          this.cdr.detectChanges();
+          // this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClients error:', err);
@@ -83,8 +86,7 @@ export class Clientlist implements OnInit, OnDestroy {
           this.loading = false;
         }
       })
-    );
-  }
+    }
   loadClientCategories() {
     this.subs.add(
       this.clientService.getClientCategories().subscribe({
@@ -99,8 +101,7 @@ export class Clientlist implements OnInit, OnDestroy {
             this.categoryMap[c.id] = c.clientType || c.name || '';
           });
           this.buildCategories();
-          this.refreshGrid();
-          this.cdr.detectChanges();
+          // this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClientCategories error:', err);
@@ -110,57 +111,57 @@ export class Clientlist implements OnInit, OnDestroy {
     );
   }
 
-  refreshGrid() {
-    // this.currentPage=1;
-    let filtered = [...this.clients];
+  // refreshGrid() {
+  //   // this.currentPage=1;
+  //   let filtered = [...this.clients];
 
-    if (this.filterCategoryId) {
-      filtered = filtered.filter(
-        x => x.clientCategoryId == this.filterCategoryId
-      );
-    }
-    // Name
-    if (this.searchClientName.trim()) {
+  //   if (this.filterCategoryId) {
+  //     filtered = filtered.filter(
+  //       x => x.clientCategoryId == this.filterCategoryId
+  //     );
+  //   }
+  //   // Name
+  //   if (this.searchClientName.trim()) {
 
-      const search =
-        this.searchClientName.toLowerCase();
+  //     const search =
+  //       this.searchClientName.toLowerCase();
 
-      filtered = filtered.filter(
-        x =>
-          (x.clientName || '')
-            .toLowerCase()
-            .includes(search)
-      );
-    }
+  //     filtered = filtered.filter(
+  //       x =>
+  //         (x.clientName || '')
+  //           .toLowerCase()
+  //           .includes(search)
+  //     );
+  //   }
 
-    // Date
-    if (this.selectedDate) {
+  //   // Date
+  //   if (this.selectedDate) {
 
-      filtered = filtered.filter(x => {
+  //     filtered = filtered.filter(x => {
 
-        const d =
-          new Date(x.createdOn);
-        const date =
-          `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')
-          }-${d.getDate().toString().padStart(2, '0')
-          }`;
+  //       const d =
+  //         new Date(x.createdOn);
+  //       const date =
+  //         `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')
+  //         }-${d.getDate().toString().padStart(2, '0')
+  //         }`;
 
 
-        return date === this.selectedDate;
-      });
-    }
+  //       return date === this.selectedDate;
+  //     });
+  //   }
 
-    this.filteredClients = this.sortClients(filtered);
+  //   this.filteredClients = this.sortClients(filtered);
 
-    const start =
-      (this.currentPage - 1) * this.itemsPerPage;
+  //   const start =
+  //     (this.currentPage - 1) * this.itemsPerPage;
 
-    this.paginatedClients =
-      this.filteredClients.slice(
-        start,
-        start + this.itemsPerPage
-      );
-  }
+  //   this.paginatedClients =
+  //     this.filteredClients.slice(
+  //       start,
+  //       start + this.itemsPerPage
+  //     );
+  // }
   trackByClientId(
     index: number,
     client: any
@@ -190,66 +191,67 @@ export class Clientlist implements OnInit, OnDestroy {
     return cat ? (cat.clientType || cat.name || '') : '';
   }
 
-  toggleSort(key: string) {
-    this.currentPage = 1;
-    if (this.sortKey === key) {
-      this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortKey = key;
-      this.sortDir = 'asc';
-    }
-    this.currentPage = 1;
-    this.refreshGrid();
-  }
+toggleSort(key: string) {
 
+    if (this.sortKey === key)
+        this.sortDir =
+            this.sortDir === 'asc'
+            ? 'desc'
+            : 'asc';
+    else{
+        this.sortKey = key;
+        this.sortDir = 'asc';
+    }
+
+    this.currentPage = 1;
+
+    this.loadClients();
+}
   getSortIcon(key: string): string {
     if (this.sortKey !== key) return '⇅';
     return this.sortDir === 'asc' ? '↑' : '↓';
   }
 
-  sortClients(items: any[]): any[] {
-    if (!this.sortKey) return items;
+  // sortClients(items: any[]): any[] {
+  //   if (!this.sortKey) return items;
 
-    const sorted = [...items].sort((a, b) => {
-      let aVal = a[this.sortKey];
-      let bVal = b[this.sortKey];
+  //   const sorted = [...items].sort((a, b) => {
+  //     let aVal = a[this.sortKey];
+  //     let bVal = b[this.sortKey];
 
-      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+  //     if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+  //     if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
-      if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
-      if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
-      return 0;
-    });
+  //     if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
+  //     if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
+  //     return 0;
+  //   });
 
-    return sorted;
-  }
+  //   return sorted;
+  // }
 
 
-  getPaginatedClients(): any[] {
-    const filtered = this.filteredClients;
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return filtered.slice(start, end);
-  }
+  // getPaginatedClients(): any[] {
+  //   // const filtered = this.filteredClients;
+  //   const start = (this.currentPage - 1) * this.itemsPerPage;
+  //   const end = start + this.itemsPerPage;
+  //   return filtered.slice(start, end);
+  // }
 
   getTotalPages() {
-    return Math.max(
-      1,
-      Math.ceil(
-        this.filteredClients.length /
+      return Math.ceil(
+        this.totalRecords /
         this.itemsPerPage
-      )
-    );
+      );
   }
 
   goToPage(page: number) {
-    const total = this.getTotalPages();
-    if (page >= 1 && page <= total) {
+    // const total = this.getTotalFPages();
+    // if (page >= 1 && page <= total) {
       this.currentPage = page;
-      this.refreshGrid();
+      this.loadClients();
     }
-  }
+  
   //when edit button is clicked
   editClient(clientId: number) {
     const client = this.clients.find(
@@ -287,7 +289,7 @@ export class Clientlist implements OnInit, OnDestroy {
           this.isEditMode = false;
           this.selectedClient = null;
 
-          this.refreshGrid();
+          this.loadClients();
           this.cdr.detectChanges();
 
           this.toastr.success('Client updated successfully');
@@ -325,7 +327,7 @@ export class Clientlist implements OnInit, OnDestroy {
                   x.clientId !==
                   this.selectedClient.clientId
               );
-            this.refreshGrid();
+            this.loadClients();
             this.selectedClient = null;
             this.isDeleteMode = false;
             this.toastr.success(
@@ -356,25 +358,21 @@ export class Clientlist implements OnInit, OnDestroy {
     this.filterCategoryId = null;
     this.currentPage = 1;
     this.selectedDate = '';
-    this.refreshGrid();
+    this.loadClients();
   }
 
   exportAssignedExcel() {
-    const tasks = this.filteredClients;
-    this.exportService.exportExcel(tasks, 'Completed_Assigned_Tasks_Export');
+    // const tasks = this.filteredClients;
+    this.exportService.exportExcel(this.clients, 'Completed_Assigned_Tasks_Export');
   }
 
   exportCreatedExcel() {
-    const tasks = this.filteredClients;
-    this.exportService.exportExcel(tasks, 'Completed_Created_Tasks_Export');
+    // const tasks = this.filteredClients;
+    this.exportService.exportExcel(this.clients, 'Completed_Created_Tasks_Export');
   }
   exportCreatedPdf() {
-
-    const clients =
-      this.filteredClients;
-
     this.exportService.exportPdf(
-      clients,
+      this.clients,
       'Clients_Export'
     );
 

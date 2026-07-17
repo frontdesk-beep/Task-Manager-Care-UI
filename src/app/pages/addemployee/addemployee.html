@@ -38,8 +38,10 @@
                     <label for="role" class="form-label">Role</label>
                     <select name="role" id="role" class="form-select" [(ngModel)]="employee.role">
                         <option value="">Choose Role</option>
-                        <option [ngValue]="'Employee'">Employee</option>
-                        <option [ngValue]="'Admin'">Admin</option>
+                        <ng-container *ngIf="currentUserRole === 'SuperAdmin'">
+                            <option [ngValue]="'Admin'">Admin</option>
+                        </ng-container>
+                        <option [ngValue]="'Employee'">Employee</option>    
                     </select>
                 </div>
                 <div class="col-12 d-flex gap-2">
