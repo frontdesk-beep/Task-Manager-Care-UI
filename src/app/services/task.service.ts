@@ -73,16 +73,8 @@ export class TaskService {
     });
   }
 
-  GetTasksByAssignedTo(userId: number) {
+  GetAllTasks() {
     return this.http.get(`${this.baseUrl}/tasks`, {
-      params: { assignedToId: userId.toString() },
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  GetTasksByCreatedBy(userId: number) {
-    return this.http.get(`${this.baseUrl}/tasks`, {
-      params: { createdById: userId.toString() },
       headers: this.getAuthHeaders()
     });
   }

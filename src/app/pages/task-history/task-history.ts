@@ -45,8 +45,8 @@ export class TaskHistory implements OnInit {
     private router: Router,
     private exportService: Export,
     private cdr: ChangeDetectorRef
-    
-  ) {}
+
+  ) { }
 
   ngOnInit() {
     const userData = localStorage.getItem('user');
@@ -106,14 +106,15 @@ export class TaskHistory implements OnInit {
     this.error = null;
 
     forkJoin({
-      statuses: this.taskService.GetStatuses().pipe(catchError(() => of([]))),
-      assigned: this.taskService.GetTasksByAssignedTo(this.currentUserId).pipe(catchError(() => of([]))),
-      created: this.taskService.GetTasksByCreatedBy(this.currentUserId).pipe(catchError(() => of([])))
+      tasks: this.taskService.GetAllTasks(),
+      statuses: this.taskService.GetStatuses()
     }).subscribe({
-      next: ({ statuses, assigned, created }) => {
+      next: ({ tasks, statuses }) => {
+        const taskList = this.extractArray(tasks);
         const statusList = this.extractArray(statuses);
         this.statuses = statusList;
         console.log('statuses:');
+
         const statusMap = new Map<number, string>(
           statusList.map((status: any) => [
             Number(status.id),
@@ -123,31 +124,38 @@ export class TaskHistory implements OnInit {
         const completedStatusIds = this.createCompletedStatusSet(statusList);
 
         console.log('assigned tasks:')
-        this.completedAssigned = this.extractArray(assigned)
-          .map((task: any) => this.normalizeTask(task, statusMap))
-          .filter((task: any) =>
-            completedStatusIds.has(task.statusId) || this.isCompletedStatus(task.statusName)
-          );
+        const mappedTasks = taskList.map((task: any) =>
+          this.normalizeTask(task, statusMap)
+        );
 
-        console.log('created tasks:');
-        this.completedCreated = this.extractArray(created)
-          .map((task: any) => this.normalizeTask(task, statusMap))
-          .filter((task: any) =>
-            completedStatusIds.has(task.statusId) || this.isCompletedStatus(task.statusName)
-          );
+        this.completedAssigned = mappedTasks.filter(task =>
+          Number(task.assignedToId) === this.currentUserId &&
+          (
+            completedStatusIds.has(task.statusId) ||
+            this.isCompletedStatus(task.statusName)
+          )
+        );
+
+        this.completedCreated = mappedTasks.filter(task =>
+          Number(task.createdById) === this.currentUserId &&
+          (
+            completedStatusIds.has(task.statusId) ||
+            this.isCompletedStatus(task.statusName)
+          )
+        );
 
         this.loading = false;
-         this.cdr.detectChanges();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);
         this.error = 'Failed to load task history. Please try again.';
         this.loading = false;
-         this.cdr.detectChanges();
+        this.cdr.detectChanges();
       }
     });
   }
-  
+
 
   openTask(id: number) {
     this.router.navigate(['/main', 'task', id]).catch(err => {
