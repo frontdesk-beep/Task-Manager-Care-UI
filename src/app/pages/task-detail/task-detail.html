@@ -3,23 +3,25 @@
   <div *ngIf="loadError" class="error">Error: {{ loadError }}</div>
   <div *ngIf="!loading && !loadError && !task">No task found.</div>
   <div *ngIf="task">
-    <h2>{{ task.clientName }} - {{ task.task_Description }}</h2>
+    <div class="card-header", >
+      <h2>{{ task.No }} - {{ task.clientName }}</h2>
+    </div>
 
     <div class="meta">
+      <div><strong>Status:</strong> {{ task.statusName }}</div>
+      <div><strong>Priority:</strong> {{ task.priorityName }}</div>
       <div><strong>Assigned To:</strong> {{ task.assignedToName || task.assignedToId }}</div>
       <div><strong>Created By:</strong> {{ task.createdByName || task.createdById }}</div>
-      <div><strong>Status:</strong> {{ task.statusName }}</div>
+      <div><strong>Client:</strong> {{ task.clientName }}</div>
       <div><strong>Due:</strong> {{ task.dueDate }}</div>
+      <div><strong>Service:</strong> {{ task.serviceName }}</div>
+      <div><strong>Description:</strong>{{ task.task_Description }}</div>
     </div>
 
     <div class="details">
       <h3>Details</h3>
       <p>{{ task.longDescription || task.task_Description }}</p>
     </div>
-
-    <!-- <div class="actions">
-      <button (click)="openInEditor()">Edit Task</button>
-    </div> -->
 
     <div class="comments-pane">
       <h3>Comments</h3>

@@ -22,7 +22,7 @@ import { ChangeDetectorRef } from '@angular/core';
 export class Dashboard implements OnInit, OnDestroy {
   currentUserId = 0;
   completedStatusIds = new Set<number>();
-
+  count=0;
   //assigned to current user
   assignedTasks: any[] = [];
 
@@ -53,6 +53,7 @@ export class Dashboard implements OnInit, OnDestroy {
   pendingCount = 0;
   completedCount = 0;
   overdueCount = 0;
+  urgentCount = 0;
 
   // Sorting state
   assignedSortKey: string = '';
@@ -136,10 +137,12 @@ export class Dashboard implements OnInit, OnDestroy {
         this.pendingCount = res.pendingTasks;
         this.completedCount = res.completedTasks;
         this.overdueCount = res.overDueTasks;
+        this.urgentCount = res.urgentTasks;
         console.log(this.pendingCount);
         console.log(this.completedCount);
         console.log(this.overdueCount);
-        // this.cdr.detectChanges();
+        console.log(this.urgentCount);
+         this.cdr.detectChanges();
       });
   }
   private isCompletedStatus(statusName?: string): boolean {
@@ -403,5 +406,36 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.paginatedAllTasks =
       filtered.slice(start, start + this.allItemPerPage);
+  }
+
+
+// Turns "In Progress" -> "status-in-progress" to match a CSS class
+  getStatusClass(statusName?: string): string {
+    const clean = (statusName || 'unknown')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-');
+    return 'status-' + clean;
+  }
+
+  // Turns "High" -> "priority-high" to match a CSS class
+  getPriorityClass(priorityName?: string): string {
+    const clean = (priorityName || 'medium')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-');
+    return 'priority-' + clean;
+  }
+
+  // "Sonia Shams" -> "SS", for the small avatar circle
+  getInitials(name?: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
   }
 }
