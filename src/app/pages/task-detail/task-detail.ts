@@ -9,22 +9,26 @@ import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, Comments],
+  imports: [CommonModule, FormsModule],
   templateUrl: './task-detail.html',
   styleUrl: './task-detail.css'
 })
 export class TaskDetail implements OnInit {
   taskId = 0;
   task: any = null;
+  
   loading = false;
   loadError: string | null = null;
+
+  //tab switching
+  activeTab = 'details';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private taskService: TaskService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -50,7 +54,9 @@ export class TaskDetail implements OnInit {
       }
     });
   }
-
+  setTab(tab: string) {
+    this.activeTab = tab;
+  }
   openInEditor() {
     // placeholder: navigate to create/edit page if exists
     this.router.navigate(['/main', 'create-task'], { queryParams: { id: this.taskId } });
