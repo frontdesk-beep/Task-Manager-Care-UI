@@ -8,14 +8,17 @@
       <div class="filters-left">
 
         <div class="filter-group">
-          <input type="text" [(ngModel)]="searchClientName" (ngModelChange)="refreshGrid()" placeholder="Search client name..." class="filter-input">
+          <input type="text" [(ngModel)]="searchClientName" (ngModelChange)="currentPage=1; loadClients()"
+          placeholder="Search client name..." class="filter-input">
         </div>
         <div class="filter-group">
-          <input type="date" [(ngModel)]="selectedDate" class="filter-input" (ngModelChange)="refreshGrid()">
+          <input type="date" [(ngModel)]="selectedDate" class="filter-input" 
+          (ngModelChange)="currentPage=1; loadClients()">
         </div>
         <div class="filter-group">
+          
           <select [(ngModel)]="filterCategoryId" 
-          class="filter-select" (ngModelChange)="currentPage=1; refreshGrid()">
+          class="filter-select" (ngModelChange)="currentPage=1; loadClients()">
            
           <option [ngValue]="null">
               All Categories
@@ -73,7 +76,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of paginatedClients; trackBy: trackByClientId">
+          <tr *ngFor="let client of clients; trackBy: trackByClientId">
             <td>{{ client.clientName }}</td>
             <td>{{ getCategoryName(client.clientCategoryId) }}</td>
             <td>{{ client.companyName || '-' }}</td>

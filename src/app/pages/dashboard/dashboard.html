@@ -1,159 +1,218 @@
-<section class="dashboard-overview">
-  <div class="dashboard-grid">
-    <div class="card">
-      <h3>Assigned</h3>
-      <p>{{ assignedCount }}</p>
-      <span class="card-note">Open Tasks</span>
-    </div>
-    <div class="card">
-      <h3>Pending</h3>
-      <p>{{ pendingCount }}</p>
-      <span class="card-note">Waiting to start</span>
-    </div>
-    <div class="card">
-      <h3>Overdue</h3>
-      <p>{{ overdueCount }}</p>
-      <span class="card-note">Need attention</span>
-    </div>
-  </div>
-</section>
-
-<section class="tasks-grid">
-  <div class="task-panel">
-    <div class="panel-header">
-      <div>
-        <h2>Assigned to me</h2>
+<div class="dashboard-container">
+  <section class="dashboard-overview">
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>Assigned</h3>
+        <p>{{ assignedCount }}</p>
+        <span class="card-note">Open Tasks</span>
       </div>
-      <div class="panel-count">{{ filteredAssignedTasks.length }} items</div>
+      <div class="card">
+        <h3>Pending</h3>
+        <p>{{ pendingCount }}</p>
+        <span class="card-note">Waiting to start</span>
+      </div>
+      <div class="card">
+        <h3>Overdue</h3>
+        <p>{{ overdueCount }}</p>
+        <span class="card-note">Need attention</span>
+      </div>
+      <div class="card">
+        <h3>Urgent</h3>
+        <p>{{ urgentCount }}</p>
+        <span class="card-note">High priority</span>
+      </div>
     </div>
+  </section>
 
-    <div class="filter-controls">
-      <div class="filter-group">
-        <label>
+  <!-- My tasks - loggedin user -->
+  <!-- ================= MY TASKS ================= -->
+  <section class="tasks-grid">
+
+    <div class="task-panel">
+
+      <div class="panel-header">
+        <h2>My Tasks</h2>
+        <div class="panel-count">{{ filteredAssignedTasks.length }} items</div>
+      </div>
+
+      <div class="filter-controls">
+
+        <div class="filter-group">
           <span class="filter-icon">🔍</span>
-          <input type="text" [(ngModel)]="searchClientNameAssigned" (input)="refreshAssignedView()" class="filter-input"
-            placeholder="Search client name...">
-        </label>
-      </div>
-      <div class="filter-group">
-        <label>
-          <select [(ngModel)]="assignedByFilter" (input)="refreshAssignedView()" class="filter-select">
-            <option [value]="null">All Created by</option>
-            <option *ngFor="let user of uniqueCreatedUsers" [value]="user.id">{{ user.name }}</option>
+
+          <input type="text" class="filter-input" [(ngModel)]="searchClientNameAssigned" (input)="refreshAssignedView()"
+            placeholder="Search client..." />
+        </div>
+
+        <div class="filter-group">
+          <select class="filter-select" [(ngModel)]="assignedByFilter" (change)="refreshAssignedView()">
+            <option [ngValue]="null">All Created By</option>
+            <option *ngFor="let user of uniqueCreatedUsers" [ngValue]="user.id">
+              {{user.name}}
+            </option>
           </select>
-        </label>
+        </div>
+
+        <button class="btn-clear-filters" (click)="clearAllFilters()">
+          Clear
+        </button>
       </div>
-      <button type="button" class="btn-clear-filters" (click)="clearAllFilters()">Clear All</button>
-    </div>
 
-    <div *ngIf="filteredAssignedTasks.length === 0" class="empty-state">No assigned tasks matching filters.</div>
+      <div class="task-table-wrapper">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th class="sortable" (click)="toggleSort('clientName')">
+                Client <span class="sort-icon">{{getSortIcon('clientName')}}</span>
+              </th>
+              <th>Status</th>
+              <th class="sortable" (click)="toggleSort('priorityName')">
+                Priority <span class="sort-icon">{{getSortIcon('priorityName')}}</span>
+              </th>
+              <th class="sortable" (click)="toggleSort('dueDate')">
+                Due <span class="sort-icon">{{getSortIcon('dueDate')}}</span>
+              </th>
+              <th>Created By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
 
-    <div *ngIf="filteredAssignedTasks.length > 0" class="task-list">
-      <article *ngFor="let task of paginatedAssignedTasks; trackBy: trackByTaskId" class="task-card">
-        <div class="task-card-top">
-          <div>
-            <h3>{{ task.clientName }}</h3>
-            <p class="task-description">{{ task.task_Description }}</p>
-          </div>
-          <span class="status-chip">{{ task.statusName || 'Unknown' }}</span>
-        </div>
+          <tbody>
+            <tr *ngFor="let task of paginatedAssignedTasks; trackBy: trackByTaskId; let i=index">
+              <td>
+                {{ (assignedPage - 1) * assignedItemsPerPage + i + 1 }}
+              </td>
+              <td>{{task.clientName}}</td>
+              <td>
+                <select class="status-select" [ngClass]="getStatusClass(getStatusName(task.statusId))"
+                  [(ngModel)]="task.statusId">
+                  <option *ngFor="let status of statuses" [value]="status.id">{{status.name}}</option>
+                </select>
+              </td>
 
-        <div class="task-card-meta">
-          <span><strong>Created by:</strong> {{ task.createdByName }}</span>
-          <span><strong>Due:</strong>
-            {{ task.dueDate | date:'dd MMM yyyy' }}
-              <span class="overdue-badge" *ngIf="isOverdue(task)">
-                ⚠ Overdue
-              </span>
-          </span>
-        </div>
-
-        <div class="task-card-actions">
-          <select [(ngModel)]="task.statusId">
-            <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
-          </select>
-          <button type="button" (click)="UpdateTask(task, task.statusId)">Save</button>
-          <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()"
-            class="open-link">Open</a>
-        </div>
-      </article>
-    </div>
-
-    <div class="pagination" *ngIf="assignedTotalPages > 1">
-      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage - 1)"
-        [disabled]="assignedPage === 1">← Previous</button>
-      <span class="pagination-info">Page {{ assignedPage }} of {{ assignedTotalPages }}</span>
-      <button type="button" class="pagination-btn" (click)="goToAssignedPage(assignedPage + 1)"
-        [disabled]="assignedPage === assignedTotalPages">Next →</button>
-    </div>
-  </div>
-
-  <div class="task-panel">
-    <div class="panel-header">
-      <div>
-        <h2>Created by me</h2>
+              <td>
+                <span class="priority-badge" [ngClass]="getPriorityClass(task.priorityName)">
+                  {{task.priorityName}}
+                </span>
+              </td>
+              <td>
+                {{task.dueDate | date:'dd MMM yyyy'}}
+                <span *ngIf="isOverdue(task)" class="overdue-badge">
+                  Overdue
+                </span>
+              </td>
+              <td>
+                <div class="person-cell">
+                  <span class="avatar">{{getInitials(task.createdByName)}}</span>
+                  {{task.createdByName}}
+                </div>
+              </td>
+              <td>
+                <button class="btn-save" (click)="UpdateTask(task,task.statusId)">Save</button>
+                <a [routerLink]="['/main','task',task.id]">
+                  Open
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="panel-count">{{ filteredCreatedTasks.length }} items</div>
+
+      <div class="pagination" *ngIf="assignedTotalPages>1">
+        <button class="pagination-btn" (click)="goToAssignedPage(assignedPage-1)" [disabled]="assignedPage==1">
+          ← Previous
+        </button>
+        <span class="pagination-info">
+          Page {{assignedPage}} of {{assignedTotalPages}}
+        </span>
+        <button class="pagination-btn" (click)="goToAssignedPage(assignedPage+1)"
+          [disabled]="assignedPage==assignedTotalPages">
+          Next →
+        </button>
+      </div>
     </div>
 
-    <div class="filter-controls">
-      <div class="filter-group">
-        <label>
+    <!-- ================= ALL TASKS ================= -->
+    <div class="task-panel">
+      <div class="panel-header">
+        <h2>All Tasks</h2>
+        <div class="panel-count">
+          {{filteredAllTasks.length}} items
+        </div>
+      </div>
+      <div class="filter-controls">
+        <div class="filter-group">
           <span class="filter-icon">🔍</span>
-          <input type="text" [(ngModel)]="searchClientNameCreated" (input)="refreshCreatedView()" class="filter-input"
-            placeholder="Search client name...">
-        </label>
+          <input class="filter-input" [(ngModel)]="searchAllClient" (input)="refreshAllView()"
+            placeholder="Search client..." />
+        </div>
+        <button class="btn-clear-filters" (click)="clearAllTaskFilters()">
+          Clear
+        </button>
       </div>
-      <div class="filter-group">
-        <label>
-          <select [(ngModel)]="createdStatusFilter" (input)="refreshCreatedView()" class="filter-select">
-            <option [value]="null">All Status</option>
-            <option *ngFor="let status of createdStatusOptions" [value]="status.id">{{ status.name || status.statusName
-              }}</option>
-          </select>
-        </label>
+      <div class="task-table-wrapper">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Client</th>
+              <th>Assigned To</th>
+              <th>Created By</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Due</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of paginatedAllTasks; trackBy: trackByTaskId; let i=index">
+              <td>{{ (allPage - 1) * allItemPerPage + i + 1 }}</td>
+              <td>{{task.clientName}}</td>
+              <td>
+                <div class="person-cell">
+                  <span class="avatar">{{getInitials(task.assignedToName)}}</span>
+                  {{task.assignedToName}}
+                </div>
+              </td>
+              <td>
+                <div class="person-cell">
+                  <span class="avatar">{{getInitials(task.createdByName)}}</span>
+                  {{task.createdByName}}
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(task.statusName)">
+                  {{task.statusName}}
+                </span>
+              </td>
+              <td>
+                <span class="priority-badge" [ngClass]="getPriorityClass(task.priorityName)">
+                  {{task.priorityName}}
+                </span>
+              </td>
+              <td>
+                {{task.dueDate | date:'dd MMM yyyy'}}
+                <span *ngIf="isOverdue(task)" class="overdue-badge">Overdue</span>
+              </td>
+              <td>
+                <a [routerLink]="['/main','task',task.id]">
+                  Open
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <!-- <div class="filter-group">
-        <label>
-          <select [(ngModel)]="createdToFilter" (input)="refreshCreatedView()" class="filter-select">
-            <option [value]="null">All Assigned to</option>
-            <option *ngFor="let user of uniqueCreatedUsers" [value]="user.id">{{ user.name }}</option>
-          </select>
-        </label>
-      </div> -->
-      <button type="button" class="btn-clear-filters" (click)="clearAllFilters()">Clear All</button>
+      <div class="pagination" *ngIf="allTotalPages>1">
+        <button class="pagination-btn" (click)="goToAllPage(allPage-1)" [disabled]="allPage==1">
+          ← Previous
+        </button>
+        <span class="pagination-info">Page {{allPage}} of {{allTotalPages}}</span>
+        <button class="pagination-btn" (click)="goToAllPage(allPage+1)" [disabled]="allPage==allTotalPages">
+          Next →
+        </button>
+      </div>
     </div>
-
-    <div *ngIf="filteredCreatedTasks.length === 0" class="empty-state">No tasks created yet matching filters.</div>
-
-    <div *ngIf="filteredCreatedTasks.length > 0" class="task-list">
-      <article *ngFor="let task of paginatedCreatedTasks; trackBy: trackByTaskId" class="task-card">
-        <div class="task-card-top">
-          <div>
-            <h3>{{ task.clientName }}</h3>
-            <p class="task-description">{{ task.task_Description }}</p>
-          </div>
-          <span class="status-chip">{{ task.statusName || 'Unknown' }}</span>
-        </div>
-
-        <div class="task-card-meta">
-          <span><strong>Assigned to:</strong> {{ task.assignedToName }}</span>
-          <span><strong>Due:</strong> {{ task.dueDate | date:'dd MMM yyyy' }}</span>
-        </div>
-
-        <div class="task-card-actions">
-          <a href="/main/task/{{task.id}}" (click)="openTask(task.id); $event.preventDefault()"
-            class="open-link">Open</a>
-        </div>
-      </article>
-    </div>
-
-    <div class="pagination" *ngIf="createdTotalPages > 1">
-      <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage - 1)"
-        [disabled]="createdPage === 1">← Previous</button>
-      <span class="pagination-info">Page {{ createdPage }} of {{ createdTotalPages }}</span>
-      <button type="button" class="pagination-btn" (click)="goToCreatedPage(createdPage + 1)"
-        [disabled]="createdPage === createdTotalPages">Next →</button>
-    </div>
-  </div>
-</section>
+  </section>
+</div>

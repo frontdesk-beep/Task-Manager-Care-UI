@@ -68,6 +68,7 @@ export class Addemployee implements OnInit, AfterViewInit {
   totalPages = 1;
   activeFilter = '';
   showInactive = false;
+  currentUserRole = '';
 
 
   constructor(
@@ -81,6 +82,7 @@ export class Addemployee implements OnInit, AfterViewInit {
     this.loadCurrentUser();
     this.loadEmployees();
   }
+  
   createEmptyEmployee(): Employee {
     return {
       id: 0,
@@ -95,6 +97,7 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   private loadCurrentUser() {
     try {
+      this.currentUserRole = localStorage.getItem('role') || '';
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       this.currentUserId = Number(user?.id || 0);
     } catch {

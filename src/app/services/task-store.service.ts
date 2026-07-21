@@ -7,8 +7,7 @@ import { TaskService } from './task.service';
 export class TaskStore {
   //BahaviorSubject - Stores Data and automatically notifies componenents when data chnages.
   //These Store dashboard data.
-  assignedTasks$ = new BehaviorSubject<any[]>([]);
-  createdTasks$ = new BehaviorSubject<any[]>([]);
+  tasks$ = new BehaviorSubject<any[]>([]);
   statuses$ = new BehaviorSubject<any[]>([]);
   loading$ = new BehaviorSubject<boolean>(false);
 
@@ -56,7 +55,7 @@ export class TaskStore {
     this.refreshInFlight = true;
     this.lastRefreshAt = Date.now();
     this.loading$.next(true);
-    let remaining = 3;
+    let remaining = 2;
     const complete = () => {
       remaining -= 1;
       if (remaining === 0) {
@@ -99,61 +98,46 @@ export class TaskStore {
         complete
       });
 
-    this.taskService
-      .GetTasksByAssignedTo(this.currentUserId)
-      .pipe(
-        catchError((err) => {
-          console.log('Assigned API error', err);
-          return of([]);
+this.taskService
+    .GetAllTasks()
+    .pipe(
+        catchError(err=>{
+            console.log(err);
+            return of([]);
         })
-      )
-      .subscribe({
-        next: (res: any) => {
-          const assignedRaw = Array.isArray(res) ? res : (res?.data || []);
-          const assignedTasks = assignedRaw.map((task: any) => ({
-            ...task,
-            assignedToId: Number(task.assignedToId),
-            createdById: Number(task.createdById),
-            statusId: Number(task.statusId),
-            statusName: statusMap.get(Number(task.statusId)) || task.statusName || 'Unknown'
-          }));
+    )
+    .subscribe({
+        next:(res:any)=>{
 
-          this.assignedTasks$.next(assignedTasks);
+            const tasksRaw = Array.isArray(res)
+                ? res
+                : (res?.data || []);
+
+            const tasks = tasksRaw.map((task:any)=>({
+
+                ...task,
+
+                assignedToId:Number(task.assignedToId),
+
+                createdById:Number(task.createdById),
+
+                statusId:Number(task.statusId),
+
+                statusName:
+                    statusMap.get(Number(task.statusId))
+                    || task.statusName
+                    || 'Unknown'
+
+            }));
+
+            this.tasks$.next(tasks);
+
         },
-        error: (err) => {
-          console.log('Assigned tasks subscription error', err);
-        },
+
         complete
-      });
+    });
 
-    this.taskService
-      .GetTasksByCreatedBy(this.currentUserId)
-      .pipe(
-        catchError((err) => {
-          console.log('Created API error', err);
-          return of([]);
-        })
-      )
-      .subscribe({
-        next: (res: any) => {
-          const createdRaw = Array.isArray(res) ? res : (res?.data || []);
-          const createdTasks = createdRaw.map((task: any) => ({
-            ...task,
-            assignedToId: Number(task.assignedToId),
-            createdById: Number(task.createdById),
-            statusId: Number(task.statusId),
-            statusName: statusMap.get(Number(task.statusId)) || task.statusName || 'Unknown'
-          }));
-
-          this.createdTasks$.next(createdTasks);
-        },
-        error: (err) => {
-          console.log('Created tasks subscription error', err);
-        },
-        complete
-      });
   }
-
   private applyStatusNames(statusMap: Map<number, string>) {
     const updateTasks = (tasks: any[]) =>
       tasks.map((task: any) => ({
@@ -161,8 +145,7 @@ export class TaskStore {
         statusName: statusMap.get(Number(task.statusId)) || task.statusName || 'Unknown'
       }));
 
-    this.assignedTasks$.next(updateTasks(this.assignedTasks$.value));
-    this.createdTasks$.next(updateTasks(this.createdTasks$.value));
+this.tasks$.next(updateTasks(this.tasks$.value));
   }
 
   UpdateTask(taskId: number, data: any) {
@@ -227,8 +210,7 @@ export class TaskStore {
 //clear
     this.currentUserId = 0;
 
-    this.assignedTasks$.next([]);
-    this.createdTasks$.next([]);
+    this.tasks$.next([]);
     this.statuses$.next([]);
     this.loading$.next(false);
     this.refreshInFlight = false;
