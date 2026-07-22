@@ -1,0 +1,120 @@
+.task-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Header */
+.task-header {
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 8px;
+  border: 1px solid #DFE1E6;
+}
+
+.task-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.task-key {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B778C;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.task-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #172B4D;
+}
+
+.task-tags {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.status-badge,
+.priority-badge {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Status color variants */
+.status-pending { background: #DFE1E6; color: #42526E; }
+.status-in-progress { background: #DEEBFF; color: #0052CC; }
+.status-completed { background: #E3FCEF; color: #006644; }
+.status-assigned { background: #FFF0B3; color: #974F0C; }
+.status-default { background: #DFE1E6; color: #42526E; }
+
+/* Priority color variants */
+.priority-high { background: #FFEBE6; color: #DE350B; }
+.priority-medium { background: #FFF7D6; color: #974F0C; }
+.priority-low { background: #E3FCEF; color: #006644; }
+.priority-default { background: #EBECF0; color: #42526E; }
+
+/* Info grid */
+.task-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: #DFE1E6;
+  border: 1px solid #DFE1E6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.info-item {
+  background: #fff;
+  padding: 14px 18px;
+}
+
+.label {
+  color: #6B778C;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #172B4D;
+}
+
+/* Description */
+.description-card {
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 8px;
+  border: 1px solid #DFE1E6;
+}
+
+.description-card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #172B4D;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.description-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #42526E;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

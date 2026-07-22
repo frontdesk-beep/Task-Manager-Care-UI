@@ -1,0 +1,34 @@
+<div class="remarks-container">
+  <h2 class="section-title">Comments</h2>
+
+  <div class="comment-editor">
+    <div class="avatar-circle">{{ getInitials('You') }}</div>
+    <div class="editor-body">
+      <textarea
+        [(ngModel)]="newRemark"
+        placeholder="Add a comment...">
+      </textarea>
+      <div class="editor-actions" *ngIf="newRemark.trim().length > 0">
+        <button class="btn-save" (click)="addRemark()">Save</button>
+        <button class="btn-cancel" (click)="newRemark = ''">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="remark-list" *ngIf="remarks.length > 0">
+    <div *ngFor="let remark of remarks" class="remark-card">
+      <div class="avatar-circle">{{ getInitials(remark.authorName) }}</div>
+      <div class="remark-body">
+        <div class="remark-header">
+          <strong class="author">{{ remark.authorName }}</strong>
+          <small class="timestamp">{{ remark.createdAt | date:'d MMM yyyy, h:mm a' }}</small>
+        </div>
+        <p class="remark-text">{{ remark.text }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="state-msg" *ngIf="remarks.length === 0">
+    No comments yet.
+  </div>
+</div>

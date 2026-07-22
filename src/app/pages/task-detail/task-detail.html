@@ -1,115 +1,53 @@
 <div class="task-detail">
-  <div *ngIf="loading">Loading task details...</div>
-  <div *ngIf="loadError" class="error">Error: {{ loadError }}</div>
-  <div *ngIf="!loading && !loadError && !task">No task found.</div>
-  <div *ngIf="task">
+
+  <div *ngIf="loading" class="state-msg">Loading task details...</div>
+
+  <div *ngIf="loadError" class="error-msg">Error: {{ loadError }}</div>
+
+  <div *ngIf="!loading && !loadError && !task" class="state-msg">
+    No task found.
+  </div>
+
+  <div *ngIf="task" class="task-detail-inner">
 
     <!-- Tabs -->
-
-      <div class="task-tabs">
-
-    <button
-        [class.active]="activeTab=='details'"
+    <div class="task-tabs">
+      <button
+        [class.active]="activeTab === 'details'"
         (click)="setTab('details')">
         Details
-    </button>
+      </button>
 
-    <button
-        [class.active]="activeTab=='activity'"
+      <button
+        [class.active]="activeTab === 'activity'"
         (click)="setTab('activity')">
         Activity
-    </button>
+      </button>
 
-    <button
-        [class.active]="activeTab=='remarks'"
+      <button
+        [class.active]="activeTab === 'remarks'"
         (click)="setTab('remarks')">
         Remarks
-    </button>
-    <button
-        [class.active]="activeTab=='comments'"
-        (click)="setTab('comments')">
-        Comments
-    </button>
-    <button
-        [class.active]="activeTab=='files'"
-        (click)="setTab('files')">
-        Files
-    </button>
-</div>
-    <div class="task-details-page">
-
-      <!-- Header Card -->
-      <div class="task-header">
-        <div class="task-header-top">
-          <div>
-            <h1>Task #{{task.id}}</h1>
-            <p>{{task.clientName}}</p>
-          </div>
-
-          <div class="task-tags">
-            <span class="status-badge">
-              {{task.statusName}}
-            </span>
-
-           <span class="priority-badge">
-              {{task.priorityName}}
-            </span>
-          </div>
-        </div>
-        
-        <div class="task-info">
-
-    <div class="info-item">
-        <div class="label">
-            👤 Assigned To
-        </div>
-
-        <div class="value">
-            {{task.assignedToName}}
-        </div>
+      </button>
     </div>
 
-    <div class="info-item">
-        <div class="label">
-            👤 Created By
-        </div>
+    <div class="tab-panel">
+      <app-details
+        *ngIf="activeTab === 'details'"
+        [task]="task">
+      </app-details>
 
-        <div class="value">
-            {{task.createdByName}}
-        </div>
+      <app-activity
+        *ngIf="activeTab === 'activity'"
+        [taskId]="taskId">
+      </app-activity>
+
+      <app-remarks
+        *ngIf="activeTab === 'remarks'"
+        [taskId]="taskId">
+      </app-remarks>
     </div>
 
-    <div class="info-item">
-        <div class="label">
-            📞 Phone
-        </div>
-
-        <div class="value">
-            {{task.phoneNumber}}
-        </div>
-    </div>
-
-    <div class="info-item">
-        <div class="label">
-            ✉️ Email
-        </div>
-
-        <div class="value">
-            {{task.email}}
-        </div>
-    </div>
-
-    <div class="info-item">
-        <div class="label">
-            📅 Due Date
-        </div>
-
-        <div class="value">
-            {{task.dueDate | date:'dd MMM yyyy'}}
-        </div>
-    </div>
+  </div>
 
 </div>
-      </div>
-
-      

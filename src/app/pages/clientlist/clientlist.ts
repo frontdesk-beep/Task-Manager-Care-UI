@@ -49,7 +49,6 @@ export class Clientlist implements OnInit, OnDestroy {
     private clientService: ClientService,
     private toastr: ToastrService,
     private exportService: Export,
-    private cdr: ChangeDetectorRef,
     private userStore: UserStore
   ) { }
 
@@ -78,7 +77,6 @@ export class Clientlist implements OnInit, OnDestroy {
           this.totalRecords = res.totalRecords;
           this.loadClientCategories();
           this.loading = false;
-          // this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClients error:', err);
@@ -101,7 +99,6 @@ export class Clientlist implements OnInit, OnDestroy {
             this.categoryMap[c.id] = c.clientType || c.name || '';
           });
           this.buildCategories();
-          // this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClientCategories error:', err);
@@ -110,7 +107,12 @@ export class Clientlist implements OnInit, OnDestroy {
       })
     );
   }
-
+getInitials(name: string): string {
+  if (!name) return '?';
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
   // refreshGrid() {
   //   // this.currentPage=1;
   //   let filtered = [...this.clients];
@@ -290,7 +292,6 @@ toggleSort(key: string) {
           this.selectedClient = null;
 
           this.loadClients();
-          this.cdr.detectChanges();
 
           this.toastr.success('Client updated successfully');
         },

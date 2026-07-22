@@ -44,7 +44,6 @@ export class TaskHistory implements OnInit {
     private taskService: TaskService,
     private router: Router,
     private exportService: Export,
-    private cdr: ChangeDetectorRef
 
   ) { }
 
@@ -145,13 +144,11 @@ export class TaskHistory implements OnInit {
         );
 
         this.loading = false;
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);
         this.error = 'Failed to load task history. Please try again.';
         this.loading = false;
-        this.cdr.detectChanges();
       }
     });
   }
@@ -181,7 +178,6 @@ export class TaskHistory implements OnInit {
         this.createdSortDir = 'asc';
       }
     }
-    // this.cdr.detectChanges();
   }
 
   getSortIcon(table: 'assigned' | 'created', key: string): string {
@@ -260,12 +256,10 @@ export class TaskHistory implements OnInit {
 
   onAssignedFilterChange() {
     this.assignedPage = 1;
-    // this.cdr.detectChanges();
   }
 
   onCreatedFilterChange() {
     this.createdPage = 1;
-    // this.cdr.detectChanges();
   }
 
   getAssignedTotalPages(): number {
@@ -291,13 +285,11 @@ export class TaskHistory implements OnInit {
   goToAssignedPage(page: number) {
     const total = this.getAssignedTotalPages();
     this.assignedPage = Math.max(1, Math.min(page, total));
-    // this.cdr.detectChanges();
   }
 
   goToCreatedPage(page: number) {
     const total = this.getCreatedTotalPages();
     this.createdPage = Math.max(1, Math.min(page, total));
-    // this.cdr.detectChanges();
   }
 
   clearAllFilters() {
@@ -307,7 +299,6 @@ export class TaskHistory implements OnInit {
     this.createdClientNameSearch = '';
     this.assignedPage = 1;
     this.createdPage = 1;
-    // this.cdr.detectChanges();
   }
 
   exportAssignedExcel() {

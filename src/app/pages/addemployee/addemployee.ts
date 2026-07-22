@@ -73,7 +73,6 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   constructor(
     private auth: Auth,
-    private cdr: ChangeDetectorRef,
     private toastr: ToastrService,
     private exportService: Export
   ) { }
@@ -130,7 +129,6 @@ export class Addemployee implements OnInit, AfterViewInit {
         }));
         this.updateEmployeeView();
 
-        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading employees:', error);
@@ -204,7 +202,6 @@ export class Addemployee implements OnInit, AfterViewInit {
           email: user.email || '',
           role: user.role || 'Employee',
         };
-        this.cdr.detectChanges();
         console.log('employeeToEdit:', this.employeeToEdit);
       },
       error: (error) => {

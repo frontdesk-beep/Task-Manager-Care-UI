@@ -41,7 +41,7 @@
                         <ng-container *ngIf="currentUserRole === 'SuperAdmin'">
                             <option [ngValue]="'Admin'">Admin</option>
                         </ng-container>
-                        <option [ngValue]="'Employee'">Employee</option>    
+                        <option [ngValue]="'Employee'">Employee</option>
                     </select>
                 </div>
                 <div class="col-12 d-flex gap-2">
@@ -92,16 +92,14 @@
     <div class="card p-4 shadow">
         <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-3 align-items-center">
             <div class="d-flex flex-column flex-sm-row gap-2 w-100">
-                <input type="text" class="form-control" placeholder="Search name"
-                    [(ngModel)]="searchText" (input)="onFilterChange()">
+                <input type="text" class="form-control" placeholder="Search name" [(ngModel)]="searchText"
+                    (input)="onFilterChange()">
                 <!-- <select class="form-select" [(ngModel)]="roleFilter" (change)="onFilterChange()">
                     <option [ngValue]="''">All Roles</option>
                     <option [ngValue]="'Admin'">Admin</option>
                     <option [ngValue]="'Employee'">Employee</option>
                 </select> -->
-                <select class="form-select" 
-                [(ngModel)]="statusFilter" 
-                (change)="onFilterChange()">
+                <select class="form-select" [(ngModel)]="statusFilter" (change)="onFilterChange()">
                     <option value="All">All Status</option>
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -147,25 +145,13 @@
                         <td>{{ employee.email }}</td>
                         <td>{{ employee.role }}</td>
                         <td>{{ employee.createdAt | date:'dd MMM yyyy' }}</td>
-                        <!-- <td>
-                            <span class="badge" [ngClass]="employee.isActive
-                                ? 'bg-success'
-                                : 'bg-danger'">
-                                {{ employee.isActive
-                                ? 'Active'
-                                : 'Inactive' }}
-                            </span> -->
-                        <!-- </td> -->
+
                         <td class="d-flex gap-2">
-                            <button  class="btn btn-sm btn-primary"
-                                (click)="editEmployee(employee)">Edit</button>
-                            <button *ngIf="canDeleteEmployee(employee) && employee.isActive" 
-                                class="btn btn-sm btn-danger"
-                                (click)="confirmDelete(employee)">Deactivate</button>
-                            <button *ngIf="!employee.isActive" class="btn btn-sm btn-success"
-                                (click)="reactivateEmployee(employee)">
-                                Reactivate
-                            </button>
+                            <a class="action-link" (click)="editEmployee(employee)">Edit</a>
+                            <a class="action-link danger" *ngIf="canDeleteEmployee(employee) && employee.isActive"
+                                (click)="confirmDelete(employee)">Deactivate</a>
+                            <a class="action-link success" *ngIf="!employee.isActive"
+                                (click)="reactivateEmployee(employee)">Reactivate</a>
                         </td>
                     </tr>
                 </tbody>

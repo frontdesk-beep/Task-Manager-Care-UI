@@ -67,3 +67,31 @@
     overflow-x: auto;
 }
 
+/* Action links - matches Client List style */
+.action-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563EB;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.action-link:hover {
+  color: #1D4ED8;
+}
+
+.action-link.danger {
+  color: #DC2626;
+}
+
+.action-link.danger:hover {
+  color: #B91C1C;
+}
+
+.action-link.success {
+  color: #16A34A;
+}
+
+.action-link.success:hover {
+  color: #15803D;
+}

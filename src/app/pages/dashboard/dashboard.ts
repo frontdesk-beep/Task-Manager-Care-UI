@@ -76,7 +76,6 @@ export class Dashboard implements OnInit, OnDestroy {
     private auth: Auth,
     private taskStore: TaskStore,
     private router: Router,
-    private cdr: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
@@ -142,7 +141,6 @@ export class Dashboard implements OnInit, OnDestroy {
         console.log(this.completedCount);
         console.log(this.overdueCount);
         console.log(this.urgentCount);
-         this.cdr.detectChanges();
       });
   }
   private isCompletedStatus(statusName?: string): boolean {
