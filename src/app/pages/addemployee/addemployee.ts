@@ -400,4 +400,22 @@ export class Addemployee implements OnInit, AfterViewInit {
         }
       })
   }
+  private readonly avatarPalette = ['#7c3aed', '#2563eb', '#059669', '#d97706', '#db2777', '#0891b2'];
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const second = parts.length > 1 ? parts[1][0] : '';
+    return (first + second).toUpperCase();
+  }
+
+  getAvatarColor(name: string): string {
+    if (!name) return this.avatarPalette[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
+  }
 }

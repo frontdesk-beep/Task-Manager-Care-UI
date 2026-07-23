@@ -1,13 +1,30 @@
 <div class="task-details-page">
 
-  <!-- Header -->
-  <div class="task-header">
-    <div class="task-header-top">
-      <div>
+  <!-- Tabs -->
+  <!-- <div class="task-tabs">
+    <button class="tab-item active">Details</button>
+    <button class="tab-item">Activity</button>
+    <button class="tab-item">Remarks</button>
+  </div> -->
+
+  <div class="task-body">
+
+    <!-- Main column -->
+    <div class="task-main">
+      <div class="task-header-card">
         <div class="task-key">TASK-{{ task.id }}</div>
         <h2>{{ task.clientName }}</h2>
       </div>
-      <div class="task-tags">
+
+      <div class="description-card">
+        <h3>Description</h3>
+        <p>{{ task.task_Description }}</p>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="task-sidebar">
+      <div class="sidebar-tags">
         <span class="status-badge" [ngClass]="getStatusClass(task.statusName)">
           {{ task.statusName }}
         </span>
@@ -15,53 +32,60 @@
           {{ task.priorityName }}
         </span>
       </div>
+
+      <div class="sidebar-panel">
+        <div class="sidebar-section-title">Details</div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Assigned To</div>
+          <div class="sidebar-value with-avatar">
+            <span class="avatar-circle" [style.background]="getAvatarColor(task.assignedToName)">
+              {{ getInitials(task.assignedToName) }}
+            </span>
+            {{ task.assignedToName }}
+          </div>
+        </div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Created By</div>
+          <div class="sidebar-value with-avatar">
+            <span class="avatar-circle" [style.background]="getAvatarColor(task.createdByName)">
+              {{ getInitials(task.createdByName) }}
+            </span>
+            {{ task.createdByName }}
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Due Date</div>
+          <div class="sidebar-value">{{ task.dueDate | date:'d MMM yyyy' }}</div>
+        </div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Created On</div>
+          <div class="sidebar-value">{{ task.created_On | date:'d MMM yyyy, h:mm a' }}</div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Phone</div>
+          <div class="sidebar-value">{{ task.phoneNumber }}</div>
+        </div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Email</div>
+          <div class="sidebar-value">{{ task.email }}</div>
+        </div>
+
+        <div class="sidebar-row">
+          <div class="sidebar-label">Service Category</div>
+          <div class="sidebar-value">{{ task.serviceCategoryName }}</div>
+        </div>
+      </div>
     </div>
+
   </div>
-
-  <!-- Information -->
-  <div class="task-info">
-
-    <div class="info-item">
-      <div class="label">Assigned To</div>
-      <div class="value">{{ task.assignedToName }}</div>
-    </div>
-
-    <div class="info-item">
-      <div class="label">Created By</div>
-      <div class="value">{{ task.createdByName }}</div>
-    </div>
-
-    <div class="info-item">
-      <div class="label">Phone</div>
-      <div class="value">{{ task.phoneNumber }}</div>
-    </div>
-
-    <div class="info-item">
-      <div class="label">Email</div>
-      <div class="value">{{ task.email }}</div>
-    </div>
-
-    <div class="info-item">
-      <div class="label">Due Date</div>
-      <div class="value">{{ task.dueDate | date:'d MMM yyyy' }}</div>
-    </div>
-
-    <div class="info-item">
-      <div class="label">Created On</div>
-      <div class="value">{{ task.created_On | date:'d MMM yyyy, h:mm a' }}</div>
-    </div>
-
-    <div class="info-item">
-      <div class="label">Service Category</div>
-      <div class="value">{{ task.serviceCategoryName }}</div>
-    </div>
-
-  </div>
-
-  <!-- Description -->
-  <div class="description-card">
-    <h3>Description</h3>
-    <p>{{ task.task_Description }}</p>
-  </div>
-
 </div>

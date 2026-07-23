@@ -22,7 +22,7 @@ import { ChangeDetectorRef } from '@angular/core';
 export class Dashboard implements OnInit, OnDestroy {
   currentUserId = 0;
   completedStatusIds = new Set<number>();
-  count=0;
+  count = 0;
   //assigned to current user
   assignedTasks: any[] = [];
 
@@ -70,6 +70,11 @@ export class Dashboard implements OnInit, OnDestroy {
   uniqueCreatedUsers: any[] = [];
 
   today = new Date();
+
+  showReassignModal = false;
+  selectedTask: any = null;
+  selectedUserId = 0;
+  reassignRemarks = '';
 
   constructor(
     private taskService: TaskService,
@@ -254,13 +259,23 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   isOverdue(task: any): boolean {
-    if (!task.dueDate) {
-      return false;
-    }
-    return new Date(task.dueDate) < this.today
-      && !this.isCompletedStatus(task.statusName);
+  if (!task?.dueDate) {
+    return false;
   }
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dueDate = new Date(task.dueDate);
+  dueDate.setHours(0, 0, 0, 0);
+
+  const currentStatus = this.getStatusName(task.statusId);
+
+  return (
+    dueDate < today &&
+    currentStatus.toLowerCase() !== 'completed'
+  );
+}
   trackByTaskId(index: number, task: any) {
     return task.id;
   }
@@ -407,7 +422,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
 
-// Turns "In Progress" -> "status-in-progress" to match a CSS class
+  // Turns "In Progress" -> "status-in-progress" to match a CSS class
   getStatusClass(statusName?: string): string {
     const clean = (statusName || 'unknown')
       .toLowerCase()
@@ -436,4 +451,43 @@ export class Dashboard implements OnInit, OnDestroy {
       .slice(0, 2)
       .toUpperCase();
   }
-}
+  toggleMenu(task: any) {
+
+    task.showMenu = !task.showMenu;
+
+  }
+  openReassign(task: any) {
+
+    this.selectedTask = task;
+
+    this.selectedUserId = task.assignedToId;
+
+    this.reassignRemarks = '';
+
+    this.showReassignModal = true;
+
+  }
+  closeReassign() {
+
+    this.showReassignModal = false;
+
+  }
+confirmReassign() {
+  const payload = {
+    assignedToId: this.selectedUserId,
+    comment: this.reassignRemarks
+  };
+  this.taskService.ReassignTask(this.selectedTask.id, payload).subscribe({
+    next: () => {
+      this.taskStore.refresh();
+      this.showReassignModal = false;
+      this.selectedTask.showMenu = false;
+    },
+    error: (err) => {
+      console.error('Reassign failed:', err);
+    }
+  });
+    }
+  
+  }
+  

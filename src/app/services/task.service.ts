@@ -174,5 +174,10 @@ export class TaskService {
 
     );
   }
+ ReassignTask(taskId: number, data: any) {
+  return this.http.put(`${this.baseUrl}/tasks/${taskId}/reassign`, data, {
+    headers: this.getAuthHeaders()
+  });
+}
 
 }

@@ -1,8 +1,274 @@
-/* Employee management table and modal styles */
+.container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Cards */
+.card {
+    border: 1px solid #DFE1E6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.card h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #172B4D;
+    margin: 0;
+}
+
+.card .form-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #172B4D;
+}
+
+/* Inputs */
+.form-control,
+.form-select {
+    border: 1px solid #DFE1E6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #172B4D;
+    background: #FAFBFC;
+}
+
+.form-control::placeholder {
+    color: #97A0AF;
+}
+
+.form-control:hover,
+.form-select:hover {
+    background: #F4F5F7;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    background: #FFFFFF;
+    border-color: #4C9AFF;
+    box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.25);
+}
+
+/* Buttons - Jira palette */
+.btn {
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: #0052CC;
+    border-color: #0052CC;
+}
+
+.btn-primary:hover {
+    background: #0747A6;
+    border-color: #0747A6;
+}
+
+.btn-secondary {
+    background: #FAFBFC;
+    color: #42526E;
+    border: 1px solid #DFE1E6;
+}
+
+.btn-secondary:hover {
+    background: #F4F5F7;
+}
+
+.btn-outline-secondary {
+    background: #FAFBFC;
+    color: #42526E;
+    border: 1px solid #DFE1E6;
+    min-width: 110px;
+}
+
+.btn-outline-secondary:hover {
+    background: #F4F5F7;
+}
+
+.btn-outline-success {
+    background: #E3FCEF;
+    color: #006644;
+    border: 1px solid transparent;
+}
+
+.btn-outline-success:hover {
+    background: #ABF5D1;
+}
+
+.btn-outline-primary {
+    background: #DEEBFF;
+    color: #0052CC;
+    border: 1px solid transparent;
+}
+
+.btn-outline-primary:hover {
+    background: #B3D4FF;
+}
+
+.btn-danger {
+    background: #DE350B;
+    border-color: #DE350B;
+}
+
+.btn-danger:hover {
+    background: #BF2600;
+    border-color: #BF2600;
+}
+
+/* Item count pill */
+.item-count-pill {
+    background: #F1F2F5;
+    color: #5E6C84;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Table */
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.table thead th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6B778C;
+    border-bottom: 2px solid #EBECF0;
+    border-top: none;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #F0F1F3;
+    border-top: none;
+    color: #172B4D;
+    font-size: 14px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #F7F8FA;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Avatar */
+.employee-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.avatar-circle {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+/* Sorting */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable:hover {
+    color: #172B4D;
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 6px;
+    color: #97A0AF;
+}
+
+.sort-icon.asc::after {
+    content: '▲';
+    margin-left: 4px;
+    font-size: 9px;
+}
+
+.sort-icon.desc::after {
+    content: '▼';
+    margin-left: 4px;
+    font-size: 9px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Action links - Jira soft pill style */
+.action-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #DEEBFF;
+    color: #0052CC;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.action-link:hover {
+    background: #B3D4FF;
+}
+
+.action-link.danger {
+    background: #FFEBE6;
+    color: #BF2600;
+}
+
+.action-link.danger:hover {
+    background: #FFBDAD;
+}
+
+.action-link.success {
+    background: #E3FCEF;
+    color: #006644;
+}
+
+.action-link.success:hover {
+    background: #ABF5D1;
+}
+
+/* Pagination */
+.btn-group .btn-outline-secondary {
+    border-radius: 6px !important;
+    min-width: 90px;
+}
+
+/* Modal */
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.45);
+    background: rgba(9, 30, 66, 0.54);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,87 +277,42 @@
 
 .modal-panel {
     background: white;
-    padding: 20px;
+    padding: 24px;
     border-radius: 8px;
     width: 520px;
     max-width: calc(100% - 40px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 12px 30px rgba(9, 30, 66, 0.2);
 }
+
+.modal-panel h5 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #172B4D;
+}
+
+.modal-panel label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #172B4D;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Neutralize browser autofill highlight */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #172B4D !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
 .text-success {
     font-weight: 600;
+    color: #006644;
 }
 
 .text-danger {
     font-weight: 600;
-}
-.table td, .table th {
-    vertical-align: middle;
-}
-
-.sortable {
-    cursor: pointer;
-    user-select: none;
-}
-
-.sort-icon {
-    display: inline-block;
-    margin-left: 6px;
-    color: #9ca3af;
-}
-
-.sort-icon.asc::after {
-    content: '▲';
-    margin-left: 4px;
-    font-size: 0.7rem;
-}
-
-.sort-icon.desc::after {
-    content: '▼';
-    margin-left: 4px;
-    font-size: 0.7rem;
-}
-
-.sort-icon:hover {
-    color: #374151;
-}
-
-.card .form-label {
-    font-weight: 600;
-}
-
-.card .btn-outline-secondary {
-    min-width: 110px;
-}
-
-.table-responsive {
-    overflow-x: auto;
-}
-
-/* Action links - matches Client List style */
-.action-link {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2563EB;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.action-link:hover {
-  color: #1D4ED8;
-}
-
-.action-link.danger {
-  color: #DC2626;
-}
-
-.action-link.danger:hover {
-  color: #B91C1C;
-}
-
-.action-link.success {
-  color: #16A34A;
-}
-
-.action-link.success:hover {
-  color: #15803D;
+    color: #BF2600;
 }
