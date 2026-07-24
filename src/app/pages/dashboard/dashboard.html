@@ -24,11 +24,22 @@
     </div>
   </section>
 
-  <!-- My tasks - loggedin user -->
-  <!-- ================= MY TASKS ================= -->
+  <!-- ================= TABS ================= -->
+  <div class="dashboard-tabs">
+    <button class="dash-tab-item" [class.active]="activeTab === 'mine'" (click)="activeTab = 'mine'">
+      My Tasks
+      <span class="dash-tab-count">{{ filteredAssignedTasks.length }}</span>
+    </button>
+    <button class="dash-tab-item" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
+      All Tasks
+      <span class="dash-tab-count">{{ filteredAllTasks.length }}</span>
+    </button>
+  </div>
+
   <section class="tasks-grid">
 
-    <div class="task-panel">
+    <!-- ================= MY TASKS ================= -->
+    <div class="task-panel" *ngIf="activeTab === 'mine'">
 
       <div class="panel-header">
         <h2>My Tasks</h2>
@@ -39,7 +50,6 @@
 
         <div class="filter-group">
           <span class="filter-icon">🔍</span>
-
           <input type="text" class="filter-input" [(ngModel)]="searchClientNameAssigned" (input)="refreshAssignedView()"
             placeholder="Search client..." />
         </div>
@@ -125,6 +135,9 @@
             </tr>
           </tbody>
         </table>
+        <div *ngIf="paginatedAssignedTasks.length === 0" class="empty-state">
+          No tasks assigned to you right now.
+        </div>
       </div>
 
       <div class="pagination" *ngIf="assignedTotalPages>1">
@@ -142,7 +155,7 @@
     </div>
 
     <!-- ================= ALL TASKS ================= -->
-    <div class="task-panel">
+    <div class="task-panel" *ngIf="activeTab === 'all'">
       <div class="panel-header">
         <h2>All Tasks</h2>
         <div class="panel-count">
@@ -204,14 +217,16 @@
                 <span *ngIf="isOverdue(task)" class="overdue-badge">Overdue</span>
               </td>
               <td>
-                <a [routerLink]="['/main','task',task.id]">
+                <a class="open-link" [routerLink]="['/main','task',task.id]">
                   Open
                 </a>
-
               </td>
             </tr>
           </tbody>
         </table>
+        <div *ngIf="paginatedAllTasks.length === 0" class="empty-state">
+          No tasks found.
+        </div>
       </div>
       <div class="pagination" *ngIf="allTotalPages>1">
         <button class="pagination-btn" (click)="goToAllPage(allPage-1)" [disabled]="allPage==1">
@@ -225,6 +240,7 @@
     </div>
   </section>
 </div>
+
 <div class="reassign-overlay" *ngIf="showReassignModal">
   <div class="reassign-dialog">
     <div class="reassign-header">
@@ -239,9 +255,6 @@
           {{user.name}}
         </option>
       </select>
-
-      <!-- <label class="reassign-label">Remarks</label>
-      <textarea class="reassign-textarea" [(ngModel)]="reassignRemarks"></textarea> -->
     </div>
 
     <div class="reassign-footer">

@@ -12,6 +12,7 @@ import { TaskDetail } from './pages/task-detail/task-detail';
 import { TaskHistory } from './pages/task-history/task-history';
 import {Clientlist} from './pages/clientlist/clientlist';
 import { Resetpassword } from './pages/resetpassword/resetpassword';
+import { TaskReportComponent } from './pages/task-report/task-report';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -29,7 +30,8 @@ export const routes: Routes = [
       { path: 'task-history', component: TaskHistory },
       { path: 'addemployee', component: Addemployee },
       { path: 'employee-management', component: Addemployee },
-      { path: 'clientlist', component: Clientlist }
+      { path: 'clientlist', component: Clientlist },
+      { path: 'task-report', component: TaskReportComponent}
     ]
   }
 ];

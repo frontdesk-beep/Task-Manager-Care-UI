@@ -170,7 +170,7 @@ export class TaskService {
   GetHistory(taskId: number) {
     return this.http.get(
 
-      this.baseUrl + '/TaskHistory?taskId=' + taskId
+      this.baseUrl + '/Activity?taskId=' + taskId
 
     );
   }

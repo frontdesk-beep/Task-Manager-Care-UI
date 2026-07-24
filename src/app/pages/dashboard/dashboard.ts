@@ -75,7 +75,7 @@ export class Dashboard implements OnInit, OnDestroy {
   selectedTask: any = null;
   selectedUserId = 0;
   reassignRemarks = '';
-
+activeTab: 'mine' | 'all' = 'mine';
   constructor(
     private taskService: TaskService,
     private auth: Auth,

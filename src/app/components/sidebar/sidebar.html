@@ -7,7 +7,7 @@
                 <i class="bi bi-speedometer2"></i>
                     Dashboard
         </a>
-        <a routerLink="/main/task-history">
+        <a *ngIf="role==='Admin' || role==='SuperAdmin'" routerLink="/main/task-report">
             <i class="bi bi-bar-chart"></i>
             Reports</a>
         <a routerLink="/main/clientlist">
