@@ -20,8 +20,8 @@ export class TaskStore {
   private pendingRefresh = false;
   private lastRefreshAt = 0;
 
-  constructor(private taskService: TaskService) {}
-//called when dashboard loads.
+  constructor(private taskService: TaskService) { }
+  //called when dashboard loads.
   initForUser(userId: number) {
     if (!userId) {
       return;
@@ -35,7 +35,7 @@ export class TaskStore {
 
   private loadAll(force = false) {
 
-        console.log('called');
+    console.log('called');
 
     if (!this.currentUserId) {
       return;
@@ -98,44 +98,44 @@ export class TaskStore {
         complete
       });
 
-this.taskService
-    .GetAllTasks()
-    .pipe(
-        catchError(err=>{
-            console.log(err);
-            return of([]);
+    this.taskService
+      .GetActiveTasks()
+      .pipe(
+        catchError(err => {
+          console.log(err);
+          return of([]);
         })
-    )
-    .subscribe({
-        next:(res:any)=>{
+      )
+      .subscribe({
+        next: (res: any) => {
 
-            const tasksRaw = Array.isArray(res)
-                ? res
-                : (res?.data || []);
+          const tasksRaw = Array.isArray(res)
+            ? res
+            : (res?.data || []);
 
-            const tasks = tasksRaw.map((task:any)=>({
+          const tasks = tasksRaw.map((task: any) => ({
 
-                ...task,
+            ...task,
 
-                assignedToId:Number(task.assignedToId),
+            assignedToId: Number(task.assignedToId),
 
-                createdById:Number(task.createdById),
+            createdById: Number(task.createdById),
 
-                statusId:Number(task.statusId),
+            statusId: Number(task.statusId),
 
-                statusName:
-                    statusMap.get(Number(task.statusId))
-                    || task.statusName
-                    || 'Unknown'
+            statusName:
+              statusMap.get(Number(task.statusId))
+              || task.statusName
+              || 'Unknown'
 
-            }));
+          }));
 
-            this.tasks$.next(tasks);
+          this.tasks$.next(tasks);
 
         },
 
         complete
-    });
+      });
 
   }
   private applyStatusNames(statusMap: Map<number, string>) {
@@ -145,7 +145,7 @@ this.taskService
         statusName: statusMap.get(Number(task.statusId)) || task.statusName || 'Unknown'
       }));
 
-this.tasks$.next(updateTasks(this.tasks$.value));
+    this.tasks$.next(updateTasks(this.tasks$.value));
   }
 
   UpdateTask(taskId: number, data: any) {
@@ -200,14 +200,14 @@ this.tasks$.next(updateTasks(this.tasks$.value));
       this.refreshTimer = null;
     }
   }
-//Create WebSocket connection.
+  //Create WebSocket connection.
   destroy() {
     this.stopPolling();
-//remove websocket connection.
+    //remove websocket connection.
     this.socketSub?.unsubscribe();
     //disconnect socket
     this.taskService.disconnectTaskUpdates();
-//clear
+    //clear
     this.currentUserId = 0;
 
     this.tasks$.next([]);

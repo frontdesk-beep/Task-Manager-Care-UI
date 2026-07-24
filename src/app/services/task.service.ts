@@ -78,6 +78,11 @@ export class TaskService {
       headers: this.getAuthHeaders()
     });
   }
+  GetActiveTasks() {
+  return this.http.get(`${this.baseUrl}/tasks/active`, {
+    headers: this.getAuthHeaders()
+  });
+}
 
   GetTaskById(id: number) {
     return this.http.get(`${this.baseUrl}/tasks/${id}`, {

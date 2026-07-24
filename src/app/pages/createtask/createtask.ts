@@ -12,6 +12,8 @@ import { ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { UserStore } from '../../services/user-store';
 import { ClientService } from '../../services/client.service';
+import { NgSelectModule } from '@ng-select/ng-select';
+
 
 interface DropdownItem {
   id: number;
@@ -37,7 +39,10 @@ interface TaskItem {
 @Component({
   selector: 'app-createtask',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    NgSelectModule,],
   templateUrl: './createtask.html',
   styleUrl: './createtask.css',
 })

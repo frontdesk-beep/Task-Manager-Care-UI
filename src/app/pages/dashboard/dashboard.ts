@@ -137,7 +137,7 @@ activeTab: 'mine' | 'all' = 'mine';
     this.taskService.GetMySummary()
       .subscribe((res: any) => {
         console.log("Dashboard getsummary", res);
-        this.assignedCount = res.openTasks;
+        this.assignedCount = res.assignedTasks;
         this.pendingCount = res.pendingTasks;
         this.completedCount = res.completedTasks;
         this.overdueCount = res.overDueTasks;
