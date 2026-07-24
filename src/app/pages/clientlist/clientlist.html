@@ -1,64 +1,54 @@
 <div class="page client-list-page">
   <div class="client-card">
-    <h1>Client List</h1>
+
+    <div class="card-header">
+      <h1>Client List</h1>
+      <span class="count-badge">{{ totalRecords }} items</span>
+    </div>
 
     <!-- Filters -->
     <div class="filters-section">
 
       <div class="filters-left">
-
-        <div class="filter-group">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
           <input type="text" [(ngModel)]="searchClientName" (ngModelChange)="currentPage=1; loadClients()"
-          placeholder="Search client name..." class="filter-input">
+            placeholder="Search client name..." class="filter-input search-input">
         </div>
         <div class="filter-group">
-          <input type="date" [(ngModel)]="selectedDate" class="filter-input" 
-          (ngModelChange)="currentPage=1; loadClients()">
+          <input type="date" [(ngModel)]="selectedDate" class="filter-input"
+            (ngModelChange)="currentPage=1; loadClients()">
         </div>
         <div class="filter-group">
-          
-          <select [(ngModel)]="filterCategoryId" 
-          class="filter-select" (ngModelChange)="currentPage=1; loadClients()">
-           
-          <option [ngValue]="null">
-              All Categories
-          </option>
-          <option *ngFor="let cat of uniqueCategories" 
-          [ngValue]="cat.id">
-              {{ cat.name }}
-          </option>
+          <select [(ngModel)]="filterCategoryId" class="filter-select" (ngModelChange)="currentPage=1; loadClients()">
+            <option [ngValue]="null">All Categories</option>
+            <option *ngFor="let cat of uniqueCategories" [ngValue]="cat.id">{{ cat.name }}</option>
           </select>
         </div>
-
       </div>
 
       <div class="filters-right">
-
-        <button class="btn btn-outline-secondary" (click)="clearFilters()">
-          Clear All
-        </button>
-        <button class="btn btn-outline-success" (click)="exportCreatedExcel()">
-          Export Excel
-        </button>
-        <button class="btn btn-outline-primary" (click)="exportCreatedPdf()">
-          Export PDF
-        </button>
+        <button class="btn btn-outline-secondary" (click)="clearFilters()">Clear</button>
+        <button class="btn btn-outline-success" (click)="exportCreatedExcel()">Export Excel</button>
+        <button class="btn btn-outline-primary" (click)="exportCreatedPdf()">Export PDF</button>
       </div>
 
     </div>
+
     <!-- Clients Table -->
     <div class="table-wrapper">
       <table class="table">
         <thead>
           <tr>
+            <th class="no-col">No.</th>
             <th (click)="toggleSort('clientName')" class="sortable">
-              Client Name <span class="sort-icon">{{ getSortIcon('clientName') }}</span>
+              Client <span class="sort-icon">{{ getSortIcon('clientName') }}</span>
             </th>
             <th (click)="toggleSort('clientCategoryId')" class="sortable">
               Category <span class="sort-icon">{{ getSortIcon('clientCategoryId') }}</span>
             </th>
             <th (click)="toggleSort('companyName')" class="sortable">
-              Company Name <span class="sort-icon">{{ getSortIcon('companyName') }}</span>
+              Company <span class="sort-icon">{{ getSortIcon('companyName') }}</span>
             </th>
             <th (click)="toggleSort('phoneNumber')" class="sortable">
               Phone <span class="sort-icon">{{ getSortIcon('phoneNumber') }}</span>
@@ -72,28 +62,36 @@
             <th (click)="toggleSort('createdOn')" class="sortable">
               Created On <span class="sort-icon">{{ getSortIcon('createdOn') }}</span>
             </th>
-            <th>Actions</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of clients; trackBy: trackByClientId">
-            <td>{{ client.clientName }}</td>
-            <td>{{ getCategoryName(client.clientCategoryId) }}</td>
+          <tr *ngFor="let client of clients; let i = index; trackBy: trackByClientId">
+            <td class="no-col">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+            <td>
+              <div class="person-cell">
+                <span class="avatar-badge">{{ getInitials(client.clientName) }}</span>
+                <span class="person-name">{{ client.clientName }}</span>
+              </div>
+            </td>
+            <td>
+              <!-- <span class="category-pill"
+                [ngClass]="{
+                  'new': getCategoryName(client.clientCategoryId).toLowerCase().includes('new'),
+                  'existing': getCategoryName(client.clientCategoryId).toLowerCase().includes('existing')
+                }"> -->
+                <span class="pill-dot"></span>{{ getCategoryName(client.clientCategoryId) }}
+              <!-- </span> -->
+            </td>
             <td>{{ client.companyName || '-' }}</td>
             <td>{{ client.phoneNumber || '-' }}</td>
             <td>{{ client.email || '-' }}</td>
             <td>{{ client.address || '-' }}</td>
-            <td>{{ client.createdOn ? (client.createdOn | date:'dd MMM yyyy') : '-' }}</td>
+            <td>{{ client.createdOn ? (client.createdOn | date:'d MMM yyyy') : '-' }}</td>
             <td>
               <div class="action-buttons">
-                <button class="btn btn-primary btn-sm" 
-                (click)="editClient(client.clientId)" title="Edit">
-                  Edit
-                </button>
-                <button class="btn btn-danger btn-sm" 
-                (click)="openDeletePopup(client.clientId)" title="Delete">
-                  Delete
-                </button>
+                <a class="action-link" (click)="editClient(client.clientId)">Edit</a>
+                <a class="action-link danger" (click)="openDeletePopup(client.clientId)">Delete</a>
               </div>
             </td>
           </tr>
@@ -103,93 +101,45 @@
 
     <!-- Pagination -->
     <div class="pagination">
-      <button class="btn btn-sm" (click)="goToPage(1)" [disabled]="currentPage === 1">
-        First
-      </button>
-      <button class="btn btn-sm" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-        Previous
-      </button>
-
-      <span class="page-info">
-        Page {{ currentPage }} of {{ getTotalPages() }}
-      </span>
-
-      <button class="btn btn-sm" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === getTotalPages()">
-        Next
-      </button>
-      <button class="btn btn-sm" (click)="goToPage(getTotalPages())" [disabled]="currentPage === getTotalPages()">
-        Last
-      </button>
+      <button class="btn btn-sm" (click)="goToPage(1)" [disabled]="currentPage === 1">First</button>
+      <button class="btn btn-sm" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+      <span class="page-info">Page {{ currentPage }} of {{ getTotalPages() }}</span>
+      <button class="btn btn-sm" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === getTotalPages()">Next</button>
+      <button class="btn btn-sm" (click)="goToPage(getTotalPages())" [disabled]="currentPage === getTotalPages()">Last</button>
     </div>
+
   </div>
 </div>
 
-<!-- Delete confirmation modal for pop-up -->
-<div *ngIf="isDeleteMode && selectedClient"
-      class="modal-backdrop">
+<!-- Delete confirmation modal -->
+<div *ngIf="isDeleteMode && selectedClient" class="modal-backdrop">
   <div class="delete-modal">
     <h3>Delete Client</h3>
     <p>Are you sure you want to delete this client?</p>
     <div class="modal-actions">
-      <button
-        class="btn btn-danger"
-        (click)="deleteClient()">
-        Yes, Delete
-      </button>
-      <button
-        class="btn btn-secondary"
-        (click)="cancelDelete()">
-        Cancel
-      </button>
+      <button class="btn btn-danger" (click)="deleteClient()">Yes, Delete</button>
+      <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
     </div>
   </div>
 </div>
-<!-- Edit & update Client Modal for pop-up -->
-<div *ngIf="isEditMode && selectedClient" 
-      class="modal-backdrop">
+
+<!-- Edit Client modal -->
+<div *ngIf="isEditMode && selectedClient" class="modal-backdrop">
   <div class="modal-content">
     <h3>Edit Client</h3>
     <div class="form-grid">
-      <input
-        type="text"
-        [(ngModel)]="selectedClient.clientName"
-        placeholder="Client Name">
-      <input
-        type="text"
-        [(ngModel)]="selectedClient.companyName"
-        placeholder="Company Name">
-      <input
-        type="text"
-        [(ngModel)]="selectedClient.phoneNumber"
-        placeholder="Phone Number">
-      <input
-        type="email"
-        [(ngModel)]="selectedClient.email"
-        placeholder="Email">
-      <input
-        type="text"
-        [(ngModel)]="selectedClient.address"
-        placeholder="Address">
+      <input type="text" [(ngModel)]="selectedClient.clientName" placeholder="Client Name">
+      <input type="text" [(ngModel)]="selectedClient.companyName" placeholder="Company Name">
+      <input type="text" [(ngModel)]="selectedClient.phoneNumber" placeholder="Phone Number">
+      <input type="email" [(ngModel)]="selectedClient.email" placeholder="Email">
+      <input type="text" [(ngModel)]="selectedClient.address" placeholder="Address">
       <select [(ngModel)]="selectedClient.clientCategoryId">
-        <option *ngFor="let cat of clientCategories"
-                [ngValue]="cat.id">
-          {{ cat.clientType || cat.name }}
-        </option>
+        <option *ngFor="let cat of clientCategories" [ngValue]="cat.id">{{ cat.clientType || cat.name }}</option>
       </select>
     </div>
     <div class="modal-actions">
-      <button
-        type="button"
-        class="btn btn-primary"
-        (click)="updateClient(selectedClient.clientId)">
-        Save
-      </button>
-      <button
-        type="button"
-        class="btn btn-danger"
-        (click)="cancelEdit()">
-        Cancel
-      </button>
+      <button type="button" class="btn btn-primary" (click)="updateClient(selectedClient.clientId)">Save</button>
+      <button type="button" class="btn btn-danger" (click)="cancelEdit()">Cancel</button>
     </div>
   </div>
 </div>

@@ -44,7 +44,6 @@ export class TaskHistory implements OnInit {
     private taskService: TaskService,
     private router: Router,
     private exportService: Export,
-    private cdr: ChangeDetectorRef
 
   ) { }
 
@@ -145,13 +144,11 @@ export class TaskHistory implements OnInit {
         );
 
         this.loading = false;
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);
         this.error = 'Failed to load task history. Please try again.';
         this.loading = false;
-        this.cdr.detectChanges();
       }
     });
   }
@@ -181,7 +178,6 @@ export class TaskHistory implements OnInit {
         this.createdSortDir = 'asc';
       }
     }
-    // this.cdr.detectChanges();
   }
 
   getSortIcon(table: 'assigned' | 'created', key: string): string {
@@ -260,12 +256,10 @@ export class TaskHistory implements OnInit {
 
   onAssignedFilterChange() {
     this.assignedPage = 1;
-    // this.cdr.detectChanges();
   }
 
   onCreatedFilterChange() {
     this.createdPage = 1;
-    // this.cdr.detectChanges();
   }
 
   getAssignedTotalPages(): number {
@@ -291,13 +285,11 @@ export class TaskHistory implements OnInit {
   goToAssignedPage(page: number) {
     const total = this.getAssignedTotalPages();
     this.assignedPage = Math.max(1, Math.min(page, total));
-    // this.cdr.detectChanges();
   }
 
   goToCreatedPage(page: number) {
     const total = this.getCreatedTotalPages();
     this.createdPage = Math.max(1, Math.min(page, total));
-    // this.cdr.detectChanges();
   }
 
   clearAllFilters() {
@@ -307,7 +299,6 @@ export class TaskHistory implements OnInit {
     this.createdClientNameSearch = '';
     this.assignedPage = 1;
     this.createdPage = 1;
-    // this.cdr.detectChanges();
   }
 
   exportAssignedExcel() {
@@ -336,5 +327,31 @@ export class TaskHistory implements OnInit {
 
   trackByTaskId(index: number, item: any): any {
     return item.id;
+  }
+  private readonly avatarPalette = ['#7c3aed', '#2563eb', '#059669', '#d97706', '#db2777', '#0891b2'];
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const second = parts.length > 1 ? parts[1][0] : '';
+    return (first + second).toUpperCase();
+  }
+
+  getAvatarColor(name: string): string {
+    if (!name) return this.avatarPalette[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
+  }
+  getStatusClass(status: string): string {
+    const normalized = String(status || '').toLowerCase().replace(/\s+/g, '-');
+    if (['completed', 'done', 'closed'].includes(normalized)) return 'status-completed';
+    if (['in-progress', 'inprogress'].includes(normalized)) return 'status-in-progress';
+    if (['pending', 'todo', 'open'].includes(normalized)) return 'status-pending';
+    if (['overdue', 'blocked'].includes(normalized)) return 'status-overdue';
+    return 'status-default';
   }
 }

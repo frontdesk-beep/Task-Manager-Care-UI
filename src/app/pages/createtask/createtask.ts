@@ -284,7 +284,6 @@ export class Createtask implements OnInit {
     // which we can use in the save task() also now.
     // this.task = this.createEmptyTask();
     // this.task.createdById = this.currentUserId;
-    // this.cdr.detectChanges();
   }
   onClientChange() {
 

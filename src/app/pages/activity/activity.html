@@ -1,0 +1,32 @@
+<div class="activity-container">
+  <h2 class="section-title">Activity</h2>
+
+  <div *ngIf="loading" class="state-msg">Loading activity...</div>
+
+  <div *ngIf="!loading && history.length === 0" class="state-msg">
+    No activity found.
+  </div>
+
+  <div class="timeline" *ngIf="!loading && history.length > 0">
+    <div *ngFor="let item of history; let last = last" class="activity-item">
+      <div class="activity-left">
+        <div class="icon-circle" [ngClass]="getIconClass(item.action)">
+          {{ getIcon(item.action) }}
+        </div>
+        <div class="connector" *ngIf="!last"></div>
+      </div>
+
+      <div class="activity-right">
+        <div class="activity-header">
+          <span class="action-label">{{ item.action }}</span>
+        </div>
+        <p class="description">{{ item.description }}</p>
+        <div class="meta">
+          <span class="actor">{{ item.changedBy }}</span>
+          <span class="dot">•</span>
+          <span class="timestamp">{{ item.changedAt | date:'d MMM yyyy, h:mm a' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

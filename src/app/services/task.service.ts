@@ -11,7 +11,7 @@ export class TaskService {
   private socket$: WebSocketSubject<any> | null = null;
   private commentsSocket$: WebSocketSubject<any> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('token');
@@ -161,12 +161,23 @@ export class TaskService {
     this.socket$ = null;
   }
 
-  GetMySummary()
-  {
+  GetMySummary() {
     return this.http.get(`${this.baseUrl}/dashboard/my-summary`, { headers: this.getAuthHeaders() });
   }
-  GetSummary()
-  {
+  GetSummary() {
     return this.http.get(`${this.baseUrl}/dashboard/summary`, { headers: this.getAuthHeaders() });
   }
+  GetHistory(taskId: number) {
+    return this.http.get(
+
+      this.baseUrl + '/TaskHistory?taskId=' + taskId
+
+    );
+  }
+ ReassignTask(taskId: number, data: any) {
+  return this.http.put(`${this.baseUrl}/tasks/${taskId}/reassign`, data, {
+    headers: this.getAuthHeaders()
+  });
+}
+
 }

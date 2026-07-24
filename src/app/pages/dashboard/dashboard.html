@@ -109,10 +109,18 @@
                 </div>
               </td>
               <td>
-                <button class="btn-save" (click)="UpdateTask(task,task.statusId)">Save</button>
-                <a [routerLink]="['/main','task',task.id]">
-                  Open
-                </a>
+                <div class="action-cell">
+                  <button class="btn-save" (click)="UpdateTask(task,task.statusId)">Save</button>
+                  <a class="open-link" [routerLink]="['/main','task',task.id]">Open</a>
+                  <button class="menu-btn" (click)="toggleMenu(task)">⋮</button>
+
+                  <div class="menu-dropdown" *ngIf="task.showMenu">
+                    <button class="menu-item" (click)="openReassign(task)">
+                      <span class="menu-item-icon">↻</span>
+                      Reassign
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -199,6 +207,7 @@
                 <a [routerLink]="['/main','task',task.id]">
                   Open
                 </a>
+
               </td>
             </tr>
           </tbody>
@@ -215,4 +224,29 @@
       </div>
     </div>
   </section>
+</div>
+<div class="reassign-overlay" *ngIf="showReassignModal">
+  <div class="reassign-dialog">
+    <div class="reassign-header">
+      <h3>Reassign Task</h3>
+      <button class="reassign-close" (click)="closeReassign()">✕</button>
+    </div>
+
+    <div class="reassign-body">
+      <label class="reassign-label">Assign To</label>
+      <select class="reassign-select" [(ngModel)]="selectedUserId">
+        <option *ngFor="let user of users" [value]="user.id">
+          {{user.name}}
+        </option>
+      </select>
+
+      <!-- <label class="reassign-label">Remarks</label>
+      <textarea class="reassign-textarea" [(ngModel)]="reassignRemarks"></textarea> -->
+    </div>
+
+    <div class="reassign-footer">
+      <button class="btn-cancel" (click)="closeReassign()">Cancel</button>
+      <button class="btn-confirm" (click)="confirmReassign()">Reassign</button>
+    </div>
+  </div>
 </div>

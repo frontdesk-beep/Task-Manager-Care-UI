@@ -29,7 +29,6 @@ export class HeaderTop implements OnInit, OnDestroy {
     private router: Router,
     private taskService: TaskService,
     private toastr: ToastrService,
-    private cdr:ChangeDetectorRef,
     private userStore:UserStore
   ) { }
 
@@ -56,7 +55,6 @@ export class HeaderTop implements OnInit, OnDestroy {
           this.notifications = list;
           this.unreadCount=
                 list.filter((x:any) => !x.isRead).length;
-                // this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.log('Notification load failed', err);

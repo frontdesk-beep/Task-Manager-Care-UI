@@ -1,0 +1,109 @@
+.container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Card */
+.card {
+    border: 1px solid #DFE1E6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.card h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #172B4D;
+    margin: 0;
+}
+
+.card .form-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #172B4D;
+    margin-bottom: 6px;
+}
+
+/* Inputs, selects, textarea */
+.form-control,
+.form-select {
+    border: 1px solid #DFE1E6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #172B4D;
+    background: #FAFBFC;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.form-control::placeholder {
+    color: #97A0AF;
+}
+
+.form-control:hover,
+.form-select:hover {
+    background: #F4F5F7;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    background: #FFFFFF;
+    border-color: #4C9AFF;
+    box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.25);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Readonly fields (auto-filled from existing client) */
+.form-control[readonly] {
+    background: #F4F5F7;
+    color: #42526E;
+    cursor: default;
+}
+
+/* Disabled Created On field */
+.form-control:disabled {
+    background: #EBECF0;
+    color: #5E6C84;
+    border-color: #DFE1E6;
+    opacity: 1;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary {
+    background: #0052CC;
+    border-color: #0052CC;
+}
+
+.btn-primary:hover {
+    background: #0747A6;
+    border-color: #0747A6;
+}
+
+.btn-outline-secondary {
+    background: #FAFBFC;
+    color: #42526E;
+    border: 1px solid #DFE1E6;
+}
+
+.btn-outline-secondary:hover {
+    background: #F4F5F7;
+    border-color: #C1C7D0;
+}
+
+/* Required asterisk - keep red but slightly muted to match Jira's tone */
+.required {
+    color: #DE350B !important;
+}
