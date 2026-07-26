@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TaskReportService } from '../../services/task-report';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-task-report',
@@ -42,7 +43,9 @@ export class TaskReportComponent implements OnInit {
     { id: 12, name: 'December' }
   ];
 
-  constructor(private reportService: TaskReportService) { }
+  constructor(private reportService: TaskReportService,
+    private ChangeDetectorRef: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.loadYears();

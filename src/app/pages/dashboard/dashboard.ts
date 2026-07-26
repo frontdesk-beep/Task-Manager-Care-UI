@@ -7,6 +7,10 @@ import { TaskService } from '../../services/task.service';
 import { Auth } from '../../services/auth';
 import { TaskStore } from '../../services/task-store.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -14,7 +18,8 @@ import { ChangeDetectorRef } from '@angular/core';
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule
+    RouterModule,
+    NgSelectModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -75,12 +80,17 @@ export class Dashboard implements OnInit, OnDestroy {
   selectedTask: any = null;
   selectedUserId = 0;
   reassignRemarks = '';
-activeTab: 'mine' | 'all' = 'mine';
+  activeTab: 'mine' | 'all' = 'mine';
+
+  userInput$ = new Subject<string>();
+  usersLoading = false;
+
   constructor(
     private taskService: TaskService,
     private auth: Auth,
     private taskStore: TaskStore,
     private router: Router,
+    private ChangeDetectorRef: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
@@ -106,6 +116,7 @@ activeTab: 'mine' | 'all' = 'mine';
     );
 
     this.loadUsers();
+    this.setupUserSearch();
 
     // important - starts here
     this.taskStore.initForUser(this.currentUserId);
@@ -126,6 +137,7 @@ activeTab: 'mine' | 'all' = 'mine';
           ? res
           : (res?.data || []);
         this.addNames();
+        this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
@@ -142,6 +154,8 @@ activeTab: 'mine' | 'all' = 'mine';
         this.completedCount = res.completedTasks;
         this.overdueCount = res.overDueTasks;
         this.urgentCount = res.urgentTasks;
+        this.ChangeDetectorRef.detectChanges();
+
         console.log(this.pendingCount);
         console.log(this.completedCount);
         console.log(this.overdueCount);
@@ -212,7 +226,28 @@ activeTab: 'mine' | 'all' = 'mine';
     this.refreshAllView();
 
   }
-
+  //for employee search dopdown- REASSIGN
+  setupUserSearch() {
+    this.userInput$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(() => this.usersLoading = true),
+      switchMap((term: string) => this.auth.searchUsers(term))
+    ).subscribe({
+      next: (response: any) => {
+        const data = Array.isArray(response) ? response : (response?.data || []);
+        this.users = data.map((user: any) => ({
+          id: Number(user.id),
+          name: user.name || user.email || `User ${user.id}`
+        }));
+        this.usersLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error searching users:', error);
+        this.usersLoading = false;
+      }
+    });
+  }
   openTask(id: number) {
     this.router.navigate(['/main', 'task', id]).catch(err => {
       console.error(err);
@@ -259,23 +294,23 @@ activeTab: 'mine' | 'all' = 'mine';
   }
 
   isOverdue(task: any): boolean {
-  if (!task?.dueDate) {
-    return false;
+    if (!task?.dueDate) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(task.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const currentStatus = this.getStatusName(task.statusId);
+
+    return (
+      dueDate < today &&
+      currentStatus.toLowerCase() !== 'completed'
+    );
   }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const dueDate = new Date(task.dueDate);
-  dueDate.setHours(0, 0, 0, 0);
-
-  const currentStatus = this.getStatusName(task.statusId);
-
-  return (
-    dueDate < today &&
-    currentStatus.toLowerCase() !== 'completed'
-  );
-}
   trackByTaskId(index: number, task: any) {
     return task.id;
   }
@@ -451,10 +486,18 @@ activeTab: 'mine' | 'all' = 'mine';
       .slice(0, 2)
       .toUpperCase();
   }
-  toggleMenu(task: any) {
+  toggleMenu(task: any, event: MouseEvent) {
+    // close others first (optional, if you want only one open at a time)
+    this.tasks.forEach(t => { if (t !== task) t.showMenu = false; });
 
     task.showMenu = !task.showMenu;
 
+    if (task.showMenu) {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      task.menuOpensUp = spaceBelow < 150; // adjust threshold to your menu's height
+    }
   }
   openReassign(task: any) {
 
@@ -472,22 +515,21 @@ activeTab: 'mine' | 'all' = 'mine';
     this.showReassignModal = false;
 
   }
-confirmReassign() {
-  const payload = {
-    assignedToId: this.selectedUserId,
-    comment: this.reassignRemarks
-  };
-  this.taskService.ReassignTask(this.selectedTask.id, payload).subscribe({
-    next: () => {
-      this.taskStore.refresh();
-      this.showReassignModal = false;
-      this.selectedTask.showMenu = false;
-    },
-    error: (err) => {
-      console.error('Reassign failed:', err);
-    }
-  });
-    }
-  
+  confirmReassign() {
+    const payload = {
+      assignedToId: this.selectedUserId,
+      comment: this.reassignRemarks
+    };
+    this.taskService.ReassignTask(this.selectedTask.id, payload).subscribe({
+      next: () => {
+        this.taskStore.refresh();
+        this.showReassignModal = false;
+        this.selectedTask.showMenu = false;
+      },
+      error: (err) => {
+        console.error('Reassign failed:', err);
+      }
+    });
   }
-  
+
+}

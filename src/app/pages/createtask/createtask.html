@@ -28,17 +28,6 @@
           <label class="form-label">
             Client
           </label>
-          <!-- <select class="form-select" 
-          [(ngModel)]="selectedClientId" name="selectedClientId"
-            (change)="onClientChange()">
-            <option [ngValue]="0">
-              Select Client
-            </option>
-            <option *ngFor="let client of clients"
-             [ngValue]="client.clientId">
-              {{client.clientName}}
-            </option>
-          </select> -->
 
           <ng-select
               [items]="clients"
@@ -46,9 +35,12 @@
               bindValue="clientId"
               [(ngModel)]="selectedClientId"
               name="selectedClientId"
+              [loading]="clientsLoading"
+              [typeahead]="clientInput$"
               placeholder="Search client..."
               [searchable]="true"
               [clearable]="true"
+              [appendTo]="'body'"
               (change)="onClientChange()"
           >
           </ng-select>
@@ -78,11 +70,21 @@
         <div class="col-md-6">
           <label class="form-label" for="assignedTo">
             Assign To <span class="required" style="color: red;">*</span></label>
-            
-          <select id="assignedTo" name="assignedToId" class="form-select" [(ngModel)]="task.assignedToId">
-            <option [ngValue]="0">Choose employee</option>
-            <option *ngFor="let user of users" [ngValue]="user.id">{{ user.name }}</option>
-          </select>
+         
+           <ng-select
+              [items]="users"
+              bindLabel="name"
+              bindValue="id"
+              [(ngModel)]="task.assignedToId"
+              name="assignedToId"
+              [loading]="usersLoading"
+              [typeahead]="userInput$"
+              placeholder="Search employee..."
+              [searchable]="true"
+              [clearable]="true"
+              [appendTo]="'body'"
+          >
+          </ng-select>
         </div>
 
         <div class="col-md-6">

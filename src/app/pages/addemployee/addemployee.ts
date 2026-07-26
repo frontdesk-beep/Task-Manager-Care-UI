@@ -74,7 +74,9 @@ export class Addemployee implements OnInit, AfterViewInit {
   constructor(
     private auth: Auth,
     private toastr: ToastrService,
-    private exportService: Export
+    private exportService: Export,
+    private ChangeDetectorRef : ChangeDetectorRef 
+
   ) { }
 
   ngOnInit() {
@@ -128,6 +130,7 @@ export class Addemployee implements OnInit, AfterViewInit {
           isActive: employee.isActive
         }));
         this.updateEmployeeView();
+        
 
       },
       error: (error) => {

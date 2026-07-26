@@ -44,6 +44,7 @@ export class TaskHistory implements OnInit {
     private taskService: TaskService,
     private router: Router,
     private exportService: Export,
+    private ChangeDetectorRef: ChangeDetectorRef
 
   ) { }
 
@@ -144,6 +145,7 @@ export class TaskHistory implements OnInit {
         );
 
         this.loading = false;
+        this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);

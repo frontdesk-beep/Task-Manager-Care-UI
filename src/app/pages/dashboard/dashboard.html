@@ -122,9 +122,9 @@
                 <div class="action-cell">
                   <button class="btn-save" (click)="UpdateTask(task,task.statusId)">Save</button>
                   <a class="open-link" [routerLink]="['/main','task',task.id]">Open</a>
-                  <button class="menu-btn" (click)="toggleMenu(task)">⋮</button>
+                  <button class="menu-btn" (click)="toggleMenu(task,$event)">⋮</button>
 
-                  <div class="menu-dropdown" *ngIf="task.showMenu">
+                  <div class="menu-dropdown" [class.menu-dropdown-up]="task.menuOpensUp" *ngIf="task.showMenu">
                     <button class="menu-item" (click)="openReassign(task)">
                       <span class="menu-item-icon">↻</span>
                       Reassign
@@ -250,13 +250,11 @@
 
     <div class="reassign-body">
       <label class="reassign-label">Assign To</label>
-      <select class="reassign-select" [(ngModel)]="selectedUserId">
-        <option *ngFor="let user of users" [value]="user.id">
-          {{user.name}}
-        </option>
-      </select>
+      <ng-select [items]="users" bindLabel="name" bindValue="id" [(ngModel)]="selectedUserId" name="selectedUserId"
+        [loading]="usersLoading" [typeahead]="userInput$" placeholder="Search employee..." [searchable]="true"
+        [clearable]="true" [appendTo]="'body'">
+      </ng-select>
     </div>
-
     <div class="reassign-footer">
       <button class="btn-cancel" (click)="closeReassign()">Cancel</button>
       <button class="btn-confirm" (click)="confirmReassign()">Reassign</button>

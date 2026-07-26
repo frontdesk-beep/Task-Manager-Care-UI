@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-details',
@@ -10,6 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './details.css',
 })
 export class Details {
+  constructor(private ChangeDetectorRef: ChangeDetectorRef){}
   @Input() task: any;
 
   getStatusClass(status: string): string {
@@ -46,4 +48,5 @@ export class Details {
     }
     return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
   }
+  
 }

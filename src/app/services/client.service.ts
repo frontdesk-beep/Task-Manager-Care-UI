@@ -55,7 +55,16 @@ export class ClientService {
   getClientCategories() {
     return this.http.get(this.categoryApi);
   }
-  getExistingClients() {
-    return this.http.get(`${this.api}/existing`);
-  }
+  // reusing the getclients endpoint for create task-> filtered clients
+  searchClients(search: string = '', pagesize:number = 5) {
+    const params:any = {
+      categoryId: 2,
+      pageSize: pagesize.toString(),
+      page: '1'
+    };
+    if(search){
+      params.search= search;
+    }
+  return this.http.get<any>(`${this.api}`, { params });
+}
 }
