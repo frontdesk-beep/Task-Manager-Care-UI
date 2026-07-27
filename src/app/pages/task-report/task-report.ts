@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TaskReportService } from '../../services/task-report';
 import { ChangeDetectorRef } from '@angular/core';
+import { Export } from '../../services/export';
 
 @Component({
   selector: 'app-task-report',
@@ -44,7 +45,8 @@ export class TaskReportComponent implements OnInit {
   ];
 
   constructor(private reportService: TaskReportService,
-    private ChangeDetectorRef: ChangeDetectorRef
+    private ChangeDetectorRef: ChangeDetectorRef,
+    private exportService: Export,
   ) { }
 
   ngOnInit(): void {
@@ -143,4 +145,14 @@ export class TaskReportComponent implements OnInit {
     return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
   }
 
+exportTasksExcel() {
+    this.exportService.exportExcel(this.reports, 'Report_Export');
+  }
+  exportTasksPdf() {
+    this.exportService.exportPdf(
+      this.reports,
+      'Report_Export'
+    );
+
+  }
 }

@@ -53,12 +53,19 @@ export class Dashboard implements OnInit, OnDestroy {
   filteredAssignedTasks: any[] = [];
   paginatedAssignedTasks: any[] = [];
 
-  //dashboard cards
+  //dashboard cards - my summary
   assignedCount = 0;
   pendingCount = 0;
   completedCount = 0;
   overdueCount = 0;
   urgentCount = 0;
+
+  //dashboard cards - all tasks summary
+  allAssignedCount = 0;
+  allPendingCount = 0;
+  allCompletedCount = 0;
+  allOverdueCount = 0;
+  allUrgentCount = 0;
 
   // Sorting state
   assignedSortKey: string = '';
@@ -155,12 +162,15 @@ export class Dashboard implements OnInit, OnDestroy {
         this.overdueCount = res.overDueTasks;
         this.urgentCount = res.urgentTasks;
         this.ChangeDetectorRef.detectChanges();
-
-        console.log(this.pendingCount);
-        console.log(this.completedCount);
-        console.log(this.overdueCount);
-        console.log(this.urgentCount);
       });
+    this.taskService.GetSummary().subscribe((res: any) => {
+      this.allAssignedCount = res.assignedTasks;
+      this.allPendingCount = res.pendingTasks;
+      this.allCompletedCount = res.completedTasks;
+      this.allOverdueCount = res.overDueTasks;
+      this.allUrgentCount = res.urgentTasks;
+      this.ChangeDetectorRef.detectChanges();
+    });
   }
   private isCompletedStatus(statusName?: string): boolean {
     const s = (statusName || '').toLowerCase();
