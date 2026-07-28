@@ -9,8 +9,12 @@ import { TaskService } from './task.service';
 export class TaskStore {
   //BahaviorSubject - Stores Data and automatically notifies componenents when data chnages.
   //These Store dashboard data.
-  tasks$ = new BehaviorSubject<any[]>([]);
-  statuses$ = new BehaviorSubject<any[]>([]);
+  private tasksSubject = new BehaviorSubject<any[]>([]);
+  private statusesSubject = new BehaviorSubject<any[]>([]);
+
+  tasks$ = this.tasksSubject.asObservable();
+  statuses$ = this.statusesSubject.asObservable();
+
   loading$ = new BehaviorSubject<boolean>(false);
 
   private pollingId: any;
@@ -31,135 +35,64 @@ export class TaskStore {
 
     this.currentUserId = userId;
     this.stopPolling();
-    this.loadAll(true);
+    this.loadAll();
     this.startPolling();
   }
 
-  private loadAll(force = false) {
+  private loadAll() {
+  if (!this.currentUserId) {
+    return;
+  }
 
-    console.log('called');
+  this.loading$.next(true);
 
-    if (!this.currentUserId) {
-      return;
-    }
+  forkJoin({
+    statuses: this.taskService.GetStatuses(),
+    tasks: this.taskService.GetActiveTasks()
+  }).subscribe({
+    next: ({ statuses, tasks }: any) => {
 
-    if (!force && this.refreshInFlight) {
-      this.pendingRefresh = true;
-      return;
-    }
-
-    if (!force && Date.now() - this.lastRefreshAt < 4000) {
-      // schedule a retry so this pending flag actually gets consumed
-      if (!this.refreshTimer) {
-        this.refreshTimer = setTimeout(() => {
-          this.refreshTimer = null;
-          if (this.pendingRefresh) {
-            this.pendingRefresh = false;
-            this.loadAll(true);
-          }
-        }, 4000 - (Date.now() - this.lastRefreshAt));
-      }
-      return;
-    }
-
-    const start = performance.now();
-    this.refreshInFlight = true;
-    this.lastRefreshAt = Date.now();
-    this.loading$.next(true);
-    
-    let remaining = 2;
-    const complete = () => {
-      remaining -= 1;
-      if (remaining === 0) {
-        this.refreshInFlight = false;
-        this.loading$.next(false);
-        if (this.pendingRefresh) {
-          this.pendingRefresh = false;
-          this.loadAll(true);
-        }
-        console.log('Dashboard data loaded in', Math.round(performance.now() - start), 'ms');
-      }
-    };
-
-    const statusMap = new Map<number, string>();
-
-    this.taskService
-      .GetStatuses()
-      .pipe(
-        catchError((err) => {
-          console.log('Statuses API error', err);
-          //when API crashes it ,instead of crashing,return an empty array.
-          return of([]);
-        })
-      )
-      .subscribe({
-        next: (res: any) => {
-          const statusesRaw = Array.isArray(res) ? res : (res?.data || []);
-          const mappedStatuses = statusesRaw.map((s: any) => ({
+      const mappedStatuses = Array.isArray(statuses)
+        ? statuses.map((s: any) => ({
             id: Number(s.id),
             name: s.statusName || s.name || ''
-          }));
+          }))
+        : [];
 
-          mappedStatuses.forEach((s: any) => statusMap.set(s.id, s.name));
-          this.statuses$.next(mappedStatuses);
-          this.applyStatusNames(statusMap);
-        },
-        error: (err) => {
-          console.log('Statuses subscription error', err);
-        },
-        complete
+      const statusMap = new Map<number, string>();
+
+      mappedStatuses.forEach((s: any) => {
+        statusMap.set(s.id, s.name);
       });
 
-    this.taskService
-      .GetActiveTasks()
-      .pipe(
-        catchError(err => {
-          console.log('Active Tasks API error', err);
-          return of([]);
-        })
-      )
-      .subscribe({
-        next: (res: any) => {
-
-          const tasksRaw = Array.isArray(res)
-            ? res
-            : (res?.data || []);
-
-          const tasks = tasksRaw.map((task: any) => ({
-
+      const mappedTasks = Array.isArray(tasks)
+        ? tasks.map((task: any) => ({
             ...task,
-
             assignedToId: Number(task.assignedToId),
-
             createdById: Number(task.createdById),
-
             statusId: Number(task.statusId),
-
             statusName:
-              statusMap.get(Number(task.statusId))
-              || task.statusName
-              || 'Unknown'
+              statusMap.get(Number(task.statusId)) ||
+              task.statusName ||
+              'Unknown'
+          }))
+        : [];
 
-          }));
+      this.tasksSubject.next(mappedTasks);
+      this.statusesSubject.next(mappedStatuses);
 
-          this.tasks$.next(tasks);
+      console.log('TASKS LOADED:', mappedTasks.length);
+    },
 
-        },
+    error: (err) => {
+      console.error('Dashboard loading failed:', err);
+    },
 
-        complete
-      });
-
-  }
-  private applyStatusNames(statusMap: Map<number, string>) {
-    const updateTasks = (tasks: any[]) =>
-      tasks.map((task: any) => ({
-        ...task,
-        statusName: statusMap.get(Number(task.statusId)) || task.statusName || 'Unknown'
-      }));
-
-    this.tasks$.next(updateTasks(this.tasks$.value));
-  }
-
+    complete: () => {
+      this.loading$.next(false);
+    }
+  });
+}
   UpdateTask(taskId: number, data: any) {
     return this.taskService.UpdateTask(taskId, data).pipe(
       catchError((err) => {
@@ -170,7 +103,7 @@ export class TaskStore {
   }
 
   refresh() {
-    this.scheduleRefresh();
+   this.loadAll();
   }
 
   forceRefresh(userId?: number) {
@@ -178,7 +111,7 @@ export class TaskStore {
       this.currentUserId = userId;
     }
 
-    this.loadAll(true);
+    this.loadAll();
   }
 
   private scheduleRefresh() {
@@ -192,7 +125,7 @@ export class TaskStore {
 
     this.refreshTimer = setTimeout(() => {
       this.refreshTimer = null;
-      this.loadAll(true);
+      this.loadAll();
     }, 250);
   }
 
@@ -207,10 +140,10 @@ export class TaskStore {
       this.pollingId = null;
     }
 
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-      this.refreshTimer = null;
-    }
+    // if (this.refreshTimer) {
+    //   clearTimeout(this.refreshTimer);
+    //   this.refreshTimer = null;
+    // }
   }
   //Create WebSocket connection.
   destroy() {
@@ -222,10 +155,10 @@ export class TaskStore {
     //clear
     this.currentUserId = 0;
 
-    this.tasks$.next([]);
-    this.statuses$.next([]);
+    this.tasksSubject.next([]);
+    this.statusesSubject.next([]);
     this.loading$.next(false);
-    this.refreshInFlight = false;
-    this.pendingRefresh = false;
+    // this.refreshInFlight = false;
+    // this.pendingRefresh = false;
   }
 }

@@ -5,7 +5,8 @@ import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import {ToastrService} from 'ngx-toastr';
 import { UserStore } from '../../services/user-store';
-
+import { TaskStore } from '../../services/task-store.service';
+import { BrowserStorageService } from '../../services/browser-storage.service';
 @Component({
   selector: 'app-header-top',
   imports: [CommonModule, RouterLink],
@@ -29,7 +30,10 @@ export class HeaderTop implements OnInit, OnDestroy {
     private router: Router,
     private taskService: TaskService,
     private toastr: ToastrService,
-    private userStore:UserStore
+    private userStore:UserStore,
+    private taskStore: TaskStore,
+    private storage: BrowserStorageService
+
   ) { }
 
   ngOnInit(): void {
@@ -96,11 +100,13 @@ export class HeaderTop implements OnInit, OnDestroy {
     this.dropdownOpen=false;
   }
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('name');
-    localStorage.removeItem('role');
-    localStorage.removeItem('user');
-    localStorage.removeItem('isLoggedIn');
+    // localStorage.removeItem('token');
+    // localStorage.removeItem('name');
+    // localStorage.removeItem('role');
+    // localStorage.removeItem('user');
+    // localStorage.removeItem('isLoggedIn');
+    this.taskStore.destroy();
+    this.storage.removeItem('token');
     this.toastr.success('Logged out successfully!');
     this.router.navigate(['/login']);
   }

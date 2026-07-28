@@ -100,7 +100,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private taskStore: TaskStore,
     private router: Router,
     private storage: BrowserStorageService,
-     @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object
     // private ChangeDetectorRef: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
@@ -108,15 +108,16 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('Dashboard ngOnInit called');
-     if (!isPlatformBrowser(this.platformId)) {
-    return; // skip all data loading on the server
-  }
+    if (!isPlatformBrowser(this.platformId)) {
+      return; // skip all data loading on the server
+    }
 
     const user = JSON.parse(this.storage.getItem('user') || '{}');
     this.currentUserId = Number(user.id);
 
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
+        console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
         this.tasks = Array.isArray(tasks) ? tasks : [];
         this.addNames();
       })
@@ -124,6 +125,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.storeSubs.add(
       this.taskStore.statuses$.subscribe((statuses: any[]) => {
+        console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
         this.statuses = Array.isArray(statuses) ? statuses : [];
         this.addNames();
       })
@@ -140,7 +142,7 @@ export class Dashboard implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     console.log('Dashboard ngOnDestroy called');
     this.storeSubs.unsubscribe();
-    // this.taskStore.destroy();
+     this.taskStore.destroy();
   }
 
   loadUsers() {
@@ -230,6 +232,19 @@ export class Dashboard implements OnInit, OnDestroy {
         || 'Unknown'
     }));
     this.alltasks = mappedTasks;
+    console.log('CURRENT USER ID:', this.currentUserId);
+
+console.table(mappedTasks.map(task => ({
+  id: task.id,
+  client: task.clientName,
+  assignedToId: task.assignedToId,
+  currentUserId: this.currentUserId,
+  statusId: task.statusId,
+  statusName: task.statusName,
+  assignedMatch: Number(task.assignedToId) === this.currentUserId,
+  completedByName: this.isCompletedStatus(task.statusName),
+  completedById: this.isCompletedStatusId(task.statusId)
+})));
 
     //assigned to current user only
     this.assignedTasks = mappedTasks.filter(task =>
@@ -241,7 +256,9 @@ export class Dashboard implements OnInit, OnDestroy {
     );
     this.refreshAssignedView();
     this.refreshAllView();
-
+    console.log('7. ALL TASKS:', this.alltasks);
+    console.log('8. ASSIGNED TASKS:', this.assignedTasks);
+    console.log('9. PAGINATED:', this.paginatedAssignedTasks);
   }
   //for employee search dopdown- REASSIGN
   setupUserSearch() {
@@ -293,7 +310,7 @@ export class Dashboard implements OnInit, OnDestroy {
       next: () => {
         this.taskStore.refresh();
         this.loadSummary();
-        // this.refreshAssignedView();
+        this.refreshAssignedView();
       },
       error: err => {
         console.log(err);
