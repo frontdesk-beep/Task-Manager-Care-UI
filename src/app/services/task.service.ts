@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { BrowserStorageService } from './browser-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,12 @@ export class TaskService {
   private socket$: WebSocketSubject<any> | null = null;
   private commentsSocket$: WebSocketSubject<any> | null = null;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private storage: BrowserStorageService) { }
 
   private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('token');
+    const token = this.storage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 

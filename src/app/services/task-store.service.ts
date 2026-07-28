@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subscription, of } from 'rxjs';
+import { BehaviorSubject, Subscription, of, forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
+
+
 //Makes this service available throughout the application
 @Injectable({ providedIn: 'root' })
 export class TaskStore {
@@ -47,7 +49,16 @@ export class TaskStore {
     }
 
     if (!force && Date.now() - this.lastRefreshAt < 4000) {
-      this.pendingRefresh = true;
+      // schedule a retry so this pending flag actually gets consumed
+      if (!this.refreshTimer) {
+        this.refreshTimer = setTimeout(() => {
+          this.refreshTimer = null;
+          if (this.pendingRefresh) {
+            this.pendingRefresh = false;
+            this.loadAll(true);
+          }
+        }, 4000 - (Date.now() - this.lastRefreshAt));
+      }
       return;
     }
 
@@ -55,6 +66,7 @@ export class TaskStore {
     this.refreshInFlight = true;
     this.lastRefreshAt = Date.now();
     this.loading$.next(true);
+    
     let remaining = 2;
     const complete = () => {
       remaining -= 1;
@@ -102,7 +114,7 @@ export class TaskStore {
       .GetActiveTasks()
       .pipe(
         catchError(err => {
-          console.log(err);
+          console.log('Active Tasks API error', err);
           return of([]);
         })
       )

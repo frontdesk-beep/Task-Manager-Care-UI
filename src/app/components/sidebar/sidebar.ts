@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { BrowserStorageService } from '../../services/browser-storage.service';
+import { Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,10 +16,16 @@ export class Sidebar {
   role = '';
   dropdownOpen = false;
   name='';
-
+constructor(
+  private storage: BrowserStorageService,
+   @Inject(PLATFORM_ID) private platformId: Object
+  ){}
 ngOnInit() {
-
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
+ if (!isPlatformBrowser(this.platformId)) {
+    return; // skip all data loading on the server
+  }
+  const user = JSON.parse(this.storage.getItem('user') || '{}');
 
 this.name = user?.name || '';
 this.role = user?.role || '';

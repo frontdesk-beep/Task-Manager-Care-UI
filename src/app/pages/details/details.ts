@@ -11,7 +11,7 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './details.css',
 })
 export class Details {
-  constructor(private ChangeDetectorRef: ChangeDetectorRef){}
+  constructor(){}
   @Input() task: any;
 
   getStatusClass(status: string): string {

@@ -1,9 +1,11 @@
 ///to generate the token everywhere.
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { BrowserStorageService } from './services/browser-storage.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-
-  const token = localStorage.getItem('token');
+  const storage = inject(BrowserStorageService);
+  const token = storage.getItem('token');
 
   // If token exists, add Authorization header
   if (token) {

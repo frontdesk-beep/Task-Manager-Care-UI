@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs';
+import { BrowserStorageService } from './browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,12 +10,15 @@ export class Auth {
   // backend URL
   authurl = 'https://localhost:7148/api/auth';
   usersurl = 'https://localhost:7148/api/users';
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private storage: BrowserStorageService) { }
+
   login(data: any) {
     return this.http.post(`${this.authurl}/login`, data).pipe(
       tap((response: any) => {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify({
+        this.storage.setItem('token', response.token);
+        this.storage.setItem('user', JSON.stringify({
           id: response.id,
           name: response.name,
           email: response.email,

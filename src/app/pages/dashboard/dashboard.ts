@@ -6,11 +6,13 @@ import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import { Auth } from '../../services/auth';
 import { TaskStore } from '../../services/task-store.service';
-import { ChangeDetectorRef } from '@angular/core';
+// import { ChangeDetectorRef } from '@angular/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
-
+import { BrowserStorageService } from '../../services/browser-storage.service';
+import { Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
@@ -97,15 +99,20 @@ export class Dashboard implements OnInit, OnDestroy {
     private auth: Auth,
     private taskStore: TaskStore,
     private router: Router,
-    private ChangeDetectorRef: ChangeDetectorRef
+    private storage: BrowserStorageService,
+     @Inject(PLATFORM_ID) private platformId: Object
+    // private ChangeDetectorRef: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
 
   ngOnInit() {
     console.log('Dashboard ngOnInit called');
+     if (!isPlatformBrowser(this.platformId)) {
+    return; // skip all data loading on the server
+  }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(this.storage.getItem('user') || '{}');
     this.currentUserId = Number(user.id);
 
     this.storeSubs.add(
@@ -144,7 +151,7 @@ export class Dashboard implements OnInit, OnDestroy {
           ? res
           : (res?.data || []);
         this.addNames();
-        this.ChangeDetectorRef.detectChanges();
+        // this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
@@ -161,7 +168,7 @@ export class Dashboard implements OnInit, OnDestroy {
         this.completedCount = res.completedTasks;
         this.overdueCount = res.overDueTasks;
         this.urgentCount = res.urgentTasks;
-        this.ChangeDetectorRef.detectChanges();
+        // this.ChangeDetectorRef.detectChanges();
       });
     this.taskService.GetSummary().subscribe((res: any) => {
       this.allAssignedCount = res.assignedTasks;
@@ -169,7 +176,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.allCompletedCount = res.completedTasks;
       this.allOverdueCount = res.overDueTasks;
       this.allUrgentCount = res.urgentTasks;
-      this.ChangeDetectorRef.detectChanges();
+      // this.ChangeDetectorRef.detectChanges();
     });
   }
   private isCompletedStatus(statusName?: string): boolean {
