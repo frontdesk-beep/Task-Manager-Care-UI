@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-remarks',
@@ -17,7 +18,10 @@ export class Remarks implements OnChanges {
   remarks: any[] = [];
   newRemark = '';
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService,
+    private ChangeDetectorRef: ChangeDetectorRef
+
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['taskId'] && this.taskId) {
@@ -29,6 +33,7 @@ export class Remarks implements OnChanges {
     this.taskService.GetComments(this.taskId).subscribe({
       next: (res: any) => {
         this.remarks = res?.data ?? res;
+        this.ChangeDetectorRef.detectChanges();
       }
     });
   }

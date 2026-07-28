@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-comments',
@@ -17,7 +18,9 @@ export class Comments implements OnInit, OnDestroy {
   newText = '';
   sub?: Subscription;
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService,
+    private ChangeDetectorRef: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     if (!this.taskId) return;
@@ -38,6 +41,8 @@ export class Comments implements OnInit, OnDestroy {
       next: (res: any) => {
         const data = Array.isArray(res) ? res : (res?.data || []);
         this.messages = data;
+        this.ChangeDetectorRef.detectChanges();
+
       },
       error: (err) => console.error('Load comments err', err)
     });

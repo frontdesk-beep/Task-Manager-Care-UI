@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Auth } from './auth';
 import { BehaviorSubject } from 'rxjs';
+import { BrowserStorageService } from './browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,9 @@ export class UserStore {
   private userSubject = new BehaviorSubject<any>(null);
   user$ = this.userSubject.asObservable();
   
-  constructor(private auth:Auth){}
+  constructor(
+    private auth:Auth,
+    private storage: BrowserStorageService){}
 
   loadUser(id: number){
       this.auth.getProfile(id)
@@ -21,7 +24,7 @@ export class UserStore {
             // access the updated data.-next method
             this.userSubject.next(user);
             // also update localstorage when user loads
-            localStorage.setItem('user', JSON.stringify(user));
+            this.storage.setItem('user', JSON.stringify(user));
           }
         });
   }
@@ -31,12 +34,12 @@ export class UserStore {
   }
   setUser(user:any){
     this.userSubject.next(user);
-    localStorage.setItem('user',JSON.stringify(user));
+    this.storage.setItem('user',JSON.stringify(user));
   }
   clearUser()
   {
     this.userSubject.next(null);
-    localStorage.removeItem('user');
+    this.storage.removeItem('user');
   }
   updateUser(id: number, data:any)
   {

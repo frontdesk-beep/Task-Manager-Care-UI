@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TaskService } from '../../services/task.service';
+import { ChangeDetectorRef } from '@angular/core'
 
 @Component({
   selector: 'app-activity',
@@ -16,7 +17,9 @@ export class Activity implements OnChanges {
   history: any[] = [];
   loading = false;
 
-  constructor(private taskService: TaskService) { }
+  constructor(private taskService: TaskService,
+    private changedetectRef: ChangeDetectorRef
+  ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['taskId'] && this.taskId) {
@@ -30,6 +33,7 @@ export class Activity implements OnChanges {
       next: (res: any) => {
         this.history = res?.data ?? res;
         this.loading = false;
+       this.changedetectRef.detectChanges();
       },
       error: (err) => {
         console.error(err);

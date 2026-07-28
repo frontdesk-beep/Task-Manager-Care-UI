@@ -12,6 +12,9 @@ import { ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { UserStore } from '../../services/user-store';
 import { ClientService } from '../../services/client.service';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 interface DropdownItem {
   id: number;
@@ -37,7 +40,10 @@ interface TaskItem {
 @Component({
   selector: 'app-createtask',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgSelectModule,],
   templateUrl: './createtask.html',
   styleUrl: './createtask.css',
 })
@@ -59,7 +65,14 @@ export class Createtask implements OnInit {
   isExistingClient = false;
   clientTypes: DropdownItem[] = [];
 
+  //FOR DROPDOWNS
+  clientInput$ = new Subject<string>();
+  clientsLoading = false;
   currentUserId = 0;
+  userInput$ = new Subject<string>();
+  usersLoading = false;
+
+
   constructor(
     private taskService: TaskService,
     private auth: Auth,
@@ -75,7 +88,10 @@ export class Createtask implements OnInit {
     this.loadStatuses();
     this.loadPriorities();
     this.loadServiceCategories();
-    this.loadClients();
+    //for client dropdown filtering
+    this.setupClientSearch();
+    this.loadInitialClients();
+
   }
   // craete a brand new empty task object-instead of writing this.task ={clientname:'',phonenumber:''}
   // instead of writing evry field empty again and again create one seperate object which you can call.
@@ -199,18 +215,61 @@ export class Createtask implements OnInit {
       }
     });
   }
-  loadClients() {
-    this.clientService.getExistingClients().subscribe({
+
+  loadInitialClients() {
+    this.clientsLoading = true;
+    this.clientService.searchClients('', 20).subscribe({
       next: (response: any) => {
-        console.log("API Response:", response);
         this.clients = this.extractArray(response);
+        this.clientsLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading initial clients:', error);
+        this.clientsLoading = false;
+      }
+    });
+  }
+  setupClientSearch() {
+    this.clientInput$.pipe(
+      debounceTime(300),
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(() => this.clientsLoading = true),
+      switchMap(term => this.clientService.searchClients(term))
+    ).subscribe({
+      next: (response: any) => {
+        this.clients = this.extractArray(response);
+        this.clientsLoading = false;
       },
       error: (error) => {
         console.error('Error loading clients:', error);
+        this.clientsLoading = false;
       }
     });
   }
 
+  //for employees dropdown
+  setupUserSearch() {
+    this.userInput$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(() => this.usersLoading = true),
+      switchMap((term: string) => this.auth.searchUsers(term)) // this.auth, not this.userStore
+    ).subscribe({
+      next: (response: any) => {
+        const data = this.extractArray(response);
+        this.users = data.map((user: any) => ({
+          id: Number(user.id),
+          name: user.name || user.email || `User ${user.id}`
+        }));
+        this.usersLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading users:', error);
+        this.usersLoading = false;
+      }
+    });
+  }
   saveTask() {
     if (
       !this.task.clientName ||
@@ -308,12 +367,12 @@ export class Createtask implements OnInit {
     this.taskService.GetClientCategories().subscribe({
       next: (response: any) => {
         const data = this.extractArray(response);
-        this.clientTypes=data.map((item:any)=>({
-          id:Number(item.id),
-          name:item.name
+        this.clientTypes = data.map((item: any) => ({
+          id: Number(item.id),
+          name: item.name
         }));
       },
-      error:(error)=>{
+      error: (error) => {
         console.error(error);
       }
     });
@@ -321,14 +380,15 @@ export class Createtask implements OnInit {
 
   onClientTypeChange() {
 
-     if (this.task.clientCategoryId === 1) {
-        // New Client
-        this.isExistingClient = false;
-        this.selectedClientId = 0;
+    if (this.task.clientCategoryId === 1) {
+      // New Client
+      this.isExistingClient = false;
+      this.selectedClientId = 0;
     }
     else if (this.task.clientCategoryId === 2) {
-        // Existing Client
-        this.isExistingClient = true;
+      // Existing Client
+      this.isExistingClient = true;
 
+    }
   }
-}}
+}

@@ -166,7 +166,57 @@
 .report-table tbody tr:last-child td {
   border-bottom: none;
 }
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 
+.reports-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.export-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.export-btn {
+  height: 36px;
+  border: 1px solid transparent;
+  padding: 0 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  background: #FFFFFF;
+}
+
+.export-excel {
+  color: #006644;
+  border-color: #ABF5D1;
+  background: #E3FCEF;
+}
+
+.export-excel:hover {
+  background: #ABF5D1;
+}
+
+.export-pdf {
+  color: #BF2600;
+  border-color: #FFBDAD;
+  background: #FFEBE6;
+}
+
+.export-pdf:hover {
+  background: #FFBDAD;
+}
 /* Avatar + client cell */
 .client-cell {
   display: flex;

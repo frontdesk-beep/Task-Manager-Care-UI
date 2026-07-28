@@ -33,6 +33,7 @@ export class TaskDetail implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private taskService: TaskService,
+    private ChangeDetectorRef: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -50,6 +51,7 @@ export class TaskDetail implements OnInit {
       next: (res: any) => {
         this.task = res?.data ?? res;
         this.loading = false;
+        this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.error('Error loading task', err);

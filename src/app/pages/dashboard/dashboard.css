@@ -502,7 +502,12 @@
   padding: 6px;
   z-index: 50;
 }
-
+.menu-dropdown-up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
 /* ==========================================================================
    Pagination
    ========================================================================== */
@@ -862,4 +867,51 @@
   text-align: center;
   color: var(--text-tertiary);
   font-size: 13.5px;
+}
+
+/* ==========================================================================
+   ng-select (Reassign modal)
+   ========================================================================== */
+::ng-deep .reassign-body .ng-select .ng-select-container {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  min-height: 42px;
+  background: var(--color-surface);
+  font-size: 14px;
+}
+
+::ng-deep .reassign-body .ng-select.ng-select-focused .ng-select-container {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+::ng-deep .reassign-body .ng-select .ng-select-container:hover {
+  border-color: var(--text-tertiary);
+}
+
+::ng-deep .ng-dropdown-panel {
+  position: fixed !important;
+  z-index: 999999 !important;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 10000; /* above .reassign-overlay's z-index: 9999 */
+}
+
+::ng-deep .ng-dropdown-panel .ng-option {
+  background: var(--color-surface);
+  color: var(--text-primary);
+  font-size: 13.5px;
+  padding: 8px 14px;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option.ng-option-highlighted {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+::ng-deep .ng-dropdown-panel .ng-option.ng-option-selected {
+  background: var(--accent);
+  color: #fff;
 }

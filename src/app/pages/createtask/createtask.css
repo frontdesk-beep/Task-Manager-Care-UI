@@ -107,3 +107,36 @@ textarea.form-control {
 .required {
     color: #DE350B !important;
 }
+::ng-deep .ng-select .ng-select-container {
+    border: 1px solid #DFE1E6;
+    border-radius: 6px;
+    min-height: 38px;
+    background: #FAFBFC;
+}
+
+::ng-deep .ng-select.ng-select-focused .ng-select-container {
+    border-color: #4C9AFF;
+    box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.25);
+}
+
+::ng-deep .ng-dropdown-panel {
+    border: 1px solid #DFE1E6;
+    border-radius: 6px;
+    box-shadow: 0 4px 11px rgba(16, 24, 40, 0.12);
+    z-index: 1055;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option {
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option.ng-option-highlighted {
+    background: #DEEBFF;
+    color: #172B4D;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option.ng-option-selected {
+    background: #4C9AFF;
+    color: white;
+}

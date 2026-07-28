@@ -49,7 +49,8 @@ export class Clientlist implements OnInit, OnDestroy {
     private clientService: ClientService,
     private toastr: ToastrService,
     private exportService: Export,
-    private userStore: UserStore
+    private userStore: UserStore,
+    private ChangeDetectorRef: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -77,6 +78,7 @@ export class Clientlist implements OnInit, OnDestroy {
           this.totalRecords = res.totalRecords;
           this.loadClientCategories();
           this.loading = false;
+          this.ChangeDetectorRef.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClients error:', err);
@@ -113,57 +115,7 @@ getInitials(name: string): string {
   if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
-  // refreshGrid() {
-  //   // this.currentPage=1;
-  //   let filtered = [...this.clients];
-
-  //   if (this.filterCategoryId) {
-  //     filtered = filtered.filter(
-  //       x => x.clientCategoryId == this.filterCategoryId
-  //     );
-  //   }
-  //   // Name
-  //   if (this.searchClientName.trim()) {
-
-  //     const search =
-  //       this.searchClientName.toLowerCase();
-
-  //     filtered = filtered.filter(
-  //       x =>
-  //         (x.clientName || '')
-  //           .toLowerCase()
-  //           .includes(search)
-  //     );
-  //   }
-
-  //   // Date
-  //   if (this.selectedDate) {
-
-  //     filtered = filtered.filter(x => {
-
-  //       const d =
-  //         new Date(x.createdOn);
-  //       const date =
-  //         `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')
-  //         }-${d.getDate().toString().padStart(2, '0')
-  //         }`;
-
-
-  //       return date === this.selectedDate;
-  //     });
-  //   }
-
-  //   this.filteredClients = this.sortClients(filtered);
-
-  //   const start =
-  //     (this.currentPage - 1) * this.itemsPerPage;
-
-  //   this.paginatedClients =
-  //     this.filteredClients.slice(
-  //       start,
-  //       start + this.itemsPerPage
-  //     );
-  // }
+ 
   trackByClientId(
     index: number,
     client: any
@@ -214,31 +166,7 @@ toggleSort(key: string) {
     return this.sortDir === 'asc' ? '↑' : '↓';
   }
 
-  // sortClients(items: any[]): any[] {
-  //   if (!this.sortKey) return items;
-
-  //   const sorted = [...items].sort((a, b) => {
-  //     let aVal = a[this.sortKey];
-  //     let bVal = b[this.sortKey];
-
-  //     if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-  //     if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-
-  //     if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
-  //     if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
-  //     return 0;
-  //   });
-
-  //   return sorted;
-  // }
-
-
-  // getPaginatedClients(): any[] {
-  //   // const filtered = this.filteredClients;
-  //   const start = (this.currentPage - 1) * this.itemsPerPage;
-  //   const end = start + this.itemsPerPage;
-  //   return filtered.slice(start, end);
-  // }
+  
 
   getTotalPages() {
       return Math.ceil(
@@ -248,8 +176,6 @@ toggleSort(key: string) {
   }
 
   goToPage(page: number) {
-    // const total = this.getTotalFPages();
-    // if (page >= 1 && page <= total) {
       this.currentPage = page;
       this.loadClients();
     }
@@ -363,12 +289,10 @@ toggleSort(key: string) {
   }
 
   exportAssignedExcel() {
-    // const tasks = this.filteredClients;
     this.exportService.exportExcel(this.clients, 'Completed_Assigned_Tasks_Export');
   }
 
   exportCreatedExcel() {
-    // const tasks = this.filteredClients;
     this.exportService.exportExcel(this.clients, 'Completed_Created_Tasks_Export');
   }
   exportCreatedPdf() {
