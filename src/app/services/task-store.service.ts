@@ -140,10 +140,10 @@ export class TaskStore {
       this.pollingId = null;
     }
 
-    // if (this.refreshTimer) {
-    //   clearTimeout(this.refreshTimer);
-    //   this.refreshTimer = null;
-    // }
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   }
   //Create WebSocket connection.
   destroy() {
@@ -158,7 +158,7 @@ export class TaskStore {
     this.tasksSubject.next([]);
     this.statusesSubject.next([]);
     this.loading$.next(false);
-    // this.refreshInFlight = false;
-    // this.pendingRefresh = false;
+    this.refreshInFlight = false;
+    this.pendingRefresh = false;
   }
 }

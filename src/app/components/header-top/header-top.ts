@@ -100,11 +100,10 @@ export class HeaderTop implements OnInit, OnDestroy {
     this.dropdownOpen=false;
   }
   logout() {
-    // localStorage.removeItem('token');
-    // localStorage.removeItem('name');
-    // localStorage.removeItem('role');
-    // localStorage.removeItem('user');
-    // localStorage.removeItem('isLoggedIn');
+     this.storage.removeItem('name');
+    this.storage.removeItem('role');
+     this.storage.removeItem('user');
+     this.storage.removeItem('isLoggedIn');
     this.taskStore.destroy();
     this.storage.removeItem('token');
     this.toastr.success('Logged out successfully!');

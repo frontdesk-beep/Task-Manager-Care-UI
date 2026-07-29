@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { TaskStore } from '../../services/task-store.service';
 // import { ChangeDetectorRef } from '@angular/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
 import { BrowserStorageService } from '../../services/browser-storage.service';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -36,6 +36,7 @@ export class Dashboard implements OnInit, OnDestroy {
   tasks: any[] = [];
   users: any[] = [];
   statuses: any[] = [];
+  allUsers:any[]=[];
 
   //FOR ALL TASKS
   alltasks: any[] = [];
@@ -100,7 +101,8 @@ export class Dashboard implements OnInit, OnDestroy {
     private taskStore: TaskStore,
     private router: Router,
     private storage: BrowserStorageService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private zone: NgZone
     // private ChangeDetectorRef: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
@@ -119,7 +121,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
         console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
         this.tasks = Array.isArray(tasks) ? tasks : [];
-        this.addNames();
+         this.rebuildTaskViews();
       })
     );
 
@@ -127,7 +129,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.taskStore.statuses$.subscribe((statuses: any[]) => {
         console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
         this.statuses = Array.isArray(statuses) ? statuses : [];
-        this.addNames();
+        this.rebuildTaskViews();
       })
     );
 
@@ -142,18 +144,23 @@ export class Dashboard implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     console.log('Dashboard ngOnDestroy called');
     this.storeSubs.unsubscribe();
-     this.taskStore.destroy();
+    this.taskStore.destroy();
   }
 
   loadUsers() {
     console.log('Loading users...');
     this.auth.GetUsers().subscribe({
       next: (res: any) => {
-        this.users = Array.isArray(res)
+       const data  = Array.isArray(res)
           ? res
           : (res?.data || []);
-        this.addNames();
-        // this.ChangeDetectorRef.detectChanges();
+
+      this.allUsers = data;
+
+      // users is used by the Reassign dropdown
+      this.users = data;
+
+      this.rebuildTaskViews();        // this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
@@ -165,6 +172,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.taskService.GetMySummary()
       .subscribe((res: any) => {
         console.log("Dashboard getsummary", res);
+
         this.assignedCount = res.assignedTasks;
         this.pendingCount = res.pendingTasks;
         this.completedCount = res.completedTasks;
@@ -172,13 +180,16 @@ export class Dashboard implements OnInit, OnDestroy {
         this.urgentCount = res.urgentTasks;
         // this.ChangeDetectorRef.detectChanges();
       });
+
     this.taskService.GetSummary().subscribe((res: any) => {
+
       this.allAssignedCount = res.assignedTasks;
       this.allPendingCount = res.pendingTasks;
       this.allCompletedCount = res.completedTasks;
       this.allOverdueCount = res.overDueTasks;
       this.allUrgentCount = res.urgentTasks;
       // this.ChangeDetectorRef.detectChanges();
+
     });
   }
   private isCompletedStatus(statusName?: string): boolean {
@@ -193,73 +204,129 @@ export class Dashboard implements OnInit, OnDestroy {
     return this.completedStatusIds.has(statusId);
   }
 
-  addNames() {
-    const userMap = new Map<number, string>(
-      this.users.map((user: any) => [
-        Number(user.id),
-        user.name
-      ])
-    );
-    const statusMap = new Map<number, string>(
-      this.statuses.map((s: any) => [
-        Number(s.id),
-        s.name || s.statusName
-      ])
-    );
-    this.completedStatusIds = new Set(
-      this.statuses
-        .filter((status: any) =>
-          this.isCompletedStatus(status.name || status.statusName)
-        )
-        .map((status: any) => Number(status.id))
-    );
+  // addNames() {
+  //   const userMap = new Map<number, string>(
+  //     this.users.map((user: any) => [
+  //       Number(user.id),
+  //       user.name
+  //     ])
+  //   );
+  //   const statusMap = new Map<number, string>(
+  //     this.statuses.map((s: any) => [
+  //       Number(s.id),
+  //       s.name || s.statusName
+  //     ])
+  //   );
+  //   this.completedStatusIds = new Set(
+  //     this.statuses
+  //       .filter((status: any) =>
+  //         this.isCompletedStatus(status.name || status.statusName)
+  //       )
+  //       .map((status: any) => Number(status.id))
+  //   );
 
-    const mappedTasks = this.tasks.map(task => ({
-      ...task,
-      assignedToId: Number(task.assignedToId),
-      createdById: Number(task.createdById),
-      statusId: Number(task.statusId),
+  //   const mappedTasks = this.tasks.map(task => ({
+  //     ...task,
+  //     assignedToId: Number(task.assignedToId),
+  //     createdById: Number(task.createdById),
+  //     statusId: Number(task.statusId),
 
-      assignedToName:
-        userMap.get(Number(task.assignedToId)) || 'Unknown',
+  //     assignedToName:
+  //       userMap.get(Number(task.assignedToId)) || 'Unknown',
 
-      createdByName:
-        userMap.get(Number(task.createdById)) || 'Unknown',
+  //     createdByName:
+  //       userMap.get(Number(task.createdById)) || 'Unknown',
 
-      statusName:
-        statusMap.get(Number(task.statusId))
-        || task.statusName
-        || 'Unknown'
-    }));
-    this.alltasks = mappedTasks;
-    console.log('CURRENT USER ID:', this.currentUserId);
+  //     statusName:
+  //       statusMap.get(Number(task.statusId))
+  //       || task.statusName
+  //       || 'Unknown'
+  //   }));
+  //   this.alltasks = mappedTasks;
+  //   console.log('CURRENT USER ID:', this.currentUserId);
 
-console.table(mappedTasks.map(task => ({
-  id: task.id,
-  client: task.clientName,
-  assignedToId: task.assignedToId,
-  currentUserId: this.currentUserId,
-  statusId: task.statusId,
-  statusName: task.statusName,
-  assignedMatch: Number(task.assignedToId) === this.currentUserId,
-  completedByName: this.isCompletedStatus(task.statusName),
-  completedById: this.isCompletedStatusId(task.statusId)
-})));
+  //   console.table(mappedTasks.map(task => ({
+  //     id: task.id,
+  //     client: task.clientName,
+  //     assignedToId: task.assignedToId,
+  //     currentUserId: this.currentUserId,
+  //     statusId: task.statusId,
+  //     statusName: task.statusName,
+  //     assignedMatch: Number(task.assignedToId) === this.currentUserId,
+  //     completedByName: this.isCompletedStatus(task.statusName),
+  //     completedById: this.isCompletedStatusId(task.statusId)
+  //   })));
 
-    //assigned to current user only
-    this.assignedTasks = mappedTasks.filter(task =>
-      Number(task.assignedToId) === this.currentUserId
-      &&
-      !this.isCompletedStatus(task.statusName)
-      &&
-      !this.isCompletedStatusId(task.statusId)
-    );
-    this.refreshAssignedView();
-    this.refreshAllView();
-    console.log('7. ALL TASKS:', this.alltasks);
-    console.log('8. ASSIGNED TASKS:', this.assignedTasks);
-    console.log('9. PAGINATED:', this.paginatedAssignedTasks);
-  }
+  //   //assigned to current user only
+  //   this.assignedTasks = mappedTasks.filter(task =>
+  //     Number(task.assignedToId) === this.currentUserId
+  //     &&
+  //     !this.isCompletedStatus(task.statusName)
+  //     &&
+  //     !this.isCompletedStatusId(task.statusId)
+  //   );
+  //   this.refreshAssignedView();
+  //   this.refreshAllView();
+  //   console.log('7. ALL TASKS:', this.alltasks);
+  //   console.log('8. ASSIGNED TASKS:', this.assignedTasks);
+  //   console.log('9. PAGINATED:', this.paginatedAssignedTasks);
+  // }
+
+  private mapTasks(): any[] {
+  const userMap = new Map(
+    this.allUsers.map(user => [
+      Number(user.id),
+      user.name
+    ])
+  );
+
+  const statusMap = new Map(
+    this.statuses.map(status => [
+      Number(status.id),
+      status.name || status.statusName
+    ])
+  );
+
+  this.completedStatusIds = new Set(
+    this.statuses
+      .filter(status =>
+        this.isCompletedStatus(status.name || status.statusName)
+      )
+      .map(status => Number(status.id))
+  );
+
+  return this.tasks.map(task => ({
+    ...task,
+    assignedToId: Number(task.assignedToId),
+    createdById: Number(task.createdById),
+    statusId: Number(task.statusId),
+
+    assignedToName:
+      userMap.get(Number(task.assignedToId)) || 'Unknown',
+
+    createdByName:
+      userMap.get(Number(task.createdById)) || 'Unknown',
+
+    statusName:
+      statusMap.get(Number(task.statusId)) ||
+      task.statusName ||
+      'Unknown'
+  }));
+}
+private rebuildTaskViews(): void {
+  const mappedTasks = this.mapTasks();
+
+  this.alltasks = mappedTasks;
+
+  this.assignedTasks = mappedTasks.filter(task =>
+    Number(task.assignedToId) === this.currentUserId &&
+    !this.isCompletedStatus(task.statusName) &&
+    !this.isCompletedStatusId(task.statusId)
+  );
+
+  this.refreshAssignedView();
+  this.refreshAllView();
+}
   //for employee search dopdown- REASSIGN
   setupUserSearch() {
     this.userInput$.pipe(
@@ -318,33 +385,29 @@ console.table(mappedTasks.map(task => ({
     });
   }
 
-  getUserName(id: number) {
-    const user = this.users.find(x => Number(x.id) === Number(id));
-    return user ? user.name : 'Unknown';
-  }
-  getStatusName(id: number) {
-    const status = this.statuses.find(x => Number(x.id) === Number(id));
-    return status ? status.name : 'Unknown';
-  }
+  // getUserName(id: number) {
+  //   const user = this.users.find(x => Number(x.id) === Number(id));
+  //   return user ? user.name : 'Unknown';
+  // }
+  // getStatusName(id: number) {
+  //   const status = this.statuses.find(x => Number(x.id) === Number(id));
+  //   return status ? status.name : 'Unknown';
+  // }
 
   isOverdue(task: any): boolean {
-    if (!task?.dueDate) {
-      return false;
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const dueDate = new Date(task.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-
-    const currentStatus = this.getStatusName(task.statusId);
-
-    return (
-      dueDate < today &&
-      currentStatus.toLowerCase() !== 'completed'
-    );
+  if (!task?.dueDate) {
+    return false;
   }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dueDate = new Date(task.dueDate);
+  dueDate.setHours(0, 0, 0, 0);
+
+  return dueDate < today &&
+    !this.isCompletedStatus(task.statusName);
+}
   trackByTaskId(index: number, task: any) {
     return task.id;
   }

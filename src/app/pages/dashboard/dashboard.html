@@ -95,7 +95,7 @@
               </td>
               <td>{{task.clientName}}</td>
               <td>
-                <select class="status-select" [ngClass]="getStatusClass(getStatusName(task.statusId))"
+                <select class="status-select" [ngClass]="getStatusClass(task.statusName)"
                   [(ngModel)]="task.statusId">
                   <option *ngFor="let status of statuses" [value]="status.id">{{status.name}}</option>
                 </select>
@@ -203,7 +203,7 @@
                 </div>
               </td>
               <td>
-                <span class="status-badge" [ngClass]="getStatusClass(task.statusName)">
+                <span class="status-badge" [ngClass]="getStatusClass(task.statusName)" >
                   {{task.statusName}}
                 </span>
               </td>
