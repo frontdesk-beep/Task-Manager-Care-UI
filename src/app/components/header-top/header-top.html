@@ -1,27 +1,48 @@
 <header class="header-top" [class.sidebar-closed]="!sidebarOpen">
     <div class="left">
-        <button class="sidebar-button" 
-        type="button" 
-        (click)="sidebarToggle.emit()" 
-        aria-label="Toggle sidebar">
+        <button class="sidebar-button" type="button" (click)="sidebarToggle.emit()" aria-label="Toggle sidebar">
             ☰
         </button>
         <h5>Welcome, {{name}}</h5>
-        </div>
-        <div class="right">
-        <!-- <div class="notification" (click)="toggleNotifications()">
+    </div>
+    <div class="right">
+        <div class="notification" (click)="toggleNotifications()">
             🔔
             <span class="badge" *ngIf="unreadCount > 0">
                 {{ unreadCount }}
             </span>
-        </div> -->
+        </div>
+        <div class="notification-menu" *ngIf="notificationOpen">
+            <h4>Notifications</h4>
+            <ul>
+                <li *ngFor="let n of notifications" [class.unread]="!n.isRead">
+
+                    <strong>
+                        {{n.title}}
+                    </strong>
+
+                    <p>
+                        {{n.message}}
+                    </p>
+
+                    <small>
+                        {{n.createdOn | date:'short'}}
+                    </small>
+
+                </li>
+                <li *ngIf="notifications.length === 0" class="notification-empty">
+                    No notifications
+                </li>
+            </ul>
+
+        </div>
         <div class="profile" (click)="toggleDropdown(); $event.stopPropagation()">
             👤
             {{name}}
             <div class="dropdown" *ngIf="dropdownOpen">
                 <a routerLink="/main/profile" (click)="dropdownOpen = false">
                     <i class="bi bi-person-circle" gap="2"></i>
-                        View Profile
+                    View Profile
                 </a>
                 <a (click)="logout()">
                     <i class="bi bi-box-arrow-right" gap="2"></i>

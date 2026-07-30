@@ -2,20 +2,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { BrowserStorageService } from './browser-storage.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
   // backend URL
-  authurl = 'https://localhost:7148/api/auth';
-  usersurl = 'https://localhost:7148/api/users';
+  authapi = `${environment.apiUrl}/auth`;
+  usersapi = `${environment.apiUrl}/users`;
   constructor(
     private http: HttpClient,
     private storage: BrowserStorageService) { }
 
   login(data: any) {
-    return this.http.post(`${this.authurl}/login`, data).pipe(
+    return this.http.post(`${this.authapi = `${environment.apiUrl}/auth`}/login`, data).pipe(
       tap((response: any) => {
         this.storage.setItem('token', response.token);
         this.storage.setItem('user', JSON.stringify({
@@ -28,48 +29,48 @@ export class Auth {
     );
   }
   register(data: any) {
-    return this.http.post(`${this.authurl}/register`, data);
+    return this.http.post(`${this.authapi}/register`, data);
   }
   forgotpassword(email: string) {
     return this.http.post(
-      `${this.authurl}/forgot-password`,
+      `${this.authapi}/forgot-password`,
       { email }
     );
   }
   resetPassword(token: string, newPassword: string) {
     return this.http.post(
-      `${this.authurl}/reset-password`,
+      `${this.authapi}/reset-password`,
       { token, newPassword }
     )
 
 
   }
   getProfile(id: number) {
-    return this.http.get(`${this.authurl}/profile/${id}`);
+    return this.http.get(`${this.authapi}/profile/${id}`);
   }
   updateProfile(id: number, data: any) {
-    return this.http.put(`${this.authurl}/profile/${id}`, data);
+    return this.http.put(`${this.authapi}/profile/${id}`, data);
   }
   GetUsers() {
-    return this.http.get(`${this.usersurl}`);
+    return this.http.get(`${this.usersapi}`);
   }
   CreateUser(data: any) {
-    return this.http.post(`${this.usersurl}`, data);
+    return this.http.post(`${this.usersapi}`, data);
   }
   UpdateUser(id: number, data: any) {
-    return this.http.put(`${this.usersurl}/${id}`, data);
+    return this.http.put(`${this.usersapi}/${id}`, data);
   }
   DeleteUser(id: number) {
-    return this.http.delete(`${this.usersurl}/${id}`);
+    return this.http.delete(`${this.usersapi}/${id}`);
   }
   DeactivateUser(id: number) {
     return this.http.delete(
-      `${this.usersurl}/${id}`
+      `${this.usersapi}/${id}`
     );
   }
   ReactivateUser(id: number) {
     return this.http.put(
-      `${this.usersurl}/reactivate/${id}`,
+      `${this.usersapi}/reactivate/${id}`,
       {}
     );
   }
@@ -82,6 +83,6 @@ export class Auth {
     if (search) {
       params.search = search;
     }
-    return this.http.get(`${this.usersurl}`, { params });
+    return this.http.get(`${this.usersapi}`, { params });
   }
 }

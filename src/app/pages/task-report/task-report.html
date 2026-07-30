@@ -7,123 +7,123 @@
         {{ totalCount }} task{{ totalCount === 1 ? '' : 's' }}
       </span>
     </div>
-   <div class="export-actions" *ngIf="reportGenerated && reports.length > 0">
-    <button class="export-btn export-excel" (click)="exportTasksExcel()">
-      Export Excel
-    </button>
-    <button class="export-btn export-pdf" (click)="exportTasksPdf()">
-      Export PDF
-    </button>
+    <div class="export-actions" *ngIf="reportGenerated && reports.length > 0">
+      <button class="export-btn export-excel" (click)="exportTasksExcel()">
+        Export Excel
+      </button>
+      <button class="export-btn export-pdf" (click)="exportTasksPdf()">
+        Export PDF
+      </button>
+    </div>
   </div>
-</div>
 
-    <div class="filter-bar">
+  <div class="filter-bar">
 
-      <div class="search-wrapper">
-        <span class="filter-icon">🔍</span>
-        <input type="text" placeholder="Search Client..." [(ngModel)]="clientName">
-      </div>
-
-      <select [(ngModel)]="selectedYear">
-        <option [ngValue]="null">All Years</option>
-        <option *ngFor="let y of years" [ngValue]="y">
-          {{y}}
-        </option>
-      </select>
-
-      <select [(ngModel)]="selectedMonth">
-        <option [ngValue]="null">All Months</option>
-        <option *ngFor="let m of months" [ngValue]="m.id">
-          {{m.name}}
-        </option>
-      </select>
-
-      <div class="filter-bar-actions">
-        <button class="clear-btn" (click)="clearFilters()">
-          Clear
-        </button>
-        <button class="generate-btn" (click)="generateReport()">
-          Generate Report
-        </button>
-
-      </div>
+    <div class="search-wrapper">
+      <span class="filter-icon">🔍</span>
+      <input type="text" placeholder="Search Client..." [(ngModel)]="clientName">
     </div>
 
-      <div *ngIf="reportGenerated">
+    <select [(ngModel)]="selectedYear">
+      <option [ngValue]="null">All Years</option>
+      <option *ngFor="let y of years" [ngValue]="y">
+        {{y}}
+      </option>
+    </select>
 
-        <div *ngIf="reports.length === 0" class="empty-state">
-          No completed tasks found for the selected filters.
-        </div>
+    <select [(ngModel)]="selectedMonth">
+      <option [ngValue]="null">All Months</option>
+      <option *ngFor="let m of months" [ngValue]="m.id">
+        {{m.name}}
+      </option>
+    </select>
 
-        <div *ngIf="reports.length > 0" class="table-wrapper">
-          <table class="report-table">
+    <div class="filter-bar-actions">
+      <button class="clear-btn" (click)="clearFilters()">
+        Clear
+      </button>
+      <button class="generate-btn" (click)="generateReport()">
+        Generate Report
+      </button>
 
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Client</th>
-                <th>Assigned To</th>
-                <th>Created By</th>
-                <!-- <th>Status</th> -->
-                <th>Completed On</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+    </div>
+  </div>
 
-            <tbody>
-              <tr *ngFor="let task of reports; let i=index">
+  <div *ngIf="reportGenerated">
 
-                <td>{{(page-1)*pageSize+i+1}}</td>
+    <div *ngIf="reports.length === 0" class="empty-state">
+      No completed tasks found for the selected filters.
+    </div>
 
-                <td>
-                  <div class="client-cell">
-                    <span class="avatar-circle" [style.background]="getAvatarColor(task.clientName)">
-                      {{ getInitials(task.clientName) }}
-                    </span>
-                    {{task.clientName}}
-                  </div>
-                </td>
+    <div *ngIf="reports.length > 0" class="table-wrapper">
+      <table class="report-table">
 
-                <td>{{task.assignedToName}}</td>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Assigned To</th>
+            <th>Created By</th>
+            <!-- <th>Status</th> -->
+            <th>Completed On</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-                <td>{{task.createdByName}}</td>
+        <tbody>
+          <tr *ngFor="let task of reports; let i=index">
 
-                <!-- <td>
+            <td>{{(page-1)*pageSize+i+1}}</td>
+
+            <td>
+              <div class="client-cell">
+                <span class="avatar-circle" [style.background]="getAvatarColor(task.clientName)">
+                  {{ getInitials(task.clientName) }}
+                </span>
+                {{task.clientName}}
+              </div>
+            </td>
+
+            <td>{{task.assignedToName}}</td>
+
+            <td>{{task.createdByName}}</td>
+
+            <!-- <td>
               <span class="completed-badge">
                 {{task.statusName}}
               </span>
             </td> -->
 
-                <td>
-                  {{task.completedOn | date:'dd MMM yyyy'}}
-                </td>
+            <td>
+              {{task.completedOn | date:'dd MMM yyyy'}}
+            </td>
 
-                <td>
-                  <a class="action-link" [routerLink]="['/main','task',task.id]">
-                    Open
-                  </a>
-                </td>
+            <td>
+              <a class="action-link" [routerLink]="['/main','task',task.id]">
+                Open
+              </a>
+            </td>
 
-              </tr>
-            </tbody>
+          </tr>
+        </tbody>
 
-          </table>
-        </div>
-
-        <div class="pagination" *ngIf="reports.length > 0">
-          <button (click)="previousPage()" [disabled]="page==1">
-            Previous
-          </button>
-
-          <span>
-            Page {{page}} of {{totalPages}}
-          </span>
-
-          <button (click)="nextPage()" [disabled]="page==totalPages">
-            Next
-          </button>
-        </div>
-
-      </div>
-
+      </table>
     </div>
+
+    <div class="pagination" *ngIf="reports.length > 0">
+      <button (click)="previousPage()" [disabled]="page==1">
+        Previous
+      </button>
+
+      <span>
+        Page {{page}} of {{totalPages}}
+      </span>
+
+      <button (click)="nextPage()" [disabled]="page==totalPages">
+        Next
+      </button>
+    </div>
+
+  </div>
+
+</div>

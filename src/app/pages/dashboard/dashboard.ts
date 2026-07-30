@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import { Auth } from '../../services/auth';
 import { TaskStore } from '../../services/task-store.service';
-// import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
@@ -102,8 +102,8 @@ export class Dashboard implements OnInit, OnDestroy {
     private router: Router,
     private storage: BrowserStorageService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private zone: NgZone
-    // private ChangeDetectorRef: ChangeDetectorRef
+    private zone: NgZone,
+    private ChangeDetectorRef: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
@@ -160,7 +160,8 @@ export class Dashboard implements OnInit, OnDestroy {
       // users is used by the Reassign dropdown
       this.users = data;
 
-      this.rebuildTaskViews();        // this.ChangeDetectorRef.detectChanges();
+      this.rebuildTaskViews();        
+      this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
@@ -178,7 +179,7 @@ export class Dashboard implements OnInit, OnDestroy {
         this.completedCount = res.completedTasks;
         this.overdueCount = res.overDueTasks;
         this.urgentCount = res.urgentTasks;
-        // this.ChangeDetectorRef.detectChanges();
+        this.ChangeDetectorRef.detectChanges();
       });
 
     this.taskService.GetSummary().subscribe((res: any) => {
@@ -188,7 +189,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.allCompletedCount = res.completedTasks;
       this.allOverdueCount = res.overDueTasks;
       this.allUrgentCount = res.urgentTasks;
-      // this.ChangeDetectorRef.detectChanges();
+      this.ChangeDetectorRef.detectChanges();
 
     });
   }
