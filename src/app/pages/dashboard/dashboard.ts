@@ -27,6 +27,8 @@ import { isPlatformBrowser } from '@angular/common';
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit, OnDestroy {
+
+  currentUserRole = '';
   currentUserId = 0;
   completedStatusIds = new Set<number>();
   count = 0;
@@ -36,7 +38,7 @@ export class Dashboard implements OnInit, OnDestroy {
   tasks: any[] = [];
   users: any[] = [];
   statuses: any[] = [];
-  allUsers:any[]=[];
+  allUsers: any[] = [];
 
   //FOR ALL TASKS
   alltasks: any[] = [];
@@ -116,12 +118,18 @@ export class Dashboard implements OnInit, OnDestroy {
 
     const user = JSON.parse(this.storage.getItem('user') || '{}');
     this.currentUserId = Number(user.id);
+    this.currentUserRole = this.storage.getItem('role') || '';
 
+    // SuperAdmin only cares about company-wide tasks, not personal ones
+    if (this.currentUserRole === 'SuperAdmin') {
+      this.activeTab = 'all';
+    }
+    
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
         console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
         this.tasks = Array.isArray(tasks) ? tasks : [];
-         this.rebuildTaskViews();
+        this.rebuildTaskViews();
       })
     );
 
@@ -151,17 +159,17 @@ export class Dashboard implements OnInit, OnDestroy {
     console.log('Loading users...');
     this.auth.GetUsers().subscribe({
       next: (res: any) => {
-       const data  = Array.isArray(res)
+        const data = Array.isArray(res)
           ? res
           : (res?.data || []);
 
-      this.allUsers = data;
+        this.allUsers = data;
 
-      // users is used by the Reassign dropdown
-      this.users = data;
+        // users is used by the Reassign dropdown
+        this.users = data;
 
-      this.rebuildTaskViews();        
-      this.ChangeDetectorRef.detectChanges();
+        this.rebuildTaskViews();
+        this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
@@ -274,60 +282,60 @@ export class Dashboard implements OnInit, OnDestroy {
   // }
 
   private mapTasks(): any[] {
-  const userMap = new Map(
-    this.allUsers.map(user => [
-      Number(user.id),
-      user.name
-    ])
-  );
+    const userMap = new Map(
+      this.allUsers.map(user => [
+        Number(user.id),
+        user.name
+      ])
+    );
 
-  const statusMap = new Map(
-    this.statuses.map(status => [
-      Number(status.id),
-      status.name || status.statusName
-    ])
-  );
+    const statusMap = new Map(
+      this.statuses.map(status => [
+        Number(status.id),
+        status.name || status.statusName
+      ])
+    );
 
-  this.completedStatusIds = new Set(
-    this.statuses
-      .filter(status =>
-        this.isCompletedStatus(status.name || status.statusName)
-      )
-      .map(status => Number(status.id))
-  );
+    this.completedStatusIds = new Set(
+      this.statuses
+        .filter(status =>
+          this.isCompletedStatus(status.name || status.statusName)
+        )
+        .map(status => Number(status.id))
+    );
 
-  return this.tasks.map(task => ({
-    ...task,
-    assignedToId: Number(task.assignedToId),
-    createdById: Number(task.createdById),
-    statusId: Number(task.statusId),
+    return this.tasks.map(task => ({
+      ...task,
+      assignedToId: Number(task.assignedToId),
+      createdById: Number(task.createdById),
+      statusId: Number(task.statusId),
 
-    assignedToName:
-      userMap.get(Number(task.assignedToId)) || 'Unknown',
+      assignedToName:
+        userMap.get(Number(task.assignedToId)) || 'Unknown',
 
-    createdByName:
-      userMap.get(Number(task.createdById)) || 'Unknown',
+      createdByName:
+        userMap.get(Number(task.createdById)) || 'Unknown',
 
-    statusName:
-      statusMap.get(Number(task.statusId)) ||
-      task.statusName ||
-      'Unknown'
-  }));
-}
-private rebuildTaskViews(): void {
-  const mappedTasks = this.mapTasks();
+      statusName:
+        statusMap.get(Number(task.statusId)) ||
+        task.statusName ||
+        'Unknown'
+    }));
+  }
+  private rebuildTaskViews(): void {
+    const mappedTasks = this.mapTasks();
 
-  this.alltasks = mappedTasks;
+    this.alltasks = mappedTasks;
 
-  this.assignedTasks = mappedTasks.filter(task =>
-    Number(task.assignedToId) === this.currentUserId &&
-    !this.isCompletedStatus(task.statusName) &&
-    !this.isCompletedStatusId(task.statusId)
-  );
+    this.assignedTasks = mappedTasks.filter(task =>
+      Number(task.assignedToId) === this.currentUserId &&
+      !this.isCompletedStatus(task.statusName) &&
+      !this.isCompletedStatusId(task.statusId)
+    );
 
-  this.refreshAssignedView();
-  this.refreshAllView();
-}
+    this.refreshAssignedView();
+    this.refreshAllView();
+  }
   //for employee search dopdown- REASSIGN
   setupUserSearch() {
     this.userInput$.pipe(
@@ -396,19 +404,19 @@ private rebuildTaskViews(): void {
   // }
 
   isOverdue(task: any): boolean {
-  if (!task?.dueDate) {
-    return false;
+    if (!task?.dueDate) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(task.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
+    return dueDate < today &&
+      !this.isCompletedStatus(task.statusName);
   }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const dueDate = new Date(task.dueDate);
-  dueDate.setHours(0, 0, 0, 0);
-
-  return dueDate < today &&
-    !this.isCompletedStatus(task.statusName);
-}
   trackByTaskId(index: number, task: any) {
     return task.id;
   }

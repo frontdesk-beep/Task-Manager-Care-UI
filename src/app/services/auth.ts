@@ -52,7 +52,11 @@ export class Auth {
     return this.http.put(`${this.authapi}/profile/${id}`, data);
   }
   GetUsers() {
-    return this.http.get(`${this.usersapi}`);
+     const params: any = {
+    page: '1',
+    pageSize: '1000'
+  };
+    return this.http.get(`${this.usersapi}`, { params });
   }
   CreateUser(data: any) {
     return this.http.post(`${this.usersapi}`, data);

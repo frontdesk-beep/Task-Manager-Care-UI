@@ -7,12 +7,12 @@ import { ToastrService } from 'ngx-toastr';
 import { UserStore } from '../../services/user-store';
 import { TaskStore } from '../../services/task-store.service';
 import { BrowserStorageService } from '../../services/browser-storage.service';
-import { SignalrService } from '../../services/signalr';
 import { NotificationService } from '../../services/notification';
+import { TimeAgoPipe } from '../../pipes/time-ago-pipe';
 
 @Component({
   selector: 'app-header-top',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TimeAgoPipe],
   templateUrl: './header-top.html',
   styleUrl: './header-top.css',
 })
@@ -28,6 +28,7 @@ export class HeaderTop implements OnInit, OnDestroy {
   notifications: any[] = [];
   storeSubscription?: Subscription;
   unreadCount = 0;
+
   private userSubscription?: Subscription;
   private signalRSubscription?: Subscription;
 
@@ -37,25 +38,21 @@ export class HeaderTop implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private userStore: UserStore,
     private taskStore: TaskStore,
-    private storage: BrowserStorageService,
-    private signalService: SignalrService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private storage: BrowserStorageService
   ) { }
 
   ngOnInit(): void {
-    let userId = 0;
 
     this.userSubscription = this.userStore.user$.
       subscribe(user => {
-        if (!user) 
+        if (!user)
           return;
         this.name = user.name;
-        // userId = user.id;
-        // this.loadNotifications(userId);
       });
 
     this.signalRSubscription =
-      this.signalService.notifications$
+      this.notificationService.notifications$
         .subscribe(notifications => {
 
           this.notifications = notifications;
@@ -66,56 +63,75 @@ export class HeaderTop implements OnInit, OnDestroy {
 
         });
   }
-  // loadNotifications(userId: number) {
-  //   this.storeSubscription =
-  //     this.taskService.GetNotifications(userId).subscribe({
-  //       next: (res: any) => {
-  //         const list = Array.isArray(res)
-  //           ? res
-  //           : (res?.data || []);
-
-  //         this.notifications = list;
-  //         this.unreadCount =
-  //           list.filter((x: any) => !x.isRead).length;
-  //       },
-  //       error: (err: any) => {
-  //         console.log('Notification load failed', err);
-  //         this.notifications = [];
-  //         this.unreadCount = 0;
-  //       }
-  //     });
-  // }
-
 
   ngOnDestroy(): void {
     this.storeSubscription?.unsubscribe();
     this.userSubscription?.unsubscribe();
     this.signalRSubscription?.unsubscribe();
   }
-
+  // collapses near-identical notifications fired within a few seconds of each other
+  private dedupe(list: any[]): any[] {
+    return list.filter((n, i) => {
+      if (i === 0) return true;
+      const prev = list[i - 1];
+      const sameMessage = n.message === prev.message;
+      const closeInTime =
+        Math.abs(new Date(n.createdOn).getTime() - new Date(prev.createdOn).getTime()) < 5000;
+      return !(sameMessage && closeInTime);
+    });
+  }
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
   toggleNotifications() {
     this.notificationOpen = !this.notificationOpen;
-    if (this.notificationOpen) {
-      const unread = this.notifications.filter(x => !x.isRead);
-      unread.forEach((n) => {
-        n.isRead = true;
-        this.notificationService.markNotificationRead(n.id).subscribe({
-          error: (err) => {
-            console.log('Failed to mark notification read', err);
-            n.isRead = false;
-            this.unreadCount++;
-          }
-        });
+  }
+  markAllRead() {
+    const unread = this.notifications.filter(x => !x.isRead);
+    unread.forEach(n => {
+      n.isRead = true;
+      this.notificationService.markNotificationRead(n.id).subscribe({
+        error: (err) => {
+          console.log('Failed to mark notification read', err);
+          n.isRead = false;
+        }
+      });
+    });
+    this.unreadCount = 0;
+  }
+
+  openNotification(n: any) {
+    if (!n.isRead) {
+      n.isRead = true;
+      this.unreadCount = Math.max(0, this.unreadCount - 1);
+      this.notificationService.markNotificationRead(n.id).subscribe({
+        error: (err) => {
+          console.log('Failed to mark notification read', err);
+          n.isRead = false;
+          this.unreadCount++;
+        }
       });
     }
+    this.notificationOpen = false;
+    if (n.taskId) {
+      this.router.navigate(['/main', 'task', n.taskId]);
+    }
   }
+
+  getIcon(type: string): string {
+    switch (type) {
+      case 'TaskAssigned': return 'bi-person-check';
+      case 'TaskUpdated': return 'bi-pencil-square';
+      case 'CommentAdded': return 'bi-chat-dots';
+      default: return 'bi-bell';
+    }
+  }
+
   @HostListener('document:click')
   closeDropDown() {
     this.dropdownOpen = false;
+    this.notificationOpen = false;
   }
   logout() {
     this.storage.removeItem('name');
@@ -124,6 +140,8 @@ export class HeaderTop implements OnInit, OnDestroy {
     this.storage.removeItem('isLoggedIn');
     this.taskStore.destroy();
     this.storage.removeItem('token');
+    this.notificationService.clearNotifications();
+    this.notificationService.stopConnection();
     this.toastr.success('Logged out successfully!');
     this.router.navigate(['/login']);
   }

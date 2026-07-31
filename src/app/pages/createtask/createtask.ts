@@ -84,6 +84,7 @@ export class Createtask implements OnInit {
   ngOnInit() {
     this.loadCurrentUser();
     this.loadUsers();
+    this.setupUserSearch(); 
     this.loadClientTypes();
     this.loadStatuses();
     this.loadPriorities();
@@ -200,7 +201,7 @@ export class Createtask implements OnInit {
   }
 
   loadUsers() {
-    this.auth.GetUsers().subscribe({
+    this.auth.searchUsers('',5).subscribe({
       next: (response: any) => {
         const users = this.extractArray(response).filter((user: any) => this.isActiveUser(user));
 

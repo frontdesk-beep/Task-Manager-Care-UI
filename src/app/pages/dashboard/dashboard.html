@@ -26,7 +26,7 @@
 
   <!-- ================= TABS ================= -->
   <div class="dashboard-tabs">
-    <button class="dash-tab-item" [class.active]="activeTab === 'mine'" (click)="activeTab = 'mine'">
+    <button *ngIf="currentUserRole !== 'SuperAdmin'" class="dash-tab-item" [class.active]="activeTab === 'mine'" (click)="activeTab = 'mine'">
       My Tasks
       <span class="dash-tab-count">{{ filteredAssignedTasks.length }}</span>
     </button>

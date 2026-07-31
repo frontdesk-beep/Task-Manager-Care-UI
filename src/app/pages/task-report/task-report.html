@@ -64,7 +64,6 @@
             <th>Client</th>
             <th>Assigned To</th>
             <th>Created By</th>
-            <!-- <th>Status</th> -->
             <th>Completed On</th>
             <th>Action</th>
           </tr>
@@ -87,12 +86,6 @@
             <td>{{task.assignedToName}}</td>
 
             <td>{{task.createdByName}}</td>
-
-            <!-- <td>
-              <span class="completed-badge">
-                {{task.statusName}}
-              </span>
-            </td> -->
 
             <td>
               {{task.completedOn | date:'dd MMM yyyy'}}
