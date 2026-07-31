@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription, of, forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
-
-
 //Makes this service available throughout the application
 @Injectable({ providedIn: 'root' })
 export class TaskStore {

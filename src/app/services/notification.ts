@@ -5,13 +5,12 @@ import { Notification } from '../models/notification';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BrowserStorageService } from './browser-storage.service';
+import { TaskStore } from './task-store.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-
-
   private hubConnection!: HubConnection;
 
   private notifications =
@@ -24,7 +23,8 @@ export class NotificationService {
 
   constructor(
     private http: HttpClient,
-    private storage: BrowserStorageService
+    private storage: BrowserStorageService,
+    private taskStore: TaskStore
   ) { }
 
   startConnection() {
@@ -53,7 +53,18 @@ export class NotificationService {
         ]);
 
       });
+    // keep everyone's task list live, not just the bell
+    this.hubConnection.on('TaskCreated', () => {
+      this.taskStore.refresh();
+    });
 
+    this.hubConnection.on('TaskAssigned', () => {
+      this.taskStore.refresh();
+    });
+
+    this.hubConnection.on('TaskUpdated', () => {
+      this.taskStore.refresh();
+    });
     this.hubConnection
       .start()
       .then(() => {
