@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskReportService {
-
-  private api = 'https://localhost:7148/api/TaskReports';
+  private api = `${environment.apiUrl}/TaskReports`;
 
   constructor(private http: HttpClient) { }
 

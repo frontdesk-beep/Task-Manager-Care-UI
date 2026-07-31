@@ -81,6 +81,7 @@ export class TaskReportComponent implements OnInit {
         this.reports = res.items;
         this.totalCount = res.totalCount;
         this.totalPages = Math.ceil(res.totalCount / this.pageSize);
+        this.ChangeDetectorRef.detectChanges();
 
       },
 

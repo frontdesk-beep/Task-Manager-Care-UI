@@ -75,7 +75,7 @@ export class Addemployee implements OnInit, AfterViewInit {
     private auth: Auth,
     private toastr: ToastrService,
     private exportService: Export,
-    private ChangeDetectorRef : ChangeDetectorRef 
+    private ChangeDetectorRef: ChangeDetectorRef
 
   ) { }
 
@@ -83,7 +83,7 @@ export class Addemployee implements OnInit, AfterViewInit {
     this.loadCurrentUser();
     this.loadEmployees();
   }
-  
+
   createEmptyEmployee(): Employee {
     return {
       id: 0,
@@ -130,7 +130,7 @@ export class Addemployee implements OnInit, AfterViewInit {
           isActive: employee.isActive
         }));
         this.updateEmployeeView();
-        
+
 
       },
       error: (error) => {
@@ -251,7 +251,23 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   // prevent logged-in user from deleting themselves
   canDeleteEmployee(employee: Employee): boolean {
-    return employee.id != this.currentUserId;
+
+    // cannot deactivate yourself
+    if (employee.id === this.currentUserId) {
+      return false;
+    }
+
+    // SuperAdmin can deactivate everyone
+    if (this.currentUserRole === 'SuperAdmin') {
+      return true;
+    }
+
+    // Admin can only deactivate Employees
+    if (this.currentUserRole === 'Admin') {
+      return employee.role === 'Employee';
+    }
+
+    return false;
   }
   cancelDelete() {
     this.employeeToDelete = null;
@@ -330,8 +346,8 @@ export class Addemployee implements OnInit, AfterViewInit {
         this.statusFilter === 'All'
           ? true
           : this.statusFilter === 'Active'
-          ? employee.isActive
-          : !employee.isActive;
+            ? employee.isActive
+            : !employee.isActive;
 
       return matchesSearch && matchesRole && matchesStatus;
     });
