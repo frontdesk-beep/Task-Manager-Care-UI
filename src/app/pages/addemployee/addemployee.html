@@ -6,9 +6,7 @@
             </div>
         </div>
         <form (ngSubmit)="saveEmployee()" #taskForm="ngForm">
-
             <div class="row g-3">
-
                 <div class="col-md-6">
                     <label for="name" class="form-label">Name <span class="required"
                             style="color: red;">*</span></label>
@@ -33,7 +31,6 @@
                     <input name="Date" type="date" id="Date" class="form-control" [(ngModel)]="employee.createdAt"
                         placeholder="Employee date" required>
                 </div>
-
                 <div class="col-md-6">
                     <label for="role" class="form-label">Role</label>
                     <select name="role" id="role" class="form-select" [(ngModel)]="employee.role">

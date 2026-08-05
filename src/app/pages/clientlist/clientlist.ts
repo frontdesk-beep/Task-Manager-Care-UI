@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Export } from '../../services/export';
 import { ChangeDetectorRef } from '@angular/core';
 import { UserStore } from '../../services/user-store';
+import { HostListener } from '@angular/core';
 
 
 @Component({
@@ -52,10 +53,14 @@ export class Clientlist implements OnInit, OnDestroy {
     private userStore: UserStore,
     private ChangeDetectorRef: ChangeDetectorRef
   ) { }
-
+@HostListener('document:click', ['$event'])
+onScreenClick(event: MouseEvent) {
+  console.log('SCREEN CLICKED', event.target);
+}
   ngOnInit() {
     this.loadClientCategories();
     this.loadClients();
+    
   }
 
   ngOnDestroy() {
@@ -63,6 +68,7 @@ export class Clientlist implements OnInit, OnDestroy {
   }
 
   loadClients() {
+    
     const query = {
     Search: this.searchClientName,
     CategoryId: this.filterCategoryId,

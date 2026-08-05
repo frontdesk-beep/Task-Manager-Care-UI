@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { TaskService } from '../../services/task.service';
 import { Auth } from '../../services/auth';
 import { TaskStore } from '../../services/task-store.service';
@@ -13,6 +13,7 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
 import { BrowserStorageService } from '../../services/browser-storage.service';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import {HostListener} from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -112,6 +113,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('Dashboard ngOnInit called');
+    
     if (!isPlatformBrowser(this.platformId)) {
       return; // skip all data loading on the server
     }
@@ -124,7 +126,7 @@ export class Dashboard implements OnInit, OnDestroy {
     if (this.currentUserRole === 'SuperAdmin') {
       this.activeTab = 'all';
     }
-    
+
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
         console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
@@ -169,35 +171,37 @@ export class Dashboard implements OnInit, OnDestroy {
         this.users = data;
 
         this.rebuildTaskViews();
-        this.ChangeDetectorRef.detectChanges();
+        // this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
       }
     });
   }
+
   loadSummary() {
+forkJoin({
+      mine: this.taskService.GetMySummary(),
+      all: this.taskService.GetSummary()
+    }).subscribe(({ mine, all }: any) => {
+      console.log("Dashboard getsummary", mine, all);
 
-    this.taskService.GetMySummary()
-      .subscribe((res: any) => {
-        console.log("Dashboard getsummary", res);
+      this.assignedCount = mine.assignedTasks;
+        this.pendingCount = mine.pendingTasks;
+        this.completedCount = mine.completedTasks;
+        this.overdueCount = mine.overDueTasks;
+        this.urgentCount = mine.urgentTasks;
+      //   this.ChangeDetectorRef.detectChanges();
+      // });
 
-        this.assignedCount = res.assignedTasks;
-        this.pendingCount = res.pendingTasks;
-        this.completedCount = res.completedTasks;
-        this.overdueCount = res.overDueTasks;
-        this.urgentCount = res.urgentTasks;
-        this.ChangeDetectorRef.detectChanges();
-      });
+    // this.taskService.GetSummary().subscribe((res: any) => {
 
-    this.taskService.GetSummary().subscribe((res: any) => {
-
-      this.allAssignedCount = res.assignedTasks;
-      this.allPendingCount = res.pendingTasks;
-      this.allCompletedCount = res.completedTasks;
-      this.allOverdueCount = res.overDueTasks;
-      this.allUrgentCount = res.urgentTasks;
-      this.ChangeDetectorRef.detectChanges();
+      this.allAssignedCount = all.assignedTasks;
+      this.allPendingCount = all.pendingTasks;
+      this.allCompletedCount = all.completedTasks;
+      this.allOverdueCount = all.overDueTasks;
+      this.allUrgentCount = all.urgentTasks;
+      // this.ChangeDetectorRef.detectChanges();
 
     });
   }
@@ -212,74 +216,6 @@ export class Dashboard implements OnInit, OnDestroy {
   private isCompletedStatusId(statusId: number): boolean {
     return this.completedStatusIds.has(statusId);
   }
-
-  // addNames() {
-  //   const userMap = new Map<number, string>(
-  //     this.users.map((user: any) => [
-  //       Number(user.id),
-  //       user.name
-  //     ])
-  //   );
-  //   const statusMap = new Map<number, string>(
-  //     this.statuses.map((s: any) => [
-  //       Number(s.id),
-  //       s.name || s.statusName
-  //     ])
-  //   );
-  //   this.completedStatusIds = new Set(
-  //     this.statuses
-  //       .filter((status: any) =>
-  //         this.isCompletedStatus(status.name || status.statusName)
-  //       )
-  //       .map((status: any) => Number(status.id))
-  //   );
-
-  //   const mappedTasks = this.tasks.map(task => ({
-  //     ...task,
-  //     assignedToId: Number(task.assignedToId),
-  //     createdById: Number(task.createdById),
-  //     statusId: Number(task.statusId),
-
-  //     assignedToName:
-  //       userMap.get(Number(task.assignedToId)) || 'Unknown',
-
-  //     createdByName:
-  //       userMap.get(Number(task.createdById)) || 'Unknown',
-
-  //     statusName:
-  //       statusMap.get(Number(task.statusId))
-  //       || task.statusName
-  //       || 'Unknown'
-  //   }));
-  //   this.alltasks = mappedTasks;
-  //   console.log('CURRENT USER ID:', this.currentUserId);
-
-  //   console.table(mappedTasks.map(task => ({
-  //     id: task.id,
-  //     client: task.clientName,
-  //     assignedToId: task.assignedToId,
-  //     currentUserId: this.currentUserId,
-  //     statusId: task.statusId,
-  //     statusName: task.statusName,
-  //     assignedMatch: Number(task.assignedToId) === this.currentUserId,
-  //     completedByName: this.isCompletedStatus(task.statusName),
-  //     completedById: this.isCompletedStatusId(task.statusId)
-  //   })));
-
-  //   //assigned to current user only
-  //   this.assignedTasks = mappedTasks.filter(task =>
-  //     Number(task.assignedToId) === this.currentUserId
-  //     &&
-  //     !this.isCompletedStatus(task.statusName)
-  //     &&
-  //     !this.isCompletedStatusId(task.statusId)
-  //   );
-  //   this.refreshAssignedView();
-  //   this.refreshAllView();
-  //   console.log('7. ALL TASKS:', this.alltasks);
-  //   console.log('8. ASSIGNED TASKS:', this.assignedTasks);
-  //   console.log('9. PAGINATED:', this.paginatedAssignedTasks);
-  // }
 
   private mapTasks(): any[] {
     const userMap = new Map(
@@ -303,7 +239,10 @@ export class Dashboard implements OnInit, OnDestroy {
         )
         .map(status => Number(status.id))
     );
-
+// carry over UI-only flags so an open menu doesn't vanish on refresh
+  const prevMenuState = new Map(
+    this.alltasks.map(t => [t.id, { showMenu: t.showMenu, menuOpensUp: t.menuOpensUp }])
+  );
     return this.tasks.map(task => ({
       ...task,
       assignedToId: Number(task.assignedToId),
@@ -319,7 +258,9 @@ export class Dashboard implements OnInit, OnDestroy {
       statusName:
         statusMap.get(Number(task.statusId)) ||
         task.statusName ||
-        'Unknown'
+        'Unknown',
+        showMenu: prevMenuState.get(task.id)?.showMenu || false,
+        menuOpensUp: prevMenuState.get(task.id)?.menuOpensUp || false,
     }));
   }
   private rebuildTaskViews(): void {
@@ -393,15 +334,6 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
   }
-
-  // getUserName(id: number) {
-  //   const user = this.users.find(x => Number(x.id) === Number(id));
-  //   return user ? user.name : 'Unknown';
-  // }
-  // getStatusName(id: number) {
-  //   const status = this.statuses.find(x => Number(x.id) === Number(id));
-  //   return status ? status.name : 'Unknown';
-  // }
 
   isOverdue(task: any): boolean {
     if (!task?.dueDate) {
@@ -534,6 +466,7 @@ export class Dashboard implements OnInit, OnDestroy {
       filtered.slice(start, start + this.assignedItemsPerPage);
     this.uniqueCreatedUsers =
       this.getUniqueCreatedBy();
+      // this.ChangeDetectorRef.detectChanges();
   }
 
   //FOR ALL TASKS
@@ -560,6 +493,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.paginatedAllTasks =
       filtered.slice(start, start + this.allItemPerPage);
+      // this.ChangeDetectorRef.detectChanges();
   }
 
 
@@ -593,6 +527,7 @@ export class Dashboard implements OnInit, OnDestroy {
       .toUpperCase();
   }
   toggleMenu(task: any, event: MouseEvent) {
+     event.stopPropagation();
     // close others first (optional, if you want only one open at a time)
     this.tasks.forEach(t => { if (t !== task) t.showMenu = false; });
 
@@ -605,6 +540,10 @@ export class Dashboard implements OnInit, OnDestroy {
       task.menuOpensUp = spaceBelow < 150; // adjust threshold to your menu's height
     }
   }
+  @HostListener('document:click')
+closeAllMenus() {
+  this.alltasks.forEach(t => t.showMenu = false);
+}
   openReassign(task: any) {
 
     this.selectedTask = task;
