@@ -60,7 +60,6 @@ export class HeaderTop implements OnInit, OnDestroy {
           this.unreadCount =
             notifications.filter(
               x => !x.isRead).length;
-
         });
   }
 
