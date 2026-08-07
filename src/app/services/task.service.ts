@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { BrowserStorageService } from './browser-storage.service';
 import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +11,6 @@ import { environment } from '../../environments/environment';
 export class TaskService {
   private api = `${environment.apiUrl}`;
   
-  // private baseUrl = 'https://localhost:7148/api';
-  private socket$: WebSocketSubject<any> | null = null;
-  private commentsSocket$: WebSocketSubject<any> | null = null;
-
   constructor(
     private http: HttpClient,
     private storage: BrowserStorageService) { }
@@ -120,58 +116,7 @@ export class TaskService {
     });
   }
 
-  connectTaskUpdates(userId: number): Observable<any> {
-    if (!this.socket$ || this.socket$.closed) {
-      const apiHost = this.api.replace(/^https?:\/\//, '').replace(/\/api$/, '');
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const url = `${wsProtocol}://${apiHost}/task-updates?userId=${userId}`;
-
-      this.socket$ = webSocket({
-        url,
-        deserializer: ({ data }) => {
-          try {
-            return JSON.parse(data as string);
-          } catch {
-            return data;
-          }
-        }
-      });
-    }
-
-    return this.socket$;
-  }
-
-  connectComments(taskId: number): Observable<any> {
-    if (!this.commentsSocket$ || this.commentsSocket$.closed) {
-      const apiHost = this.api.replace(/^https?:\/\//, '').replace(/\/api$/, '');
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const url = `${wsProtocol}://${apiHost}/task-comments?taskId=${taskId}`;
-
-      this.commentsSocket$ = webSocket({
-        url,
-        deserializer: ({ data }) => {
-          try {
-            return JSON.parse(data as string);
-          } catch {
-            return data;
-          }
-        }
-      });
-    }
-
-    return this.commentsSocket$;
-  }
-
-  disconnectComments() {
-    this.commentsSocket$?.complete();
-    this.commentsSocket$ = null;
-  }
-
-  disconnectTaskUpdates() {
-    this.socket$?.complete();
-    this.socket$ = null;
-  }
-
+  
   GetMySummary() {
     return this.http.get(`${this.api}/dashboard/my-summary`, { headers: this.getAuthHeaders() });
   }

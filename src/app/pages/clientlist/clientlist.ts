@@ -84,7 +84,7 @@ onScreenClick(event: MouseEvent) {
           this.totalRecords = res.totalRecords;
           this.loadClientCategories();
           this.loading = false;
-          this.ChangeDetectorRef.detectChanges();
+          // this.ChangeDetectorRef.detectChanges();
         },
         error: (err: any) => {
           console.error('GetClients error:', err);

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../../services/task.service';
-import { ChangeDetectorRef } from '@angular/core';
+import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-comments',
@@ -13,57 +13,146 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './comments.css'
 })
 export class Comments implements OnInit, OnDestroy {
+
   @Input() taskId = 0;
+
   messages: any[] = [];
   newText = '';
-  sub?: Subscription;
 
-  constructor(private taskService: TaskService,
-    private ChangeDetectorRef: ChangeDetectorRef
-  ) {}
+  private commentSub?: Subscription;
+
+
+  constructor(
+    private taskService: TaskService,
+    private notificationService: NotificationService
+  ) { }
+
 
   ngOnInit() {
-    if (!this.taskId) return;
+
+    if (!this.taskId) {
+      return;
+    }
+
+
+    // Load old comments
     this.loadComments();
-    this.sub = this.taskService.connectComments(this.taskId).subscribe({
-      next: (m: any) => {
-        if (!m) return;
-        if (m.type === 'comment-added' && m.taskId === this.taskId) {
-          this.messages.push(m.comment || m.payload || {});
-        }
-      },
-      error: (err) => console.error('Comments socket err', err)
-    });
+
+
+    // Join SignalR task room
+    this.notificationService
+      .joinTask(this.taskId)
+      .catch(err =>
+        console.error("Join task error", err)
+      );
+
+
+    // Listen realtime comments
+    this.commentSub =
+      this.notificationService.comment$
+        .subscribe((data: any) => {
+
+
+          console.log(
+            "Realtime comment:",
+            data
+          );
+
+
+          if (data.taskId === this.taskId) {
+
+            this.messages.push(
+              data.comment
+            );
+
+          }
+
+        });
+
   }
+
+
 
   loadComments() {
-    this.taskService.GetComments(this.taskId).subscribe({
-      next: (res: any) => {
-        const data = Array.isArray(res) ? res : (res?.data || []);
-        this.messages = data;
-        this.ChangeDetectorRef.detectChanges();
 
-      },
-      error: (err) => console.error('Load comments err', err)
-    });
+    this.taskService
+      .GetComments(this.taskId)
+      .subscribe({
+
+        next: (res: any) => {
+
+          this.messages =
+            Array.isArray(res)
+              ? res
+              : (res?.data || []);
+
+        },
+
+        error: (err) => {
+          console.error(
+            "Load comments error",
+            err
+          );
+        }
+
+      });
+
   }
+
+
 
   send() {
-    const text = (this.newText || '').trim();
-    if (!text) return;
-    const payload = { text };
-    this.taskService.AddComment(this.taskId, payload).subscribe({
-      next: (res: any) => {
-        const comment = res || (res?.data) || payload;
-        this.messages.push(comment);
-        this.newText = '';
-      },
-      error: (err) => console.error('Send comment err', err)
-    });
+
+    const text =
+      this.newText.trim();
+
+
+    if (!text)
+      return;
+
+
+    this.taskService
+      .AddComment(
+        this.taskId,
+        { text }
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.newText = '';
+
+        },
+
+        error: (err) => {
+
+          console.error(
+            "Send comment error",
+            err
+          );
+
+        }
+
+      });
+
   }
 
+
+
   ngOnDestroy() {
-    this.sub?.unsubscribe();
-    this.taskService.disconnectComments();
+
+    this.commentSub?.unsubscribe();
+
+
+    this.notificationService
+      .leaveTask(this.taskId)
+      .catch(err =>
+        console.error(
+          "Leave task error",
+          err
+        )
+      );
+
   }
+
 }

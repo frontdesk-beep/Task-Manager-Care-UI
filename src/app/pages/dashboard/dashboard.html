@@ -83,10 +83,11 @@
               <th class="sortable" (click)="toggleSort('dueDate')">
                 Due <span class="sort-icon">{{getSortIcon('dueDate')}}</span>
               </th>
-               <th class="sortable" (click)="toggleSort('serviceCategoryName')">
+               
+              <th>Created By</th>
+              <th class="sortable" (click)="toggleSort('serviceCategoryName')">
                 Service Category <span class="sort-icon">{{getSortIcon('serviceCategoryName')}}</span>
               </th>
-              <th>Created By</th>
               <th>Action</th>
             </tr>
           </thead>

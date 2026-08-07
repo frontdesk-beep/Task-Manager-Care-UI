@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
 import { BrowserStorageService } from '../../services/browser-storage.service';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import {HostListener} from '@angular/core';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -98,6 +98,10 @@ export class Dashboard implements OnInit, OnDestroy {
   userInput$ = new Subject<string>();
   usersLoading = false;
 
+  // set true if user/role couldn't be resolved from storage - use in template
+  // to show a "please log in again" state instead of a silently-empty dashboard
+  authError = false;
+
   constructor(
     private taskService: TaskService,
     private auth: Auth,
@@ -113,14 +117,33 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('Dashboard ngOnInit called');
-    
+
     if (!isPlatformBrowser(this.platformId)) {
       return; // skip all data loading on the server
     }
 
-    const user = JSON.parse(this.storage.getItem('user') || '{}');
+    // FIX: JSON.parse can throw on corrupted/partial storage and would
+    // previously kill the rest of ngOnInit silently.
+    let user: any = {};
+    try {
+      user = JSON.parse(this.storage.getItem('user') || '{}');
+    } catch (e) {
+      console.error('Failed to parse stored user, treating as logged out', e);
+      user = {};
+    }
+
     this.currentUserId = Number(user.id);
     this.currentUserRole = this.storage.getItem('role') || '';
+
+    // FIX: if there's no valid user id, every downstream "assigned to me"
+    // filter silently returns nothing (NaN === NaN is false) with zero
+    // indication why. Surface it instead of loading a blank dashboard.
+    if (!user?.id || Number.isNaN(this.currentUserId)) {
+      console.error('No valid user found in storage - redirecting to login');
+      this.authError = true;
+      this.router.navigate(['/login']);
+      return;
+    }
 
     // SuperAdmin only cares about company-wide tasks, not personal ones
     if (this.currentUserRole === 'SuperAdmin') {
@@ -129,17 +152,27 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
-        console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
-        this.tasks = Array.isArray(tasks) ? tasks : [];
-        this.rebuildTaskViews();
+        // FIX: force this into the Angular zone + trigger CD explicitly.
+        // If TaskStore's source (websocket/manual fetch/3rd-party callback)
+        // emits from outside the Angular zone, the view won't update until
+        // some unrelated zone event (like a click) runs change detection.
+        this.zone.run(() => {
+          console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
+          this.tasks = Array.isArray(tasks) ? tasks : [];
+          this.rebuildTaskViews();
+          // this.ChangeDetectorRef.detectChanges();
+        });
       })
     );
 
     this.storeSubs.add(
       this.taskStore.statuses$.subscribe((statuses: any[]) => {
-        console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
-        this.statuses = Array.isArray(statuses) ? statuses : [];
-        this.rebuildTaskViews();
+        this.zone.run(() => {
+          console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
+          this.statuses = Array.isArray(statuses) ? statuses : [];
+          this.rebuildTaskViews();
+          // this.ChangeDetectorRef.detectChanges();
+        });
       })
     );
 
@@ -180,31 +213,40 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   loadSummary() {
-forkJoin({
+    // FIX: forkJoin had no error handler. If EITHER call failed, neither
+    // summary block updated and the error silently went to the default
+    // error handler. Also guard against a null/partial response shape.
+    forkJoin({
       mine: this.taskService.GetMySummary(),
       all: this.taskService.GetSummary()
-    }).subscribe(({ mine, all }: any) => {
-      console.log("Dashboard getsummary", mine, all);
+    }).subscribe({
+      next: ({ mine, all }: any) => {
+        console.log("Dashboard getsummary", mine, all);
 
-      this.assignedCount = mine.assignedTasks;
-        this.pendingCount = mine.pendingTasks;
-        this.completedCount = mine.completedTasks;
-        this.overdueCount = mine.overDueTasks;
-        this.urgentCount = mine.urgentTasks;
-      //   this.ChangeDetectorRef.detectChanges();
-      // });
+        if (mine) {
+          this.assignedCount = mine.assignedTasks ?? 0;
+          this.pendingCount = mine.pendingTasks ?? 0;
+          this.completedCount = mine.completedTasks ?? 0;
+          this.overdueCount = mine.overDueTasks ?? 0;
+          this.urgentCount = mine.urgentTasks ?? 0;
+        }
 
-    // this.taskService.GetSummary().subscribe((res: any) => {
+        if (all) {
+          this.allAssignedCount = all.assignedTasks ?? 0;
+          this.allPendingCount = all.pendingTasks ?? 0;
+          this.allCompletedCount = all.completedTasks ?? 0;
+          this.allOverdueCount = all.overDueTasks ?? 0;
+          this.allUrgentCount = all.urgentTasks ?? 0;
+        }
 
-      this.allAssignedCount = all.assignedTasks;
-      this.allPendingCount = all.pendingTasks;
-      this.allCompletedCount = all.completedTasks;
-      this.allOverdueCount = all.overDueTasks;
-      this.allUrgentCount = all.urgentTasks;
-      // this.ChangeDetectorRef.detectChanges();
-
+        // this.ChangeDetectorRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load dashboard summary', err);
+      }
     });
   }
+
   private isCompletedStatus(statusName?: string): boolean {
     const s = (statusName || '').toLowerCase();
     return s.includes('complete') ||
@@ -239,10 +281,15 @@ forkJoin({
         )
         .map(status => Number(status.id))
     );
-// carry over UI-only flags so an open menu doesn't vanish on refresh
-  const prevMenuState = new Map(
-    this.alltasks.map(t => [t.id, { showMenu: t.showMenu, menuOpensUp: t.menuOpensUp }])
-  );
+
+    // carry over UI-only flags so an open menu doesn't vanish on refresh
+    const prevMenuState = new Map(
+      this.alltasks.map(t => [t.id, {
+        showMenu: t.showMenu, 
+        menuOpensUp: t.menuOpensUp
+      }])
+    );
+
     return this.tasks.map(task => ({
       ...task,
       assignedToId: Number(task.assignedToId),
@@ -259,10 +306,11 @@ forkJoin({
         statusMap.get(Number(task.statusId)) ||
         task.statusName ||
         'Unknown',
-        showMenu: prevMenuState.get(task.id)?.showMenu || false,
-        menuOpensUp: prevMenuState.get(task.id)?.menuOpensUp || false,
+      showMenu: prevMenuState.get(task.id)?.showMenu || false,
+      menuOpensUp: prevMenuState.get(task.id)?.menuOpensUp || false,
     }));
   }
+
   private rebuildTaskViews(): void {
     const mappedTasks = this.mapTasks();
 
@@ -277,28 +325,36 @@ forkJoin({
     this.refreshAssignedView();
     this.refreshAllView();
   }
+
   //for employee search dopdown- REASSIGN
   setupUserSearch() {
-    this.userInput$.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      tap(() => this.usersLoading = true),
-      switchMap((term: string) => this.auth.searchUsers(term))
-    ).subscribe({
-      next: (response: any) => {
-        const data = Array.isArray(response) ? response : (response?.data || []);
-        this.users = data.map((user: any) => ({
-          id: Number(user.id),
-          name: user.name || user.email || `User ${user.id}`
-        }));
-        this.usersLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error searching users:', error);
-        this.usersLoading = false;
-      }
-    });
+    // FIX: this subscription was never added to storeSubs, so it was never
+    // torn down in ngOnDestroy - a leak if the component is destroyed while
+    // a search is in flight (e.g. within the 300ms debounce window).
+    this.storeSubs.add(
+      this.userInput$.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        tap(() => this.usersLoading = true),
+        switchMap((term: string) => this.auth.searchUsers(term))
+      ).subscribe({
+        next: (response: any) => {
+          const data = Array.isArray(response) ? response : (response?.data || []);
+          this.users = data.map((user: any) => ({
+            id: Number(user.id),
+            name: user.name || user.email || `User ${user.id}`
+          }));
+          this.usersLoading = false;
+          // this.ChangeDetectorRef.detectChanges();
+        },
+        error: (error: any) => {
+          console.error('Error searching users:', error);
+          this.usersLoading = false;
+        }
+      })
+    );
   }
+
   openTask(id: number) {
     this.router.navigate(['/main', 'task', id]).catch(err => {
       console.error(err);
@@ -327,7 +383,7 @@ forkJoin({
       next: () => {
         this.taskStore.refresh();
         this.loadSummary();
-        this.refreshAssignedView();
+        // this.refreshAssignedView();
       },
       error: err => {
         console.log(err);
@@ -349,6 +405,7 @@ forkJoin({
     return dueDate < today &&
       !this.isCompletedStatus(task.statusName);
   }
+
   trackByTaskId(index: number, task: any) {
     return task.id;
   }
@@ -360,7 +417,6 @@ forkJoin({
           ? 'desc'
           : 'asc';
     }
-
     else {
       this.assignedSortKey = key;
       this.assignedSortDir = 'asc';
@@ -404,14 +460,12 @@ forkJoin({
     this.assignedPage = page;
     this.refreshAssignedView();
   }
-  goToAllPage(page: number) {
 
+  goToAllPage(page: number) {
     if (page < 1 || page > this.allTotalPages) {
       return;
     }
-
     this.allPage = page;
-
     this.refreshAllView();
   }
 
@@ -421,11 +475,13 @@ forkJoin({
     this.assignedPage = 1;
     this.refreshAssignedView();
   }
+
   clearAllTaskFilters() {
     this.searchAllClient = '';
     this.allPage = 1;
     this.refreshAllView();
   }
+
   getUniqueCreatedBy(): any[] {
     const unique = new Map<number, string>();
     this.assignedTasks.forEach(task => {
@@ -436,7 +492,6 @@ forkJoin({
     });
     return Array.from(unique, ([id, name]) => ({ id, name }));
   }
-
 
   //FOR MY TASKS
   refreshAssignedView() {
@@ -466,12 +521,10 @@ forkJoin({
       filtered.slice(start, start + this.assignedItemsPerPage);
     this.uniqueCreatedUsers =
       this.getUniqueCreatedBy();
-      // this.ChangeDetectorRef.detectChanges();
   }
 
   //FOR ALL TASKS
   refreshAllView() {
-
     let filtered: any[] = [...this.alltasks];
 
     if (this.searchAllClient.trim()) {
@@ -493,9 +546,7 @@ forkJoin({
 
     this.paginatedAllTasks =
       filtered.slice(start, start + this.allItemPerPage);
-      // this.ChangeDetectorRef.detectChanges();
   }
-
 
   // Turns "In Progress" -> "status-in-progress" to match a CSS class
   getStatusClass(statusName?: string): string {
@@ -526,10 +577,25 @@ forkJoin({
       .slice(0, 2)
       .toUpperCase();
   }
+
   toggleMenu(task: any, event: MouseEvent) {
-     event.stopPropagation();
-    // close others first (optional, if you want only one open at a time)
-    this.tasks.forEach(t => { if (t !== task) t.showMenu = false; });
+    event.stopPropagation();
+
+    // FIX: previously this looped over `this.tasks` (the raw, un-mapped
+    // store data). `task` here comes from `paginatedAllTasks` /
+    // `paginatedAssignedTasks`, which are brand-new objects created every
+    // time `mapTasks()` runs (`{ ...task, ... }`) - never the same
+    // references as `this.tasks`. So `t !== task` was true for every
+    // element and this "close others" loop never actually closed anything
+    // that was visibly open, while also mutating objects that aren't even
+    // the ones being rendered. Operate on `this.alltasks` instead, which is
+    // the same array `closeAllMenus()` uses and the one the table actually
+    // renders from (via paginatedAllTasks/paginatedAssignedTasks).
+    this.alltasks.forEach(t => {
+      if (Number(t.id) !== Number(task.id)) {
+        t.showMenu = false;
+      }
+    });
 
     task.showMenu = !task.showMenu;
 
@@ -540,26 +606,27 @@ forkJoin({
       task.menuOpensUp = spaceBelow < 150; // adjust threshold to your menu's height
     }
   }
+
   @HostListener('document:click')
-closeAllMenus() {
-  this.alltasks.forEach(t => t.showMenu = false);
-}
+  closeAllMenus() {
+
+    this.alltasks.forEach(t => {
+      t.showMenu = false;
+    });
+
+  }
+
   openReassign(task: any) {
-
     this.selectedTask = task;
-
     this.selectedUserId = task.assignedToId;
-
     this.reassignRemarks = '';
-
     this.showReassignModal = true;
-
   }
+
   closeReassign() {
-
     this.showReassignModal = false;
-
   }
+
   confirmReassign() {
     const payload = {
       assignedToId: this.selectedUserId,

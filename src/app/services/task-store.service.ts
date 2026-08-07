@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription, of, forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
+import { NgZone } from '@angular/core';
+
 //Makes this service available throughout the application
 @Injectable({ providedIn: 'root' })
 export class TaskStore {
@@ -18,13 +20,16 @@ export class TaskStore {
   private pollingId: any;
   private refreshTimer: any;
   //subscription use for WebSocket subscriptions
-  private socketSub?: Subscription;
+  // private socketSub?: Subscription;
   private currentUserId = 0;
   private refreshInFlight = false;
   private pendingRefresh = false;
   private lastRefreshAt = 0;
 
-  constructor(private taskService: TaskService) { }
+  constructor(
+    private taskService: TaskService,
+    private zone: NgZone
+  ) { }
   //called when dashboard loads.
   initForUser(userId: number) {
     if (!userId) {
@@ -32,65 +37,67 @@ export class TaskStore {
     }
 
     this.currentUserId = userId;
-    this.stopPolling();
+    // this.stopPolling();
     this.loadAll();
-    this.startPolling();
+    // this.startPolling();
   }
 
   private loadAll() {
-  if (!this.currentUserId) {
-    return;
-  }
-
-  this.loading$.next(true);
-
-  forkJoin({
-    statuses: this.taskService.GetStatuses(),
-    tasks: this.taskService.GetActiveTasks()
-  }).subscribe({
-    next: ({ statuses, tasks }: any) => {
-
-      const mappedStatuses = Array.isArray(statuses)
-        ? statuses.map((s: any) => ({
-            id: Number(s.id),
-            name: s.statusName || s.name || ''
-          }))
-        : [];
-
-      const statusMap = new Map<number, string>();
-
-      mappedStatuses.forEach((s: any) => {
-        statusMap.set(s.id, s.name);
-      });
-
-      const mappedTasks = Array.isArray(tasks)
-        ? tasks.map((task: any) => ({
-            ...task,
-            assignedToId: Number(task.assignedToId),
-            createdById: Number(task.createdById),
-            statusId: Number(task.statusId),
-            statusName:
-              statusMap.get(Number(task.statusId)) ||
-              task.statusName ||
-              'Unknown'
-          }))
-        : [];
-
-      this.tasksSubject.next(mappedTasks);
-      this.statusesSubject.next(mappedStatuses);
-
-      console.log('TASKS LOADED:', mappedTasks.length);
-    },
-
-    error: (err) => {
-      console.error('Dashboard loading failed:', err);
-    },
-
-    complete: () => {
-      this.loading$.next(false);
+    if (!this.currentUserId) {
+      return;
     }
-  });
-}
+    this.zone.run(() => {
+      this.loading$.next(true);
+
+      forkJoin({
+        statuses: this.taskService.GetStatuses(),
+        tasks: this.taskService.GetActiveTasks()
+      }).subscribe({
+        next: ({ statuses, tasks }: any) => {
+
+          const mappedStatuses = Array.isArray(statuses)
+            ? statuses.map((s: any) => ({
+              id: Number(s.id),
+              name: s.statusName || s.name || ''
+            }))
+            : [];
+
+          const statusMap = new Map<number, string>();
+
+          mappedStatuses.forEach((s: any) => {
+            statusMap.set(s.id, s.name);
+          });
+
+          const mappedTasks = Array.isArray(tasks)
+            ? tasks.map((task: any) => ({
+              ...task,
+              assignedToId: Number(task.assignedToId),
+              createdById: Number(task.createdById),
+              statusId: Number(task.statusId),
+              statusName:
+                statusMap.get(Number(task.statusId)) ||
+                task.statusName ||
+                'Unknown'
+            }))
+            : [];
+          console.log('am I inside Angular zone right now:', (window as any).Zone?.current?.name);
+         
+          this.tasksSubject.next(mappedTasks);
+          this.statusesSubject.next(mappedStatuses);
+
+          console.log('TASKS LOADED:', mappedTasks.length);
+        },
+
+        error: (err) => {
+          console.error('Dashboard loading failed:', err);
+        },
+
+        complete: () => {
+          this.loading$.next(false);
+        }
+      });
+    });
+  }
   UpdateTask(taskId: number, data: any) {
     return this.taskService.UpdateTask(taskId, data).pipe(
       catchError((err) => {
@@ -101,7 +108,7 @@ export class TaskStore {
   }
 
   refresh() {
-   this.loadAll();
+    this.loadAll();
   }
 
   forceRefresh(userId?: number) {
@@ -129,7 +136,7 @@ export class TaskStore {
 
   private startPolling() {
     this.stopPolling();
-    this.pollingId = setInterval(() => this.scheduleRefresh(), 20000);
+    // this.pollingId = setInterval(() => this.scheduleRefresh(), 20000);
   }
 
   private stopPolling() {
@@ -146,17 +153,9 @@ export class TaskStore {
   //Create WebSocket connection.
   destroy() {
     this.stopPolling();
-    //remove websocket connection.
-    this.socketSub?.unsubscribe();
-    //disconnect socket
-    this.taskService.disconnectTaskUpdates();
-    //clear
     this.currentUserId = 0;
-
     this.tasksSubject.next([]);
     this.statusesSubject.next([]);
     this.loading$.next(false);
-    this.refreshInFlight = false;
-    this.pendingRefresh = false;
   }
 }
