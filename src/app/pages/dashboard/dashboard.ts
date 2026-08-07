@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -109,8 +109,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private router: Router,
     private storage: BrowserStorageService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private zone: NgZone,
-    private ChangeDetectorRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {
     console.log('Dashboard constructor called');
   }
@@ -135,9 +134,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.currentUserId = Number(user.id);
     this.currentUserRole = this.storage.getItem('role') || '';
 
-    // FIX: if there's no valid user id, every downstream "assigned to me"
-    // filter silently returns nothing (NaN === NaN is false) with zero
-    // indication why. Surface it instead of loading a blank dashboard.
+    
     if (!user?.id || Number.isNaN(this.currentUserId)) {
       console.error('No valid user found in storage - redirecting to login');
       this.authError = true;
@@ -152,28 +149,23 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
-        // FIX: force this into the Angular zone + trigger CD explicitly.
-        // If TaskStore's source (websocket/manual fetch/3rd-party callback)
-        // emits from outside the Angular zone, the view won't update until
-        // some unrelated zone event (like a click) runs change detection.
-        this.zone.run(() => {
+        
           console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
           this.tasks = Array.isArray(tasks) ? tasks : [];
           this.rebuildTaskViews();
-          // this.ChangeDetectorRef.detectChanges();
-        });
       })
     );
 
+
     this.storeSubs.add(
       this.taskStore.statuses$.subscribe((statuses: any[]) => {
-        this.zone.run(() => {
+        
           console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
           this.statuses = Array.isArray(statuses) ? statuses : [];
           this.rebuildTaskViews();
           // this.ChangeDetectorRef.detectChanges();
-        });
-      })
+        })
+     
     );
 
     this.loadUsers();
@@ -213,9 +205,6 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   loadSummary() {
-    // FIX: forkJoin had no error handler. If EITHER call failed, neither
-    // summary block updated and the error silently went to the default
-    // error handler. Also guard against a null/partial response shape.
     forkJoin({
       mine: this.taskService.GetMySummary(),
       all: this.taskService.GetSummary()
@@ -239,12 +228,13 @@ export class Dashboard implements OnInit, OnDestroy {
           this.allUrgentCount = all.urgentTasks ?? 0;
         }
 
-        // this.ChangeDetectorRef.detectChanges();
+      this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load dashboard summary', err);
       }
     });
+    
   }
 
   private isCompletedStatus(statusName?: string): boolean {
@@ -324,6 +314,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.refreshAssignedView();
     this.refreshAllView();
+    this.cdr.markForCheck();
   }
 
   //for employee search dopdown- REASSIGN

@@ -51,7 +51,7 @@ export class Clientlist implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private exportService: Export,
     private userStore: UserStore,
-    private ChangeDetectorRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) { }
 @HostListener('document:click', ['$event'])
 onScreenClick(event: MouseEvent) {
@@ -84,12 +84,13 @@ onScreenClick(event: MouseEvent) {
           this.totalRecords = res.totalRecords;
           this.loadClientCategories();
           this.loading = false;
-          // this.ChangeDetectorRef.detectChanges();
+          this.cdr.markForCheck();
         },
         error: (err: any) => {
           console.error('GetClients error:', err);
           this.clients = [];
           this.loading = false;
+          this.cdr.markForCheck();
         }
       })
     }

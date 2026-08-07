@@ -5,13 +5,12 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
-import { ZoneInterceptor } from './zone.interceptor'; 
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([authInterceptor, ZoneInterceptor]),
+      withInterceptors([authInterceptor]),
       withFetch()
     ),
     provideAnimations(),

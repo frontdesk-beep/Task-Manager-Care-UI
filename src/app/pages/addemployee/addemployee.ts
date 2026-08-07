@@ -43,7 +43,6 @@ export class Addemployee implements OnInit, AfterViewInit {
   employee: Employee = this.createEmptyEmployee();
 
   employees: Employee[] = [];
-  // editMode = false;
 
   searchText = '';
   roleFilter = '';
@@ -75,7 +74,7 @@ export class Addemployee implements OnInit, AfterViewInit {
     private auth: Auth,
     private toastr: ToastrService,
     private exportService: Export,
-    private ChangeDetectorRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
 
   ) { }
 
@@ -130,7 +129,7 @@ export class Addemployee implements OnInit, AfterViewInit {
           isActive: employee.isActive
         }));
         this.updateEmployeeView();
-
+        this.cdr.markForCheck();
 
       },
       error: (error) => {
