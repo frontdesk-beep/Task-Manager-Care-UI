@@ -18,7 +18,7 @@ export class Activity implements OnChanges {
   loading = false;
 
   constructor(private taskService: TaskService,
-    private changedetectRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -33,7 +33,7 @@ export class Activity implements OnChanges {
       next: (res: any) => {
         this.history = res?.data ?? res;
         this.loading = false;
-      //  this.changedetectRef.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);

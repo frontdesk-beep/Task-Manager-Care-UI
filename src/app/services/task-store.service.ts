@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription, of, forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
-import { NgZone } from '@angular/core';
 
 //Makes this service available throughout the application
 @Injectable({ providedIn: 'root' })
@@ -28,7 +27,6 @@ export class TaskStore {
 
   constructor(
     private taskService: TaskService,
-    private zone: NgZone
   ) { }
   //called when dashboard loads.
   initForUser(userId: number) {
@@ -46,7 +44,7 @@ export class TaskStore {
     if (!this.currentUserId) {
       return;
     }
-    this.zone.run(() => {
+    // this.zone.run(() => {
       this.loading$.next(true);
 
       forkJoin({
@@ -96,7 +94,7 @@ export class TaskStore {
           this.loading$.next(false);
         }
       });
-    });
+    // });
   }
   UpdateTask(taskId: number, data: any) {
     return this.taskService.UpdateTask(taskId, data).pipe(

@@ -45,7 +45,7 @@ export class TaskReportComponent implements OnInit {
   ];
 
   constructor(private reportService: TaskReportService,
-    private ChangeDetectorRef: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef,
     private exportService: Export,
   ) { }
 
@@ -81,7 +81,7 @@ export class TaskReportComponent implements OnInit {
         this.reports = res.items;
         this.totalCount = res.totalCount;
         this.totalPages = Math.ceil(res.totalCount / this.pageSize);
-        this.ChangeDetectorRef.detectChanges();
+        this.cdr.markForCheck();
 
       },
 

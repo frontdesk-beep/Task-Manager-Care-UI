@@ -19,7 +19,7 @@ export class Remarks implements OnChanges {
   newRemark = '';
 
   constructor(private taskService: TaskService,
-    private ChangeDetectorRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
 
   ) {}
 
@@ -33,7 +33,7 @@ export class Remarks implements OnChanges {
     this.taskService.GetComments(this.taskId).subscribe({
       next: (res: any) => {
         this.remarks = res?.data ?? res;
-        this.ChangeDetectorRef.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

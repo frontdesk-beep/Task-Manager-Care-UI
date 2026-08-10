@@ -1,6 +1,6 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { BehaviorSubject, Subject } from 'rxjs'; import { Notification } from '../models/notification';
+import { BehaviorSubject, Subject } from 'rxjs';import { Notification } from '../models/notification';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BrowserStorageService } from './browser-storage.service';
@@ -16,10 +16,10 @@ export class NotificationService {
     new BehaviorSubject<Notification[]>([]);
   notifications$ =
     this.notifications.asObservable();
+  
+private commentSubject = new Subject<any>();
 
-  private commentSubject = new Subject<any>();
-
-  comment$ = this.commentSubject.asObservable();
+comment$ = this.commentSubject.asObservable();
 
   private api =
     `${environment.apiUrl}/Notifications`;
@@ -27,8 +27,8 @@ export class NotificationService {
   constructor(
     private http: HttpClient,
     private storage: BrowserStorageService,
-    private taskStore: TaskStore,
-    private zone: NgZone
+    private taskStore: TaskStore
+    
   ) { }
 
   startConnection() {
@@ -48,52 +48,51 @@ export class NotificationService {
     this.hubConnection.on(
       "ReceiveNotification",
       (notification: Notification) => {
-        this.zone.run(() => {
-          const current =
-            this.notifications.value;
+        const current =
+          this.notifications.value;
 
-          this.notifications.next([
-            notification,
-            ...current
-          ]);
-        });
-      });
+        this.notifications.next([
+          notification,
+          ...current
+        ]);
+});
+      
     // keep everyone's task list live, not just the bell
     this.hubConnection.on('TaskCreated', () => {
-      this.zone.run(() => this.taskStore.refresh());
+        this.taskStore.refresh();
     });
 
     this.hubConnection.on('TaskAssigned', () => {
-      this.zone.run(() => this.taskStore.refresh());
+     this.taskStore.refresh();
     });
 
     this.hubConnection.on(
-      "ReceiveTaskUpdate",
-      (data: any) => {
+  "ReceiveTaskUpdate",
+  (data:any)=>{
 
-        console.log("Task update received", data);
+    console.log("Task update received", data);
 
-        this.zone.run(() => this.taskStore.refresh());
+    this.taskStore.refresh();
 
-      }
-    );
-    this.hubConnection.on(
-      "ReceiveComment",
-      (data: any) => {
+  }
+);
+this.hubConnection.on(
+  "ReceiveComment",
+  (data:any)=>{
 
-        console.log("Comment received", data);
+    console.log("Comment received", data);
 
-        this.zone.run(() => this.commentSubject.next(data));
+    this.commentSubject.next(data);
 
-      }
-    );
+  }
+);
     this.hubConnection.on('TaskDeleted', () => {
-      this.zone.run(() => this.taskStore.refresh());
+      this.taskStore.refresh();
     });
 
 
     this.hubConnection.on('TaskReassigned', () => {
-      this.zone.run(() => this.taskStore.refresh());
+      this.taskStore.refresh();
     });
     this.hubConnection
       .start()
@@ -123,33 +122,33 @@ export class NotificationService {
   clearNotifications() {
     this.notifications.next([]);
   }
-  joinTask(taskId: number) {
+joinTask(taskId:number){
 
-    return this.hubConnection.invoke(
-      "SubscribeToTask",
-      taskId
-    );
+ return this.hubConnection.invoke(
+   "SubscribeToTask",
+   taskId
+ );
 
-  }
+}
 
-  leaveTask(taskId: number) {
+leaveTask(taskId:number){
 
-    return this.hubConnection.invoke(
-      "LeaveTask",
-      taskId
-    );
+ return this.hubConnection.invoke(
+   "LeaveTask",
+   taskId
+ );
 
-  }
+}
 
 
-  onCommentReceived(callback: any) {
+onCommentReceived(callback:any){
 
-    this.hubConnection.on(
-      "ReceiveComment",
-      callback
-    );
+ this.hubConnection.on(
+   "ReceiveComment",
+   callback
+ );
 
-  }
+}
 }
 
 

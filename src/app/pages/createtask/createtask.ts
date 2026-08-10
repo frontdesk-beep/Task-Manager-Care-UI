@@ -15,6 +15,7 @@ import { ClientService } from '../../services/client.service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import {ChangeDetectorRef} from '@angular/core';
 
 interface DropdownItem {
   id: number;
@@ -78,7 +79,8 @@ export class Createtask implements OnInit {
     private auth: Auth,
     private toastr: ToastrService,
     private userStore: UserStore,
-    private clientService: ClientService
+    private clientService: ClientService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -318,6 +320,7 @@ export class Createtask implements OnInit {
         this.toastr.error(message);
       }
     });
+    this.cdr.markForCheck();
   }
 
   resetTask() {
@@ -339,6 +342,7 @@ export class Createtask implements OnInit {
       createdOn: now.toISOString().slice(0, 16),
       createdById: this.currentUserId
     })
+    this.cdr.markForCheck();
     // console.log('Before reset: ', this.task);
     // becoz of this the after clicking on the save btn it was pointing below method that's why the the clear was not woking perfectly so we craeteed seperate one for reset.
     // which we can use in the save task() also now.
