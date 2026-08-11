@@ -890,15 +890,17 @@
 }
 
 ::ng-deep .ng-dropdown-panel {
-  position: fixed !important;
-  z-index: 999999 !important;
+  z-index: 10000 !important;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  z-index: 10000; /* above .reassign-overlay's z-index: 9999 */
 }
 
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
+  max-height: 220px;
+  overflow-y: auto;
+}
 ::ng-deep .ng-dropdown-panel .ng-option {
   background: var(--color-surface);
   color: var(--text-primary);

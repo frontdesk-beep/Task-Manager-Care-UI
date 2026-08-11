@@ -2,17 +2,17 @@
 
   <div class="reports-header">
     <div class="reports-title-group">
-      <h2>Completed Tasks Report</h2>
+      <h1>Completed Tasks Report</h1>
       <span class="item-count-pill" *ngIf="reportGenerated">
         {{ totalCount }} task{{ totalCount === 1 ? '' : 's' }}
       </span>
     </div>
     <div class="export-actions" *ngIf="reportGenerated && reports.length > 0">
       <button class="export-btn export-excel" (click)="exportTasksExcel()">
-        Export Excel
+         Excel
       </button>
       <button class="export-btn export-pdf" (click)="exportTasksPdf()">
-        Export PDF
+        PDF
       </button>
     </div>
   </div>
@@ -25,14 +25,14 @@
     </div>
 
     <select [(ngModel)]="selectedYear">
-      <option [ngValue]="null">All Years</option>
+      <option [ngValue]="null"> Years</option>
       <option *ngFor="let y of years" [ngValue]="y">
         {{y}}
       </option>
     </select>
 
     <select [(ngModel)]="selectedMonth">
-      <option [ngValue]="null">All Months</option>
+      <option [ngValue]="null"> Months</option>
       <option *ngFor="let m of months" [ngValue]="m.id">
         {{m.name}}
       </option>
@@ -43,7 +43,7 @@
         Clear
       </button>
       <button class="generate-btn" (click)="generateReport()">
-        Generate Report
+        Generate
       </button>
 
     </div>

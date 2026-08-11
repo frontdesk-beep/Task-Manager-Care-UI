@@ -14,6 +14,7 @@ import { BrowserStorageService } from '../../services/browser-storage.service';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HostListener } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-dashboard',
@@ -107,6 +108,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private auth: Auth,
     private taskStore: TaskStore,
     private router: Router,
+    private toastr: ToastrService,
     private storage: BrowserStorageService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef
@@ -134,7 +136,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.currentUserId = Number(user.id);
     this.currentUserRole = this.storage.getItem('role') || '';
 
-    
+
     if (!user?.id || Number.isNaN(this.currentUserId)) {
       console.error('No valid user found in storage - redirecting to login');
       this.authError = true;
@@ -149,23 +151,22 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
-        
-          console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
-          this.tasks = Array.isArray(tasks) ? tasks : [];
-          this.rebuildTaskViews();
+
+        console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
+        this.tasks = Array.isArray(tasks) ? tasks : [];
+        this.rebuildTaskViews();
       })
     );
 
 
     this.storeSubs.add(
       this.taskStore.statuses$.subscribe((statuses: any[]) => {
-        
-          console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
-          this.statuses = Array.isArray(statuses) ? statuses : [];
-          this.rebuildTaskViews();
-          // this.ChangeDetectorRef.detectChanges();
-        })
-     
+
+        console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
+        this.statuses = Array.isArray(statuses) ? statuses : [];
+        this.rebuildTaskViews();
+      })
+
     );
 
     this.loadUsers();
@@ -190,13 +191,15 @@ export class Dashboard implements OnInit, OnDestroy {
           ? res
           : (res?.data || []);
 
-        this.allUsers = data;
 
+        this.allUsers = data.map((user: any) => ({
+          id: Number(user.id),
+          name: user.name || user.email || `User ${user.id}`
+        }));
         // users is used by the Reassign dropdown
-        this.users = data;
+        this.users = this.allUsers.slice(0, 5);
 
         this.rebuildTaskViews();
-        // this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.log('Users API error', err);
@@ -228,13 +231,13 @@ export class Dashboard implements OnInit, OnDestroy {
           this.allUrgentCount = all.urgentTasks ?? 0;
         }
 
-      this.cdr.markForCheck();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load dashboard summary', err);
       }
     });
-    
+
   }
 
   private isCompletedStatus(statusName?: string): boolean {
@@ -275,7 +278,7 @@ export class Dashboard implements OnInit, OnDestroy {
     // carry over UI-only flags so an open menu doesn't vanish on refresh
     const prevMenuState = new Map(
       this.alltasks.map(t => [t.id, {
-        showMenu: t.showMenu, 
+        showMenu: t.showMenu,
         menuOpensUp: t.menuOpensUp
       }])
     );
@@ -285,7 +288,7 @@ export class Dashboard implements OnInit, OnDestroy {
       assignedToId: Number(task.assignedToId),
       createdById: Number(task.createdById),
       statusId: Number(task.statusId),
-
+      originalStatusId: Number(task.statusId), // ← track the saved value separately
       assignedToName:
         userMap.get(Number(task.assignedToId)) || 'Unknown',
 
@@ -319,29 +322,51 @@ export class Dashboard implements OnInit, OnDestroy {
 
   //for employee search dopdown- REASSIGN
   setupUserSearch() {
-    // FIX: this subscription was never added to storeSubs, so it was never
-    // torn down in ngOnDestroy - a leak if the component is destroyed while
-    // a search is in flight (e.g. within the 300ms debounce window).
     this.storeSubs.add(
       this.userInput$.pipe(
         debounceTime(300),
         distinctUntilChanged(),
         tap(() => this.usersLoading = true),
-        switchMap((term: string) => this.auth.searchUsers(term))
+
+        switchMap((term: string) => {
+          const searchTerm = (term || '').trim();
+
+          // If search box is empty, show first 5 users
+          if (!searchTerm) {
+            this.usersLoading = false;
+            return this.auth.GetUsers();
+          }
+
+          return this.auth.searchUsers(searchTerm);
+        })
+
       ).subscribe({
+
         next: (response: any) => {
-          const data = Array.isArray(response) ? response : (response?.data || []);
-          this.users = data.map((user: any) => ({
+
+          const data = Array.isArray(response)
+            ? response
+            : (response?.data || []);
+
+          const mappedUsers = data.map((user: any) => ({
             id: Number(user.id),
             name: user.name || user.email || `User ${user.id}`
           }));
+
+          // IMPORTANT:
+          // Only show maximum 5 results
+          this.users = mappedUsers.slice(0, 5);
+
           this.usersLoading = false;
-          // this.ChangeDetectorRef.detectChanges();
         },
+
         error: (error: any) => {
           console.error('Error searching users:', error);
+
+          this.users = [];
           this.usersLoading = false;
         }
+
       })
     );
   }
@@ -354,6 +379,11 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   UpdateTask(task: any, statusId: number) {
+
+    if (Number(task.originalStatusId) === Number(statusId)) {
+      this.toastr.info('No changes made to the task status', 'Info');
+      return;
+    }
 
     const payload = {
       id: task.id,
@@ -372,12 +402,14 @@ export class Dashboard implements OnInit, OnDestroy {
     };
     this.taskStore.UpdateTask(task.id, payload).subscribe({
       next: () => {
+        task.originalStatusId = Number(statusId); // ← keep in sync so Save disables again until next change
         this.taskStore.refresh();
         this.loadSummary();
-        // this.refreshAssignedView();
+        this.toastr.success('Task updated successfully', 'Success');
       },
       error: err => {
         console.log(err);
+        this.toastr.error('Failed to update task', 'Error');
       }
     });
   }
@@ -572,16 +604,6 @@ export class Dashboard implements OnInit, OnDestroy {
   toggleMenu(task: any, event: MouseEvent) {
     event.stopPropagation();
 
-    // FIX: previously this looped over `this.tasks` (the raw, un-mapped
-    // store data). `task` here comes from `paginatedAllTasks` /
-    // `paginatedAssignedTasks`, which are brand-new objects created every
-    // time `mapTasks()` runs (`{ ...task, ... }`) - never the same
-    // references as `this.tasks`. So `t !== task` was true for every
-    // element and this "close others" loop never actually closed anything
-    // that was visibly open, while also mutating objects that aren't even
-    // the ones being rendered. Operate on `this.alltasks` instead, which is
-    // the same array `closeAllMenus()` uses and the one the table actually
-    // renders from (via paginatedAllTasks/paginatedAssignedTasks).
     this.alltasks.forEach(t => {
       if (Number(t.id) !== Number(task.id)) {
         t.showMenu = false;

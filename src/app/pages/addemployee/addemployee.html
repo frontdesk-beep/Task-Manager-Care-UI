@@ -42,7 +42,7 @@
                     </select>
                 </div>
                 <div class="col-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Create Employee</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                     <button type="button" class="btn btn-secondary" (click)="clearForm()">Clear</button>
                 </div>
             </div>
@@ -98,10 +98,10 @@
             <div class="d-flex flex-column flex-sm-row gap-2 align-items-center justify-content-end w-100 w-sm-auto">
                 <div class="d-flex flex-wrap gap-2">
                     <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">Clear
-                        Filters</button>
-                    <button type="button" class="btn btn-outline-success" (click)="exportEmployeesExcel()">Export
+                        </button>
+                    <button type="button" class="btn btn-outline-success" (click)="exportEmployeesExcel()">
                         Excel</button>
-                    <button type="button" class="btn btn-outline-primary" (click)="exportEmployeesPdf()">Export
+                    <button type="button" class="btn btn-outline-primary" (click)="exportEmployeesPdf()">
                         PDF</button>
                 </div>
                 <span class="item-count-pill">{{ filteredEmployees.length }} employee{{ filteredEmployees.length === 1 ?

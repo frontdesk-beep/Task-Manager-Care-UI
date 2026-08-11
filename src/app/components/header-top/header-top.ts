@@ -9,6 +9,7 @@ import { TaskStore } from '../../services/task-store.service';
 import { BrowserStorageService } from '../../services/browser-storage.service';
 import { NotificationService } from '../../services/notification';
 import { TimeAgoPipe } from '../../pipes/time-ago-pipe';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-header-top',
@@ -34,12 +35,12 @@ export class HeaderTop implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private taskService: TaskService,
     private toastr: ToastrService,
     private userStore: UserStore,
     private taskStore: TaskStore,
     private notificationService: NotificationService,
-    private storage: BrowserStorageService
+    private storage: BrowserStorageService,
+    private auth: Auth
   ) { }
 
   ngOnInit(): void {
@@ -67,6 +68,11 @@ export class HeaderTop implements OnInit, OnDestroy {
     this.storeSubscription?.unsubscribe();
     this.userSubscription?.unsubscribe();
     this.signalRSubscription?.unsubscribe();
+  }
+
+  //check the superadmin role to hide the notification bell icon
+  get isSuperAdmin(): boolean {
+    return this.auth.currentRole === 'superAdmin' || this.auth.currentRole === 'SuperAdmin';
   }
   // collapses near-identical notifications fired within a few seconds of each other
   private dedupe(list: any[]): any[] {

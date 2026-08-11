@@ -6,13 +6,13 @@
         <h5>Welcome, {{name}}</h5>
     </div>
     <div class="right">
-        <div class="notification" (click)="toggleNotifications(); $event.stopPropagation()">
+        <div class="notification" *ngIf="!isSuperAdmin" (click)="toggleNotifications(); $event.stopPropagation()">
             🔔
             <span class="badge" *ngIf="unreadCount > 0">
                 {{ unreadCount }}
             </span>
         </div>
-        <div class="notification-menu" *ngIf="notificationOpen" (click)="$event.stopPropagation()">
+        <div class="notification-menu" *ngIf="notificationOpen && !isSuperAdmin" (click)="$event.stopPropagation()">
             <div class="notif-header">
                 <h4>Notifications</h4>
                 <button *ngIf="unreadCount > 0" class="mark-all-btn" (click)="markAllRead()">

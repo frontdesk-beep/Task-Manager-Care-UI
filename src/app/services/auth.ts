@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { BrowserStorageService } from './browser-storage.service';
 import { environment } from '../../environments/environment';
+import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 
 @Injectable({
   providedIn: 'root',
@@ -89,4 +90,14 @@ export class Auth {
     }
     return this.http.get(`${this.usersapi}`, { params });
   }
-}
+
+  //to get a superadmin role 
+  getCurrentUserRole(): any {
+    const user = this.storage.getItem('user');
+    return user ? JSON.parse(user) : null;
+    }
+
+    get currentRole(): string | null {
+      return this.getCurrentUserRole()?.role || null;
+    }
+  }

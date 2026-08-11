@@ -3,9 +3,11 @@
 
     <div class="card-header">
       <h1>Client List</h1>
-      <span class="count-badge">{{ totalRecords }} items</span>
+      <div class="header-actions">
+        <span class="count-badge">{{ totalRecords }} items</span>
+        <button class="btn btn-primary" (click)="openCreateClientForm()"> + Add Client</button>
+      </div>
     </div>
-
     <!-- Filters -->
     <div class="filters-section">
 
@@ -22,15 +24,15 @@
         <div class="filter-group">
           <select [(ngModel)]="filterCategoryId" class="filter-select" (ngModelChange)="currentPage=1; loadClients()">
             <option [ngValue]="null">All Categories</option>
-            <option *ngFor="let cat of uniqueCategories" [ngValue]="cat.id">{{ cat.name }}</option>
+            <option *ngFor="let cat of clientCategories" [ngValue]="cat.id">{{ cat.clientType || cat.name }}</option>
           </select>
         </div>
       </div>
 
       <div class="filters-right">
         <button class="btn btn-outline-secondary" (click)="clearFilters()">Clear</button>
-        <button class="btn btn-outline-success" (click)="exportCreatedExcel()">Export Excel</button>
-        <button class="btn btn-outline-primary" (click)="exportCreatedPdf()">Export PDF</button>
+        <button class="btn btn-outline-success" (click)="exportCreatedExcel()"> Excel</button>
+        <button class="btn btn-outline-primary" (click)="exportCreatedPdf()"> PDF</button>
       </div>
 
     </div>
@@ -75,13 +77,7 @@
               </div>
             </td>
             <td>
-              <!-- <span class="category-pill"
-                [ngClass]="{
-                  'new': getCategoryName(client.clientCategoryId).toLowerCase().includes('new'),
-                  'existing': getCategoryName(client.clientCategoryId).toLowerCase().includes('existing')
-                }"> -->
-                <span class="pill-dot"></span>{{ getCategoryName(client.clientCategoryId) }}
-              <!-- </span> -->
+              <span class="pill-dot"></span>{{ getCategoryName(client.clientCategoryId) }}
             </td>
             <td>{{ client.companyName || '-' }}</td>
             <td>{{ client.phoneNumber || '-' }}</td>
@@ -104,8 +100,10 @@
       <button class="btn btn-sm" (click)="goToPage(1)" [disabled]="currentPage === 1">First</button>
       <button class="btn btn-sm" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
       <span class="page-info">Page {{ currentPage }} of {{ getTotalPages() }}</span>
-      <button class="btn btn-sm" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === getTotalPages()">Next</button>
-      <button class="btn btn-sm" (click)="goToPage(getTotalPages())" [disabled]="currentPage === getTotalPages()">Last</button>
+      <button class="btn btn-sm" (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === getTotalPages()">Next</button>
+      <button class="btn btn-sm" (click)="goToPage(getTotalPages())"
+        [disabled]="currentPage === getTotalPages()">Last</button>
     </div>
 
   </div>
@@ -141,5 +139,61 @@
       <button type="button" class="btn btn-primary" (click)="updateClient(selectedClient.clientId)">Save</button>
       <button type="button" class="btn btn-danger" (click)="cancelEdit()">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- Create Client modal -->
+<div *ngIf="isCreatedMode" class="modal-backdrop">
+  <div class="modal-content">
+    <h3>Add Client</h3>
+
+    <form #clientForm="ngForm" (ngSubmit)="createClient(clientForm)" novalidate>
+      <div class="form-grid">
+
+        <div class="field-wrap">
+          <label class="field-label">Client Name <span class="required-mark">*</span></label>
+          <input type="text" name="clientName" [(ngModel)]="newClient.clientName" #clientName="ngModel" required
+            placeholder="e.g. John Smith" [class.invalid]="clientName.invalid && (clientName.touched || formSubmitted)">
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Company Name</label>
+          <input type="text" name="companyName" [(ngModel)]="newClient.companyName" placeholder="e.g. Acme Corp">
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Phone Number <span class="required-mark">*</span></label>
+          <input type="text" name="phoneNumber" [(ngModel)]="newClient.phoneNumber" #phoneNumber="ngModel" required
+            placeholder="e.g. +1 555 123 4567"
+            [class.invalid]="phoneNumber.invalid && (phoneNumber.touched || formSubmitted)">
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Email <span class="required-mark">*</span></label>
+          <input type="email" name="email" [(ngModel)]="newClient.email" #email="ngModel" required email
+            placeholder="e.g. john@company.com" [class.invalid]="email.invalid && (email.touched || formSubmitted)">
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Address</label>
+          <input type="text" name="address" [(ngModel)]="newClient.address" placeholder="Street, City, Country">
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Category<span class="required-mark">*</span></label>
+          <select name="clientCategoryId" [(ngModel)]="newClient.clientCategoryId" #clientCategoryId="ngModel" required
+            [class.invalid]="clientCategoryId.invalid && (clientCategoryId.touched || formSubmitted)">
+            <option [ngValue]="null">Select Category</option>
+            <option *ngFor="let cat of clientCategories" [ngValue]="cat.id">{{ cat.clientType || cat.name }}</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" class="btn btn-danger" (click)="cancelCreateClient()">Cancel</button>
+      </div>
+    </form>
   </div>
 </div>

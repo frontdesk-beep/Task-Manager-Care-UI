@@ -41,8 +41,12 @@ export class ClientService {
     return this.http.get(`${this.api}/${id}`);
   }
 
-  editClient(data: any) {
+  //create client and edit client are using the same endpoint, so we can use the same function for both create and edit
+  createClient(data: any) {
     return this.http.post(this.api, data);
+  }
+  editClient(data: any) {
+    return this.http.put(`${this.api}/${data.id}`, data);
   }
 
   updateClient(id: number, data: any) {
