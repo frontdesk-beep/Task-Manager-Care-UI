@@ -221,7 +221,7 @@ export class Createtask implements OnInit {
 
   loadInitialClients() {
     this.clientsLoading = true;
-    this.clientService.searchClients('', 20).subscribe({
+    this.clientService.searchClients('', 5).subscribe({
       next: (response: any) => {
         this.clients = this.extractArray(response);
         this.clientsLoading = false;
@@ -234,7 +234,6 @@ export class Createtask implements OnInit {
   }
   setupClientSearch() {
     this.clientInput$.pipe(
-      debounceTime(300),
       debounceTime(300),
       distinctUntilChanged(),
       tap(() => this.clientsLoading = true),
@@ -303,16 +302,12 @@ export class Createtask implements OnInit {
     this.taskService.CreateTask(payload).subscribe({
       next: () => {
         this.toastr.success('Task created successfully!');
-        console.log("before reset: ");
         setTimeout(() => {
           this.resetTask();
         }, 0);
-        console.log("After reset: ");
       },
       error: (error) => {
         console.error('Full Error:', error);
-        console.log('Validation:', error.error);
-
         const message = error?.error?.errors
           ? JSON.stringify(error.error.errors)
           : 'Error creating task. Please try again.';
@@ -343,11 +338,7 @@ export class Createtask implements OnInit {
       createdById: this.currentUserId
     })
     this.cdr.markForCheck();
-    // console.log('Before reset: ', this.task);
-    // becoz of this the after clicking on the save btn it was pointing below method that's why the the clear was not woking perfectly so we craeteed seperate one for reset.
-    // which we can use in the save task() also now.
-    // this.task = this.createEmptyTask();
-    // this.task.createdById = this.currentUserId;
+   
   }
   onClientChange() {
 
@@ -366,6 +357,7 @@ export class Createtask implements OnInit {
         this.task.phoneNumber = client.phoneNumber;
         this.task.email = client.email;
         this.task.clientCategoryId = client.clientCategoryId;
+        this.cdr.markForCheck();
       });
   }
   loadClientTypes() {

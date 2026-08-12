@@ -113,12 +113,9 @@ export class Dashboard implements OnInit, OnDestroy {
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef
   ) {
-    console.log('Dashboard constructor called');
   }
 
   ngOnInit() {
-    console.log('Dashboard ngOnInit called');
-
     if (!isPlatformBrowser(this.platformId)) {
       return; // skip all data loading on the server
     }
@@ -151,8 +148,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.storeSubs.add(
       this.taskStore.tasks$.subscribe((tasks: any[]) => {
-
-        console.log('5. DASHBOARD RECEIVED TASKS:', tasks);
         this.tasks = Array.isArray(tasks) ? tasks : [];
         this.rebuildTaskViews();
       })
@@ -161,8 +156,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.storeSubs.add(
       this.taskStore.statuses$.subscribe((statuses: any[]) => {
-
-        console.log('6. DASHBOARD RECEIVED STATUSES:', statuses);
         this.statuses = Array.isArray(statuses) ? statuses : [];
         this.rebuildTaskViews();
       })
@@ -178,19 +171,16 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    console.log('Dashboard ngOnDestroy called');
     this.storeSubs.unsubscribe();
     this.taskStore.destroy();
   }
 
   loadUsers() {
-    console.log('Loading users...');
     this.auth.GetUsers().subscribe({
       next: (res: any) => {
         const data = Array.isArray(res)
           ? res
           : (res?.data || []);
-
 
         this.allUsers = data.map((user: any) => ({
           id: Number(user.id),
@@ -202,8 +192,7 @@ export class Dashboard implements OnInit, OnDestroy {
         this.rebuildTaskViews();
       },
       error: (err) => {
-        console.log('Users API error', err);
-      }
+        console.error('Error loading users:', err);}
     });
   }
 
@@ -213,8 +202,6 @@ export class Dashboard implements OnInit, OnDestroy {
       all: this.taskService.GetSummary()
     }).subscribe({
       next: ({ mine, all }: any) => {
-        console.log("Dashboard getsummary", mine, all);
-
         if (mine) {
           this.assignedCount = mine.assignedTasks ?? 0;
           this.pendingCount = mine.pendingTasks ?? 0;
@@ -408,7 +395,6 @@ export class Dashboard implements OnInit, OnDestroy {
         this.toastr.success('Task updated successfully', 'Success');
       },
       error: err => {
-        console.log(err);
         this.toastr.error('Failed to update task', 'Error');
       }
     });

@@ -36,7 +36,6 @@ interface EditEmployee {
 export class Addemployee implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
-    console.log('form initialized');
   }
   @ViewChild('taskForm') taskForm!: NgForm;
 
@@ -113,10 +112,7 @@ export class Addemployee implements OnInit, AfterViewInit {
   loadEmployees() {
     this.auth.GetUsers().subscribe({
       next: (response: any) => {
-        console.log('GET USERS RESPONSE', response);
         const data = this.extractArray(response);
-        console.log('USERS COUNT', data.length);
-
         this.employees = data.map((employee: any) => ({
           id: Number(employee.id),
           name: employee.name || '',
@@ -161,15 +157,11 @@ export class Addemployee implements OnInit, AfterViewInit {
     this.auth.CreateUser(payload).subscribe({
       next: () => {
         this.toastr.success('Employee created successfully!');
-        console.log('loading employees..: ');
         this.loadEmployees();
-        console.log('clear butn start...')
         this.clearForm();
-        console.log("after clear: ");
       },
       error: (error) => {
         console.error('Full Error: ', error);
-        console.log('Validation:', error.error);
 
         const message = error?.error?.errors
           ? JSON.stringify(error.error.errors)
@@ -194,27 +186,23 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   // edit employee
   editEmployee(employee: Employee) {
-    console.log("edit wmployee is clicked...", employee.id)
     this.auth.getProfile(employee.id).subscribe({
       next: (user: any) => {
-        console.log('API RESPONSE');
         this.employeeToEdit = {
           id: Number(user.id),
           name: user.name || '',
           email: user.email || '',
           role: user.role || 'Employee',
         };
-        console.log('employeeToEdit:', this.employeeToEdit);
       },
       error: (error) => {
         console.error('Error loading employee profile:', error);
-        this.toastr.error('uable to load employee');
+        this.toastr.error('Unable to load employee');
       }
     });
   }
 
   updateEmployee() {
-    console.log('updating the data...')
     if (!this.employeeToEdit) {
       return;
     }
@@ -227,11 +215,9 @@ export class Addemployee implements OnInit, AfterViewInit {
       this.employeeToEdit.id, payload
     ).subscribe({
       next: () => {
-        // this.toastr.success('Employee updated successfully');
         this.employeeToEdit = null
         this.loadEmployees();
         this.toastr.success('Employee updated successfully');
-        console.log('going to close popup');
         //close popup
       },
       error: (error) => {
@@ -244,7 +230,6 @@ export class Addemployee implements OnInit, AfterViewInit {
   }
   // closing popup of DELETE
   confirmDelete(employee: Employee) {
-    console.log('closing popup');
     this.employeeToDelete = employee;
   }
 

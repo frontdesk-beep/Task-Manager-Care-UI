@@ -20,7 +20,6 @@ role='';
   ) {}
 
   ngOnInit() {
-    console.log('Navbar initialized, role=', this.role);
     this.userStore.user$.subscribe(user=>{
       if(!user)
         return;

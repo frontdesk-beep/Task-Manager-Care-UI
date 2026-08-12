@@ -56,7 +56,6 @@ export class TaskReportComponent implements OnInit {
   loadYears() {
     this.reportService.getYears().subscribe({
       next: res => this.years = res,
-      error: err => console.log(err)
     });
   }
 
@@ -84,9 +83,6 @@ export class TaskReportComponent implements OnInit {
         this.cdr.markForCheck();
 
       },
-
-      error: err => console.log(err)
-
     });
 
   }

@@ -69,9 +69,6 @@ comment$ = this.commentSubject.asObservable();
     this.hubConnection.on(
   "ReceiveTaskUpdate",
   (data:any)=>{
-
-    console.log("Task update received", data);
-
     this.taskStore.refresh();
 
   }
@@ -79,11 +76,7 @@ comment$ = this.commentSubject.asObservable();
 this.hubConnection.on(
   "ReceiveComment",
   (data:any)=>{
-
-    console.log("Comment received", data);
-
     this.commentSubject.next(data);
-
   }
 );
     this.hubConnection.on('TaskDeleted', () => {
@@ -97,10 +90,8 @@ this.hubConnection.on(
     this.hubConnection
       .start()
       .then(() => {
-        console.log("SignalR connected");
       })
       .catch(err => {
-        console.log('SignalR connection error', err);
       });
   }
 

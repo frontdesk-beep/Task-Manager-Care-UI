@@ -70,6 +70,6 @@ export class ClientService {
     if(search){
       params.search= search;
     }
-  return this.http.get<any>(`${this.api}`, { params });
+  return this.http.get(`${this.api}`, { params });
 }
 }

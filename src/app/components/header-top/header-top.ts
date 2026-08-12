@@ -98,7 +98,6 @@ export class HeaderTop implements OnInit, OnDestroy {
       n.isRead = true;
       this.notificationService.markNotificationRead(n.id).subscribe({
         error: (err) => {
-          console.log('Failed to mark notification read', err);
           n.isRead = false;
         }
       });
@@ -112,7 +111,6 @@ export class HeaderTop implements OnInit, OnDestroy {
       this.unreadCount = Math.max(0, this.unreadCount - 1);
       this.notificationService.markNotificationRead(n.id).subscribe({
         error: (err) => {
-          console.log('Failed to mark notification read', err);
           n.isRead = false;
           this.unreadCount++;
         }

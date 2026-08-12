@@ -101,7 +101,6 @@ export class TaskHistory implements OnInit {
   }
 
   private loadHistory() {
-    console.log('called loadHistory');
     this.loading = true;
     this.error = null;
 
@@ -113,7 +112,6 @@ export class TaskHistory implements OnInit {
         const taskList = this.extractArray(tasks);
         const statusList = this.extractArray(statuses);
         this.statuses = statusList;
-        console.log('statuses:');
 
         const statusMap = new Map<number, string>(
           statusList.map((status: any) => [
@@ -123,7 +121,6 @@ export class TaskHistory implements OnInit {
         );
         const completedStatusIds = this.createCompletedStatusSet(statusList);
 
-        console.log('assigned tasks:')
         const mappedTasks = taskList.map((task: any) =>
           this.normalizeTask(task, statusMap)
         );

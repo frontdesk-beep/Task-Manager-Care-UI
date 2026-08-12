@@ -47,8 +47,6 @@ token: string = '';
   }
 
   resetPassword() {
-console.log("TOKEN:", this.token);
-console.log("Length:", this.token.length);
     if (!this.newPassword || !this.confirmPassword) {
 
       this.toastr.warning("Please fill all fields.");
@@ -69,19 +67,11 @@ console.log("Length:", this.token.length);
       .subscribe({
 
         next: () => {
-
           this.toastr.success("Password reset successfully.");
-                  console.log(this.token);
-
-
           this.router.navigate(['/login']);
-
         },
 
         error: (error) => {
-
-          console.log(error);
-
           this.toastr.error(
             error?.error?.message || "Unable to reset password."
           );

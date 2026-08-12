@@ -30,7 +30,6 @@ this.auth.forgotpassword(this.email).subscribe({
     this.email='';
   },
       error : (error) => {
-        console.log(error);
         this.toastr.error(
           error?.error?.message || 'Unable to send reset link.');
       }

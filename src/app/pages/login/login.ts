@@ -77,9 +77,8 @@ export class Login {
           localStorage.setItem('role', res.role);
           res.token ? localStorage.setItem('isLoggedIn', 'true') : localStorage.setItem('isLoggedIn', 'false');
           this.router.navigate(['/main/dashboard']);
-          console.log(res);
-
         },
+        
         error: (error) => {
           if(error.status === 403){
             this.toastr.error(

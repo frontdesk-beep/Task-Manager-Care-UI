@@ -51,27 +51,13 @@ export class Comments implements OnInit, OnDestroy {
     this.commentSub =
       this.notificationService.comment$
         .subscribe((data: any) => {
-
-
-          console.log(
-            "Realtime comment:",
-            data
-          );
-
-
           if (data.taskId === this.taskId) {
-
             this.messages.push(
               data.comment
             );
-
           }
-
         });
-
   }
-
-
 
   loadComments() {
 
@@ -106,10 +92,8 @@ export class Comments implements OnInit, OnDestroy {
     const text =
       this.newText.trim();
 
-
     if (!text)
       return;
-
 
     this.taskService
       .AddComment(

@@ -78,12 +78,10 @@ export class TaskStore {
                 'Unknown'
             }))
             : [];
-          console.log('am I inside Angular zone right now:', (window as any).Zone?.current?.name);
          
           this.tasksSubject.next(mappedTasks);
           this.statusesSubject.next(mappedStatuses);
 
-          console.log('TASKS LOADED:', mappedTasks.length);
         },
 
         error: (err) => {
@@ -99,7 +97,6 @@ export class TaskStore {
   UpdateTask(taskId: number, data: any) {
     return this.taskService.UpdateTask(taskId, data).pipe(
       catchError((err) => {
-        console.log('UpdateTask failed, falling back to PatchTask', err);
         return of(null);
       })
     );
@@ -148,6 +145,7 @@ export class TaskStore {
       this.refreshTimer = null;
     }
   }
+  
   //Create WebSocket connection.
   destroy() {
     this.stopPolling();
