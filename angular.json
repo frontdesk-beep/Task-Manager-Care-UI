@@ -19,7 +19,8 @@
           "options": {
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js", "zone.js/plugins/zone-patch-fetch"
+              "zone.js",
+              "zone.js/plugins/zone-patch-fetch"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -38,7 +39,8 @@
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "@ng-select/ng-select/themes/default.theme.css",
               "src/styles.css",
-              "node_modules/ngx-toastr/toastr.css"
+              "node_modules/ngx-toastr/toastr.css",
+              "src/app/shared/styles/loading-states.css"
             ],
             "security": {
               "allowedHosts": []

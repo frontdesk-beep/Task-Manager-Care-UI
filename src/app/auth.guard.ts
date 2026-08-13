@@ -1,6 +1,6 @@
 import {inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { BrowserStorageService } from './app/services/browser-storage.service';
+import { BrowserStorageService } from './services/browser-storage.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const storage = inject(BrowserStorageService);

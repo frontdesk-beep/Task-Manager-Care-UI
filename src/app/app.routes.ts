@@ -1,4 +1,5 @@
-import { authGuard } from '../auth.guard';
+import { authGuard } from './auth.guard';
+import { roleGuard } from './role.guard';
 import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
@@ -26,13 +27,12 @@ export const routes: Routes = [
   { path: 'main', component: MainLayout, canActivate: [authGuard], children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'profile', component: Profile },
-      { path: 'create-task', component: Createtask },
+      { path: 'create-task', component: Createtask, canActivate: [roleGuard(['Employee','Admin'])] },
       { path: 'task/:id', component: TaskDetail },
       { path: 'task-history', component: TaskHistory },
-      { path: 'addemployee', component: Addemployee },
-      { path: 'employee-management', component: Addemployee },
+      { path: 'addemployee', component: Addemployee, canActivate: [roleGuard(['SuperAdmin','Admin'])] },
       { path: 'clientlist', component: Clientlist },
-      { path: 'task-report', component: TaskReportComponent}
+      { path: 'task-report', component: TaskReportComponent, canActivate: [roleGuard(['SuperAdmin','Admin'])] }
     ]
   }
 ];
