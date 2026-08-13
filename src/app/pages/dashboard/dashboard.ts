@@ -30,6 +30,9 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class Dashboard implements OnInit, OnDestroy {
 
+  //for displaying loading icon on the screen
+  loading = true;
+
   currentUserRole = '';
   currentUserId = 0;
   completedStatusIds = new Set<number>();
@@ -99,6 +102,8 @@ export class Dashboard implements OnInit, OnDestroy {
   userInput$ = new Subject<string>();
   usersLoading = false;
 
+
+
   // set true if user/role couldn't be resolved from storage - use in template
   // to show a "please log in again" state instead of a silently-empty dashboard
   authError = false;
@@ -162,6 +167,12 @@ export class Dashboard implements OnInit, OnDestroy {
 
     );
 
+    this.storeSubs.add(
+      this.taskStore.loading$.subscribe((isLoading: boolean) => {
+        this.loading = isLoading;
+        this.cdr.markForCheck();
+      })
+    );
     this.loadUsers();
     this.setupUserSearch();
 
@@ -192,7 +203,8 @@ export class Dashboard implements OnInit, OnDestroy {
         this.rebuildTaskViews();
       },
       error: (err) => {
-        console.error('Error loading users:', err);}
+        console.error('Error loading users:', err);
+      }
     });
   }
 
