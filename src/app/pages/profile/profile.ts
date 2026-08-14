@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
-import {ToastrService} from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { UserStore } from '../../services/user-store';
+import { BrowserStorageService } from '../../services/browser-storage.service';
 
 @Component({
   selector: 'app-profile',
@@ -21,14 +22,15 @@ export class Profile {
   private originalUser: any = null;
 
   constructor(
-    private auth: Auth, 
-    private router: Router, 
+    private auth: Auth,
+    private router: Router,
     private toastr: ToastrService,
-    private userStore: UserStore) {}
+    private userStore: UserStore,
+    private storage: BrowserStorageService) { }
 
   ngOnInit() {
 
-    const stored = JSON.parse(localStorage.getItem('user') || '{}');
+    const stored = JSON.parse(this.storage.getItem('user') || '{}');
     if (!stored.id) {
       this.router.navigate(['/login']);
       return;
@@ -39,7 +41,7 @@ export class Profile {
     this.role = stored.role;
     this.loadProfile();
   }
-loadProfile() {
+  loadProfile() {
     this.auth.getProfile(this.id).subscribe({
       next: (res: any) => {
         this.name = res.name;
@@ -57,11 +59,11 @@ loadProfile() {
         this.toastr.error('Failed to load profile');
       },
     });
-}
+  }
   edit() {
     this.editMode = true;
   }
-  back(){
+  back() {
     this.router.navigate(['/main/dashboard']);
   }
 
@@ -82,18 +84,18 @@ loadProfile() {
     };
 
     this.userStore.updateUser(this.id, data)
-    .subscribe({
-      next: () => {
+      .subscribe({
+        next: () => {
 
-        this.userStore.loadUser(this.id);
+          this.userStore.loadUser(this.id);
 
-        this.toastr.success('Profile updated');
-                        this.editMode = false;
+          this.toastr.success('Profile updated');
+          this.editMode = false;
 
-      },
-      error: (err) => {
-        this.toastr.error('Update failed');
-      },
-    });
+        },
+        error: (err) => {
+          this.toastr.error('Update failed');
+        },
+      });
   }
 }

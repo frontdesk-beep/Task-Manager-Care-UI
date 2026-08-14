@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
-import {ToastrService} from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
+import { BrowserStorageService } from '../../services/browser-storage.service';
 
 @Component({
   selector: 'app-login',
@@ -12,8 +13,8 @@ import {ToastrService} from 'ngx-toastr';
   templateUrl: './login.html',
   styleUrls: [
     './login.css',
-  '../../shared/styles/auth-card.css'
-]
+    '../../shared/styles/auth-card.css'
+  ]
 })
 export class Login {
   email: string = '';
@@ -21,7 +22,11 @@ export class Login {
   emailError: string = '';
   passwordError: string = '';
 
-  constructor(private auth: Auth, private router: Router, private toastr: ToastrService) {}
+  constructor(
+    private auth: Auth,
+    private router: Router,
+    private toastr: ToastrService,
+    private storage: BrowserStorageService) { }
 
   validateEmail() {
     this.emailError = '';
@@ -29,11 +34,6 @@ export class Login {
       this.emailError = 'Email is required.';
       return;
     }
-    // const emailRegex = /^[A-Za-z0-9._%+-]+@careinsurance\.ca$/;
-    // if (!emailRegex.test(this.email)) {
-    //   this.emailError = 'Please use your @careinsurance.ca email';
-    //   return;
-    // }
   }
 
   validatePassword() {
@@ -56,7 +56,7 @@ export class Login {
   onSubmit() {
     this.validateEmail();
     this.validatePassword();
-    
+
     if (this.emailError || this.passwordError) {
       return;
     }
@@ -64,37 +64,36 @@ export class Login {
     this.auth.login({ email: this.email, password: this.password })
       .subscribe({
         next: (res: any) => {
-          localStorage.setItem('token', res.token);
-          localStorage.setItem('user', JSON.stringify({
+          this.storage.setItem('token', res.token);
+          this.storage.setItem('user', JSON.stringify({
             id: res.id,
             name: res.name,
             email: res.email,
             role: res.role,
           }));
           this.toastr.success('Login successful!');
-          localStorage.setItem('name', res.name);
-          localStorage.setItem('email', res.email);
-          localStorage.setItem('role', res.role);
-          res.token ? localStorage.setItem('isLoggedIn', 'true') : localStorage.setItem('isLoggedIn', 'false');
+          this.storage.setItem('name', res.name);
+          this.storage.setItem('email', res.email);
+          this.storage.setItem('role', res.role);
+          res.token ? this.storage.setItem('isLoggedIn', 'true') : this.storage.setItem('isLoggedIn', 'false');
           this.router.navigate(['/main/dashboard']);
         },
-        
+
         error: (error) => {
-          if(error.status === 403){
+          if (error.status === 403) {
             this.toastr.error(
               'This account has been deactivated. Contact admin.'
             );
             return;
           }
-          if(error.status === 401)
-          {
+          if (error.status === 401) {
             this.toastr.error(
               'Invalid email or password.'
             );
             return;
           }
           this.toastr.error('Something went wrong.');
-          
+
         }
       });
   }
