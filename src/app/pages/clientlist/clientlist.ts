@@ -39,12 +39,13 @@ export class Clientlist implements OnInit, OnDestroy {
   uniqueCategories: any[] = [];
 
   categoryMap: { [key: number]: string } = {};
+  //for showing skeleton
   loading: boolean = true;
   totalRecords = 0;
 
   //Client creation
-  isCreatedMode=false;
-  formSubmitted=false;
+  isCreatedMode = false;
+  formSubmitted = false;
   //new client manually added
   newClient: any = {
     clientName: '',
@@ -85,6 +86,10 @@ export class Clientlist implements OnInit, OnDestroy {
   }
 
   loadClients(page: number = this.currentPage) {
+    //SKELOTON
+    this.loading = true;
+    this.cdr.markForCheck();
+
     const query = {
       Search: this.searchClientName,
       CategoryId: this.filterCategoryId,
@@ -331,32 +336,32 @@ export class Clientlist implements OnInit, OnDestroy {
       clientCategoryId: null,
     };
   }
-  
-  createClient(form:any) {
+
+  createClient(form: any) {
     this.formSubmitted = true;
     if (form.invalid) {
       this.toastr.error('Please fill in all required fields correctly.');
       return;
     }
-      this.clientService.createClient(this.newClient).subscribe({
-        next: (res: any) => {
-          this.toastr.success('Client created successfully');
-          this.isCreatedMode = false;
-          this.formSubmitted = false;
-          this.newClient = {
-            clientName: '',
-            companyName: '',
-            phoneNumber: '',
-            email: '',
-            address: '',
-            clientCategoryId: null,
-          };
-          this.loadClients();
-        },
-        error: (err: any) => {
-          console.error('CreateClient error:', err);
-          this.toastr.error('Failed to create client');
-        }
-      });
-    }
+    this.clientService.createClient(this.newClient).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Client created successfully');
+        this.isCreatedMode = false;
+        this.formSubmitted = false;
+        this.newClient = {
+          clientName: '',
+          companyName: '',
+          phoneNumber: '',
+          email: '',
+          address: '',
+          clientCategoryId: null,
+        };
+        this.loadClients();
+      },
+      error: (err: any) => {
+        console.error('CreateClient error:', err);
+        this.toastr.error('Failed to create client');
+      }
+    });
   }
+}

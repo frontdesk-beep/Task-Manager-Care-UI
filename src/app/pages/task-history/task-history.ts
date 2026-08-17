@@ -142,7 +142,6 @@ export class TaskHistory implements OnInit {
         );
 
         this.loading = false;
-        this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);

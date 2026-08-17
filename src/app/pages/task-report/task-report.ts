@@ -26,6 +26,7 @@ export class TaskReportComponent implements OnInit {
   pageSize = 10;
   totalCount = 0;
   totalPages = 1;
+  loading = true;
 
   reportGenerated = false;
 
@@ -66,7 +67,9 @@ export class TaskReportComponent implements OnInit {
   }
 
   loadReports() {
-
+    //SKELOTON
+    this.loading = true;
+    this.cdr.markForCheck();
     this.reportService.getCompletedTasks(
       this.selectedYear,
       this.selectedMonth,
@@ -80,6 +83,7 @@ export class TaskReportComponent implements OnInit {
         this.reports = res.items;
         this.totalCount = res.totalCount;
         this.totalPages = Math.ceil(res.totalCount / this.pageSize);
+        this.loading=false;
         this.cdr.markForCheck();
 
       },
@@ -142,7 +146,7 @@ export class TaskReportComponent implements OnInit {
     return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
   }
 
-exportTasksExcel() {
+  exportTasksExcel() {
     this.exportService.exportExcel(this.reports, 'Report_Export');
   }
   exportTasksPdf() {

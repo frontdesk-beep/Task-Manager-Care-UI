@@ -3,6 +3,9 @@
     <!-- <h1>Task History</h1> -->
   </div>
 
+  <div *ngIf="loading" class="loading-state">
+  Loading task history...
+</div>
   <div *ngIf="error" class="error-state">{{ error }}</div>
 
   <div *ngIf="!loading && !error">
