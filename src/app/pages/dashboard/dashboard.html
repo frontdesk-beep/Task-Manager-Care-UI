@@ -8,12 +8,12 @@
       </div>
       <div class="card">
         <h3>Pending</h3>
-        <p>{{  activeTab === 'mine' ? pendingCount : allPendingCount }}</p>
+        <p>{{ activeTab === 'mine' ? pendingCount : allPendingCount }}</p>
         <span class="card-note">Waiting to start</span>
       </div>
       <div class="card">
         <h3>Overdue</h3>
-        <p>{{  activeTab === 'mine' ? overdueCount : allOverdueCount }}</p>
+        <p>{{ activeTab === 'mine' ? overdueCount : allOverdueCount }}</p>
         <span class="card-note">Need attention</span>
       </div>
       <div class="card">
@@ -26,7 +26,8 @@
 
   <!-- ================= TABS ================= -->
   <div class="dashboard-tabs">
-    <button *ngIf="currentUserRole !== 'SuperAdmin'" class="dash-tab-item" [class.active]="activeTab === 'mine'" (click)="activeTab = 'mine'">
+    <button *ngIf="currentUserRole !== 'SuperAdmin'" class="dash-tab-item" [class.active]="activeTab === 'mine'"
+      (click)="activeTab = 'mine'">
       My Tasks
       <span class="dash-tab-count">{{ filteredAssignedTasks.length }}</span>
     </button>
@@ -69,7 +70,19 @@
       </div>
 
       <div class="task-table-wrapper">
-        <table class="task-table">
+
+        <div class="skeleton-table" *ngIf="loading">
+          <div class="skeleton-row" *ngFor="let row of [1,2,3,4,5]">
+            <div class="skeleton-cell w-15"></div>
+            <div class="skeleton-cell w-20"></div>
+            <div class="skeleton-cell w-15"></div>
+            <div class="skeleton-cell w-10"></div>
+            <div class="skeleton-cell w-15"></div>
+            <div class="skeleton-cell w-15"></div>
+          </div>
+        </div>
+
+        <table class="task-table" *ngIf="!loading">
           <thead>
             <tr>
               <th>No.</th>
@@ -83,7 +96,7 @@
               <th class="sortable" (click)="toggleSort('dueDate')">
                 Due <span class="sort-icon">{{getSortIcon('dueDate')}}</span>
               </th>
-               
+
               <th>Created By</th>
               <th class="sortable" (click)="toggleSort('serviceCategoryName')">
                 Service Category <span class="sort-icon">{{getSortIcon('serviceCategoryName')}}</span>
@@ -99,8 +112,7 @@
               </td>
               <td>{{task.clientName}}</td>
               <td>
-                <select class="status-select" [ngClass]="getStatusClass(task.statusName)"
-                  [(ngModel)]="task.statusId">
+                <select class="status-select" [ngClass]="getStatusClass(task.statusName)" [(ngModel)]="task.statusId">
                   <option *ngFor="let status of statuses" [value]="status.id">{{status.name}}</option>
                 </select>
               </td>
@@ -127,7 +139,7 @@
               </td>
               <td>
                 <div class="action-cell">
-                  <button class="btn-save"  (click)="UpdateTask(task,task.statusId)">Save</button>
+                  <button class="btn-save" (click)="UpdateTask(task,task.statusId)">Save</button>
                   <a class="open-link" [routerLink]="['/main','task',task.id]">Open</a>
                   <button class="menu-btn" (click)="toggleMenu(task,$event)">⋮</button>
 
@@ -142,7 +154,7 @@
             </tr>
           </tbody>
         </table>
-        <div *ngIf="paginatedAssignedTasks.length === 0" class="empty-state">
+        <div *ngIf="!loading && paginatedAssignedTasks.length === 0" class="empty-state">
           No tasks assigned to you right now.
         </div>
       </div>
@@ -180,7 +192,18 @@
         </button>
       </div>
       <div class="task-table-wrapper">
-        <table class="task-table">
+        <div class="skeleton-table" *ngIf="loading">
+          <div class="skeleton-row" *ngFor="let row of [1,2,3,4,5]">
+            <div class="skeleton-cell w-15"></div>
+            <div class="skeleton-cell w-20"></div>
+            <div class="skeleton-cell w-15"></div>
+            <div class="skeleton-cell w-10"></div>
+            <div class="skeleton-cell w-15"></div>
+            <div class="skeleton-cell w-15"></div>
+          </div>
+        </div>
+
+        <table class="task-table" *ngIf="!loading">
           <thead>
             <tr>
               <th>No.</th>
@@ -211,7 +234,7 @@
                 </div>
               </td>
               <td>
-                <span class="status-badge" [ngClass]="getStatusClass(task.statusName)" >
+                <span class="status-badge" [ngClass]="getStatusClass(task.statusName)">
                   {{task.statusName}}
                 </span>
               </td>
@@ -235,7 +258,7 @@
             </tr>
           </tbody>
         </table>
-        <div *ngIf="paginatedAllTasks.length === 0" class="empty-state">
+        <div *ngIf="!loading && paginatedAllTasks.length === 0" class="empty-state">
           No tasks found.
         </div>
       </div>

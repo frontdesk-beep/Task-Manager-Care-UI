@@ -1,14 +1,13 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-// import { Router, ActivatedRoute } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { ToastrService } from 'ngx-toastr';
 import { Export } from '../../services/export';
 import { NgForm } from '@angular/forms';
 import { ViewChild } from '@angular/core';
-import { email } from '@angular/forms/signals';
 import { ChangeDetectorRef } from '@angular/core'
+import { BrowserStorageService } from '../../services/browser-storage.service';
 
 interface Employee {
   id: number;
@@ -73,7 +72,8 @@ export class Addemployee implements OnInit, AfterViewInit {
     private auth: Auth,
     private toastr: ToastrService,
     private exportService: Export,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storage: BrowserStorageService
 
   ) { }
 
@@ -96,8 +96,8 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   private loadCurrentUser() {
     try {
-      this.currentUserRole = localStorage.getItem('role') || '';
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.currentUserRole = this.storage.getItem('role') || '';
+      const user = JSON.parse(this.storage.getItem('user') || '{}');
       this.currentUserId = Number(user?.id || 0);
     } catch {
       this.currentUserId = 0;

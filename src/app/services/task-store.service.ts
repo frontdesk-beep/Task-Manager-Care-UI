@@ -44,7 +44,6 @@ export class TaskStore {
     if (!this.currentUserId) {
       return;
     }
-    // this.zone.run(() => {
       this.loading$.next(true);
 
       forkJoin({

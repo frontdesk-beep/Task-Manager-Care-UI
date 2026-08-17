@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { TaskService } from '../../services/task.service';
 import { Export } from '../../services/export';
 import { ChangeDetectorRef } from '@angular/core';
+import { BrowserStorageService } from '../../services/browser-storage.service';
 
 @Component({
   selector: 'app-task-history',
@@ -44,12 +44,12 @@ export class TaskHistory implements OnInit {
     private taskService: TaskService,
     private router: Router,
     private exportService: Export,
-    private ChangeDetectorRef: ChangeDetectorRef
-
+    private ChangeDetectorRef: ChangeDetectorRef,
+    private storage: BrowserStorageService
   ) { }
 
   ngOnInit() {
-    const userData = localStorage.getItem('user');
+    const userData = this.storage.getItem('user');
     if (!userData) {
       this.error = 'User not found. Please login again.';
       return;
@@ -142,7 +142,6 @@ export class TaskHistory implements OnInit {
         );
 
         this.loading = false;
-        this.ChangeDetectorRef.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load task history', err);

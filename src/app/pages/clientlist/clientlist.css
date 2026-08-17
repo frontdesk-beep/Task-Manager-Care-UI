@@ -561,4 +561,114 @@
   .form-grid {
     grid-template-columns: 1fr;
   }
+  /* =========================================================
+   SKELETON LOADING
+   ========================================================= */
+
+.skeleton-table {
+  width: 100%;
+  min-width: 1050px;
+  padding: 0;
+  background: #fff;
+}
+
+.skeleton-row {
+  display: grid;
+
+  /*
+   * Keep these proportions roughly aligned
+   * with your table columns.
+   */
+  grid-template-columns:
+    60px
+    1.4fr
+    1fr
+    1.1fr
+    1fr
+    1.4fr
+    1.4fr
+    1fr
+    1fr;
+
+  align-items: center;
+  gap: 16px;
+
+  min-height: 66px;
+  padding: 0 16px;
+
+  border-bottom: 1px solid #F3F4F6;
+  box-sizing: border-box;
+}
+
+.skeleton-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-cell {
+  height: 14px;
+  border-radius: 5px;
+
+  background: linear-gradient(
+    90deg,
+    #eef0f6 25%,
+    #f7f8fb 37%,
+    #eef0f6 63%
+  );
+
+  background-size: 400% 100%;
+
+  animation: clientSkeletonShimmer 1.4s ease infinite;
+}
+
+
+/* Different widths make it look more natural */
+
+.skeleton-no {
+  width: 25px;
+}
+
+.skeleton-client {
+  width: 75%;
+}
+
+.skeleton-category {
+  width: 65%;
+}
+
+.skeleton-company {
+  width: 70%;
+}
+
+.skeleton-phone {
+  width: 75%;
+}
+
+.skeleton-email {
+  width: 80%;
+}
+
+.skeleton-address {
+  width: 75%;
+}
+
+.skeleton-date {
+  width: 65%;
+}
+
+.skeleton-action {
+  width: 60%;
+}
+
+
+@keyframes clientSkeletonShimmer {
+
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+
+}
 }

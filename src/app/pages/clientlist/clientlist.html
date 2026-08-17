@@ -39,7 +39,35 @@
 
     <!-- Clients Table -->
     <div class="table-wrapper">
-      <table class="table">
+
+      <!-- ================= SKELETON LOADING ================= -->
+      <div class="skeleton-table" *ngIf="loading">
+
+        <div class="skeleton-row" *ngFor="let row of [1,2,3,4,5,6]">
+
+          <div class="skeleton-cell skeleton-no"></div>
+
+          <div class="skeleton-cell skeleton-client"></div>
+
+          <div class="skeleton-cell skeleton-category"></div>
+
+          <div class="skeleton-cell skeleton-company"></div>
+
+          <div class="skeleton-cell skeleton-phone"></div>
+
+          <div class="skeleton-cell skeleton-email"></div>
+
+          <div class="skeleton-cell skeleton-address"></div>
+
+          <div class="skeleton-cell skeleton-date"></div>
+
+          <div class="skeleton-cell skeleton-action"></div>
+
+        </div>
+
+      </div>
+      <!-- REAL TABLE -->
+      <table class="table" *ngIf="!loading">
         <thead>
           <tr>
             <th class="no-col">No.</th>
@@ -93,10 +121,17 @@
           </tr>
         </tbody>
       </table>
+      <!-- ================= EMPTY STATE ================= -->
+      <div *ngIf="!loading && clients.length === 0" class="empty-state">
+
+        No clients found.
+
+      </div>
+
     </div>
 
     <!-- Pagination -->
-    <div class="pagination">
+    <div class="pagination" *ngIf="!loading && totalRecords > 0">
       <button class="btn btn-sm" (click)="goToPage(1)" [disabled]="currentPage === 1">First</button>
       <button class="btn btn-sm" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
       <span class="page-info">Page {{ currentPage }} of {{ getTotalPages() }}</span>

@@ -1,10 +1,13 @@
 ///to generate the token everywhere.
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 import { BrowserStorageService } from './services/browser-storage.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(BrowserStorageService);
+  const router = inject(Router);
   const token = storage.getItem('token');
 
   // If token exists, add Authorization header
@@ -16,5 +19,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
-  return next(req);
+  return next(req).pipe(
+    catchError((err: HttpErrorResponse) => {
+      if (err.status === 401) {
+        storage.removeItem('token');
+        storage.removeItem('user');
+        router.navigate(['/login']);
+      }
+      return throwError(() => err);
+    })
+  );
 };

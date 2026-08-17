@@ -50,13 +50,41 @@
   </div>
 
   <div *ngIf="reportGenerated">
+     <!-- ================= EMPTY STATE ================= -->
+      <div *ngIf="!loading && reports.length === 0" class="empty-state">
 
-    <div *ngIf="reports.length === 0" class="empty-state">
-      No completed tasks found for the selected filters.
-    </div>
+        No data found.
+
+      </div>
 
     <div *ngIf="reports.length > 0" class="table-wrapper">
-      <table class="report-table">
+        <!-- ================= SKELETON LOADING ================= -->
+      <div class="skeleton-table" *ngIf="loading">
+
+        <div class="skeleton-row" *ngFor="let row of [1,2,3,4,5,6]">
+
+          <div class="skeleton-cell skeleton-no"></div>
+
+          <div class="skeleton-cell skeleton-client"></div>
+
+          <div class="skeleton-cell skeleton-category"></div>
+
+          <div class="skeleton-cell skeleton-company"></div>
+
+          <div class="skeleton-cell skeleton-phone"></div>
+
+          <div class="skeleton-cell skeleton-email"></div>
+
+          <div class="skeleton-cell skeleton-address"></div>
+
+          <div class="skeleton-cell skeleton-date"></div>
+
+          <div class="skeleton-cell skeleton-action"></div>
+
+        </div>
+
+      </div>
+      <table class="report-table" *ngIf="!loading">
 
         <thead>
           <tr>
@@ -101,9 +129,11 @@
         </tbody>
 
       </table>
+     
+
     </div>
 
-    <div class="pagination" *ngIf="reports.length > 0">
+    <div class="pagination" *ngIf="!loading && reports.length > 0">
       <button (click)="previousPage()" [disabled]="page==1">
         Previous
       </button>
