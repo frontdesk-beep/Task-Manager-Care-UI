@@ -15,7 +15,7 @@
             <span style="color:red">*</span>
           </label>
           <select class="form-select" [(ngModel)]="task.clientCategoryId" 
-          name="clientCategoryId" (change)="onClientTypeChange()">
+          name="clientCategoryId" (change)="onClientTypeChange()" required>
             <option [ngValue]="0">Select Client Type</option>
             <option *ngFor="let type of clientTypes" 
             [ngValue]="type.id">
@@ -84,6 +84,7 @@
               [searchable]="true"
               [clearable]="true"
               [appendTo]="'body'"
+              required
           >
           </ng-select>
         </div>
@@ -91,7 +92,7 @@
         <div class="col-md-6">
           <label class="form-label" for="status">Status
             <span class="required" style="color: red;">*</span></label>
-          <select id="status" name="statusId" class="form-select" [(ngModel)]="task.statusId">
+          <select id="status" name="statusId" class="form-select" [(ngModel)]="task.statusId" required>
             <option [ngValue]="0">Choose status</option>
             <option *ngFor="let option of statuses" [ngValue]="option.id">{{ option.name }}</option>
           </select>
@@ -107,7 +108,7 @@
         <div class="col-md-4">
           <label class="form-label" for="priority">Priority
             <span class="required" style="color: red;">*</span></label>
-          <select id="priority" name="priorityId" class="form-select" [(ngModel)]="task.priorityId">
+          <select id="priority" name="priorityId" class="form-select" [(ngModel)]="task.priorityId" required>
             <option [ngValue]="0">Choose priority</option>
             <option *ngFor="let option of priorities" [ngValue]="option.id">{{ option.name }}</option>
           </select>
@@ -118,7 +119,7 @@
             <span class="required" style="color: red;">*</span>
           </label>
           <select id="serviceCategory" name="serviceCategoryId" class="form-select"
-            [(ngModel)]="task.serviceCategoryId">
+            [(ngModel)]="task.serviceCategoryId" required>
             <option [ngValue]="0">Choose service category</option>
             <option *ngFor="let option of serviceCategories" [ngValue]="option.id" >{{ option.name }}</option>
           </select>

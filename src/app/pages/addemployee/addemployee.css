@@ -316,3 +316,28 @@ input:-webkit-autofill:focus {
     font-weight: 600;
     color: #BF2600;
 }
+/* Validation states */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #DE350B;
+    background: #FFF5F5;
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    box-shadow: 0 0 0 2px rgba(222, 53, 11, 0.2);
+}
+
+.invalid-feedback {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #DE350B;
+}
+
+.btn:disabled,
+.btn:disabled:hover {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

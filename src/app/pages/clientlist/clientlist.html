@@ -14,15 +14,17 @@
       <div class="filters-left">
         <div class="search-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" [(ngModel)]="searchClientName" (ngModelChange)="currentPage=1; loadClients()"
+          <input type="text" [(ngModel)]="searchClientName" (ngModelChange)="onSearchChange($event);"
             placeholder="Search client name..." class="filter-input search-input">
+          <span class="search-loading" *ngIf="isSearchingClients">
+            ⟳
+          </span>
         </div>
         <div class="filter-group">
-          <input type="date" [(ngModel)]="selectedDate" class="filter-input"
-            (ngModelChange)="currentPage=1; loadClients()">
+          <input type="date" [(ngModel)]="selectedDate" class="filter-input" (ngModelChange)="onFilterChange()">
         </div>
         <div class="filter-group">
-          <select [(ngModel)]="filterCategoryId" class="filter-select" (ngModelChange)="currentPage=1; loadClients()">
+          <select [(ngModel)]="filterCategoryId" class="filter-select" (ngModelChange)="onFilterChange()">
             <option [ngValue]="null">All Categories</option>
             <option *ngFor="let cat of clientCategories" [ngValue]="cat.id">{{ cat.clientType || cat.name }}</option>
           </select>
@@ -160,20 +162,153 @@
 <div *ngIf="isEditMode && selectedClient" class="modal-backdrop">
   <div class="modal-content">
     <h3>Edit Client</h3>
-    <div class="form-grid">
-      <input type="text" [(ngModel)]="selectedClient.clientName" placeholder="Client Name">
-      <input type="text" [(ngModel)]="selectedClient.companyName" placeholder="Company Name">
-      <input type="text" [(ngModel)]="selectedClient.phoneNumber" placeholder="Phone Number">
-      <input type="email" [(ngModel)]="selectedClient.email" placeholder="Email">
-      <input type="text" [(ngModel)]="selectedClient.address" placeholder="Address">
-      <select [(ngModel)]="selectedClient.clientCategoryId">
-        <option *ngFor="let cat of clientCategories" [ngValue]="cat.id">{{ cat.clientType || cat.name }}</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-primary" (click)="updateClient(selectedClient.clientId)">Save</button>
-      <button type="button" class="btn btn-danger" (click)="cancelEdit()">Cancel</button>
-    </div>
+    <form #editClientForm="ngForm" 
+    (ngSubmit)="updateClient(selectedClient.clientId, editClientForm)" novalidate>
+      <div class="form-grid">
+
+        <div class="field-wrap">
+  <label class="field-label">
+    Client Name <span class="required-mark">*</span>
+  </label>
+
+  <input
+    type="text"
+    name="clientName"
+    [(ngModel)]="selectedClient.clientName"
+    #ecName="ngModel"
+    required
+    minlength="2"
+    maxlength="100"
+    pattern="^[a-zA-Z][a-zA-Z\s'-]*$"
+    [class.invalid]="ecName.invalid && (ecName.touched || editFormSubmitted)"
+  >
+
+  <small class="error-text" *ngIf="ecName.invalid && (ecName.touched || editFormSubmitted)">
+    <span *ngIf="ecName.errors?.['required']">
+      Client name is required.
+    </span>
+    <span *ngIf="ecName.errors?.['minlength']">
+      Client name must be at least 2 characters.
+    </span>
+    <span *ngIf="ecName.errors?.['maxlength']">
+      Client name cannot exceed 100 characters.
+    </span>
+    <span *ngIf="ecName.errors?.['pattern']">
+      Client name can contain only letters, spaces, apostrophes, and hyphens.
+    </span>
+  </small>
+</div>
+
+        <div class="field-wrap">
+          <label class="field-label">Company Name</label>
+          <input type="text" name="companyName" [(ngModel)]="selectedClient.companyName">
+        </div>
+<div class="field-wrap">
+  <label class="field-label">
+    Phone Number <span class="required-mark">*</span>
+  </label>
+
+  <input
+    type="text"
+    name="phoneNumber"
+    [(ngModel)]="selectedClient.phoneNumber"
+    #ecPhone="ngModel"
+    required
+    pattern="^\+?[0-9\s().-]{10,20}$"
+    maxlength="20"
+    [class.invalid]="ecPhone.invalid && (ecPhone.touched || editFormSubmitted)"
+  >
+
+  <small class="error-text" *ngIf="ecPhone.invalid && (ecPhone.touched || editFormSubmitted)">
+    <span *ngIf="ecPhone.errors?.['required']">
+      Phone number is required.
+    </span>
+    <span *ngIf="ecPhone.errors?.['pattern']">
+      Please enter a valid phone number.
+    </span>
+  </small>
+</div>
+
+       <div class="field-wrap">
+  <label class="field-label">
+    Email <span class="required-mark">*</span>
+  </label>
+
+  <input
+    type="email"
+    name="email"
+    [(ngModel)]="selectedClient.email"
+    #ecEmail="ngModel"
+    required
+    email
+    maxlength="150"
+    [class.invalid]="ecEmail.invalid && (ecEmail.touched || editFormSubmitted)"
+  >
+
+  <small class="error-text" *ngIf="ecEmail.invalid && (ecEmail.touched || editFormSubmitted)">
+    <span *ngIf="ecEmail.errors?.['required']">
+      Email is required.
+    </span>
+    <span *ngIf="ecEmail.errors?.['email']">
+      Please enter a valid email address.
+    </span>
+    <span *ngIf="ecEmail.errors?.['maxlength']">
+      Email cannot exceed 150 characters.
+    </span>
+  </small>
+</div>
+
+       <div class="field-wrap">
+  <label class="field-label">Address</label>
+
+  <input
+    type="text"
+    name="address"
+    [(ngModel)]="selectedClient.address"
+    maxlength="250"
+    #ecAddress="ngModel"
+    [class.invalid]="ecAddress.invalid && (ecAddress.touched || editFormSubmitted)"
+  >
+
+  <small class="error-text"
+    *ngIf="ecAddress.invalid && (ecAddress.touched || editFormSubmitted)">
+    Address cannot exceed 250 characters.
+  </small>
+</div>
+
+      <div class="field-wrap">
+  <label class="field-label">
+    Category <span class="required-mark">*</span>
+  </label>
+
+  <select
+    name="clientCategoryId"
+    [(ngModel)]="selectedClient.clientCategoryId"
+    #ecCategory="ngModel"
+    required
+    [class.invalid]="ecCategory.invalid && (ecCategory.touched || editFormSubmitted)"
+  >
+    <option [ngValue]="null">Select Category</option>
+
+    <option
+      *ngFor="let cat of clientCategories"
+      [ngValue]="cat.id">
+      {{ cat.clientType || cat.name }}
+    </option>
+  </select>
+
+  <small class="error-text"
+    *ngIf="ecCategory.invalid && (ecCategory.touched || editFormSubmitted)">
+    Category is required.
+  </small>
+</div>
+
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-danger" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
   </div>
 </div>
 

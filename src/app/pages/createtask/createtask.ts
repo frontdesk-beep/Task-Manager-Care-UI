@@ -15,7 +15,7 @@ import { ClientService } from '../../services/client.service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import {ChangeDetectorRef} from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 
 interface DropdownItem {
   id: number;
@@ -86,7 +86,7 @@ export class Createtask implements OnInit {
   ngOnInit() {
     this.loadCurrentUser();
     this.loadUsers();
-    this.setupUserSearch(); 
+    this.setupUserSearch();
     this.loadClientTypes();
     this.loadStatuses();
     this.loadPriorities();
@@ -203,7 +203,7 @@ export class Createtask implements OnInit {
   }
 
   loadUsers() {
-    this.auth.searchUsers('',5).subscribe({
+    this.auth.searchUsers('', 5).subscribe({
       next: (response: any) => {
         const users = this.extractArray(response).filter((user: any) => this.isActiveUser(user));
 
@@ -277,7 +277,13 @@ export class Createtask implements OnInit {
       !this.task.clientName ||
       !this.task.email ||
       !this.task.phoneNumber ||
-      !this.task.task_Description
+      !this.task.task_Description ||
+      !this.task.clientCategoryId ||
+      !this.task.assignedToId ||
+      !this.task.statusId ||
+      !this.task.priorityId ||
+      !this.task.serviceCategoryId ||
+      !this.task.dueDate
     ) {
       this.toastr.warning('Please fill in all required fields before creating the task.');
       return;
@@ -338,7 +344,7 @@ export class Createtask implements OnInit {
       createdById: this.currentUserId
     })
     this.cdr.markForCheck();
-   
+
   }
   onClientChange() {
 
@@ -381,6 +387,9 @@ export class Createtask implements OnInit {
       // New Client
       this.isExistingClient = false;
       this.selectedClientId = 0;
+      this.task.clientName = '';
+      this.task.phoneNumber = '';
+      this.task.email = '';
     }
     else if (this.task.clientCategoryId === 2) {
       // Existing Client

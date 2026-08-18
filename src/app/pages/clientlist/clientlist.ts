@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Subscription, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ClientService } from '../../services/client.service';
 import { ToastrService } from 'ngx-toastr';
 import { Export, ExportColumn } from '../../services/export';
@@ -28,7 +29,7 @@ export class Clientlist implements OnInit, OnDestroy {
   // Sorting
   sortKey: string = '';
   sortDir: 'asc' | 'desc' = 'asc';
-
+  editFormSubmitted = false;
   // Filtering
   searchClientName: string = '';
 
@@ -36,6 +37,7 @@ export class Clientlist implements OnInit, OnDestroy {
   currentPage: number = 1;
   itemsPerPage: number = 6;
   private subs = new Subscription();
+  private searchSubject = new Subject<string>();
   uniqueCategories: any[] = [];
 
   categoryMap: { [key: number]: string } = {};
@@ -43,9 +45,13 @@ export class Clientlist implements OnInit, OnDestroy {
   loading: boolean = true;
   totalRecords = 0;
 
+  //search and skeloton loads
+  isSearchingClients = false;
+
   //Client creation
   isCreatedMode = false;
   formSubmitted = false;
+  currentUserId = 0;
   //new client manually added
   newClient: any = {
     clientName: '',
@@ -54,6 +60,7 @@ export class Clientlist implements OnInit, OnDestroy {
     email: '',
     address: '',
     clientCategoryId: null,
+    createdById: null,
   };
 
 
@@ -77,6 +84,20 @@ export class Clientlist implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    this.userStore.user$.subscribe(user => {
+      if (!user) return;
+      this.currentUserId = user.id;
+      this.newClient.createdById = user.id;
+    });
+    this.searchSubject
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged()
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadClients(1);
+      });
     this.loadClientCategories();
     this.loadClients();
   }
@@ -84,11 +105,25 @@ export class Clientlist implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subs.unsubscribe();
   }
+  onSearchChange(value: string) {
+    this.searchSubject.next(value);
+  }
 
+  onFilterChange() {
+    this.currentPage = 1;
+    this.loadClients(1);
+  }
   loadClients(page: number = this.currentPage) {
-    //SKELOTON
-    this.loading = true;
-    this.cdr.markForCheck();
+
+    // Show full skeleton ONLY on initial page load
+    if (this.clients.length === 0 && !this.searchClientName) {
+      this.loading = true;
+    }
+
+    // Show small loading state when searching
+    if (this.searchClientName) {
+      this.isSearchingClients = true;
+    }
 
     const query = {
       Search: this.searchClientName,
@@ -99,18 +134,30 @@ export class Clientlist implements OnInit, OnDestroy {
       Page: page,
       PageSize: this.itemsPerPage
     };
+
     this.clientService.getClients(query).subscribe({
       next: (res: any) => {
-        this.clients = res.data;
-        this.totalRecords = res.totalRecords;
+
+        this.clients = res.data || [];
+        this.totalRecords = res.totalRecords || 0;
         this.currentPage = page;
+
         this.loading = false;
+        this.isSearchingClients = false;
+
         this.cdr.markForCheck();
       },
+
       error: (err: any) => {
+
         console.error('GetClients error:', err);
+
         this.clients = [];
+        this.totalRecords = 0;
+
         this.loading = false;
+        this.isSearchingClients = false;
+
         this.cdr.markForCheck();
       }
     });
@@ -193,12 +240,20 @@ export class Clientlist implements OnInit, OnDestroy {
     if (client) {
       this.selectedClient = { ...client };
       this.isEditMode = true;
+      this.editFormSubmitted = false;
     } else {
       alert('Client not found');
     }
   }
 
-  updateClient(clientId: number) {
+  // NOTE: `form` must be passed in from the template, e.g.
+  // (ngSubmit)="updateClient(selectedClient.clientId, editClientForm)"
+  updateClient(clientId: number, form?: NgForm) {
+    this.editFormSubmitted = true;
+    if (form && form.invalid) {
+      this.toastr.error('Please fill in all required fields correctly.');
+      return;
+    }
     if (!this.selectedClient) return;
 
     this.clientService.updateClient(this.selectedClient.clientId, this.selectedClient).subscribe({
@@ -209,6 +264,7 @@ export class Clientlist implements OnInit, OnDestroy {
           this.clients[index] = updatedClient;
         }
         this.isEditMode = false;
+        this.editFormSubmitted = false;
         this.selectedClient = null;
         this.loadClients();
         this.toastr.success('Client updated successfully');
@@ -254,6 +310,7 @@ export class Clientlist implements OnInit, OnDestroy {
   cancelEdit() {
     this.selectedClient = null;
     this.isEditMode = false;
+    this.editFormSubmitted = false;
   }
 
   cancelDelete() {
@@ -265,6 +322,7 @@ export class Clientlist implements OnInit, OnDestroy {
     this.searchClientName = '';
     this.filterCategoryId = null;
     this.selectedDate = '';
+    this.currentPage = 1;
     this.loadClients(1);
   }
 
@@ -319,6 +377,7 @@ export class Clientlist implements OnInit, OnDestroy {
       email: '',
       address: '',
       clientCategoryId: null,
+      createdById: this.currentUserId,
     };
     this.formSubmitted = false;
     this.isCreatedMode = true;
@@ -334,6 +393,7 @@ export class Clientlist implements OnInit, OnDestroy {
       email: '',
       address: '',
       clientCategoryId: null,
+      createdById: this.currentUserId,
     };
   }
 
@@ -355,6 +415,7 @@ export class Clientlist implements OnInit, OnDestroy {
           email: '',
           address: '',
           clientCategoryId: null,
+          createdById: this.currentUserId,
         };
         this.loadClients();
       },

@@ -67,6 +67,10 @@ export class Addemployee implements OnInit, AfterViewInit {
   showInactive = false;
   currentUserRole = '';
 
+  //will not accept futur dates;
+  // add near your other properties
+  maxDate: string = new Date().toISOString().split('T')[0];
+
 
   constructor(
     private auth: Auth,
@@ -146,6 +150,10 @@ export class Addemployee implements OnInit, AfterViewInit {
       this.toastr.warning('Please fill in all required fields before creating the employee')
       return;
     }
+    if (this.employee.createdAt > this.maxDate) {
+      this.toastr.warning('Joining date cannot be in the future');
+      return;
+    }
     const payload = {
       name: this.employee.name,
       email: this.employee.email,
@@ -194,6 +202,7 @@ export class Addemployee implements OnInit, AfterViewInit {
           email: user.email || '',
           role: user.role || 'Employee',
         };
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading employee profile:', error);
