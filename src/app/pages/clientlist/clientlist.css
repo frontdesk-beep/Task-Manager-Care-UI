@@ -561,6 +561,7 @@
   .form-grid {
     grid-template-columns: 1fr;
   }
+}
   /* =========================================================
    SKELETON LOADING
    ========================================================= */
@@ -671,4 +672,46 @@
   }
 
 }
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  width: 100%;
+  text-align: center;
+  color: #6B7280;
+  font-size: 14px;
+}
+.search-wrap {
+  position: relative;
+}
+
+.search-loading {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+.error-text {
+  display: block;
+  margin-top: 5px;
+  color: #dc3545;
+  font-size: 12px;
+}
+
+.invalid {
+  border-color: #dc3545 !important;
+}
+
+.invalid:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.15);
 }

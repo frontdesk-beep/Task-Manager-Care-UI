@@ -1,78 +1,135 @@
 <div class="container mt-4">
-    <div class="card p-4 shadow mb-4">
+    <div class="card p-4 shadow">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h1>Add Employee</h1>
             </div>
         </div>
-        <form (ngSubmit)="saveEmployee()" #taskForm="ngForm">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="name" class="form-label">Name <span class="required"
-                            style="color: red;">*</span></label>
-                    <input name="name" type="text" id="name" class="form-control" [(ngModel)]="employee.name"
-                        placeholder="Employee name" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="email" class="form-label">Email <span class="required"
-                            style="color: red;">*</span></label>
-                    <input name="email" type="email" id="email" class="form-control" [(ngModel)]="employee.email"
-                        placeholder="example@careinsurance.ca" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="password" class="form-label">Password <span class="required"
-                            style="color: red;">*</span></label>
-                    <input name="password" type="password" id="password" class="form-control"
-                        [(ngModel)]="employee.password" placeholder="Employee password" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="Date" class="form-label">Date <span class="required"
-                            style="color: red;">*</span></label>
-                    <input name="Date" type="date" id="Date" class="form-control" [(ngModel)]="employee.createdAt"
-                        placeholder="Employee date" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="role" class="form-label">Role</label>
-                    <select name="role" id="role" class="form-select" [(ngModel)]="employee.role">
-                        <option value="">Choose Role</option>
-                        <ng-container *ngIf="currentUserRole === 'SuperAdmin'">
-                            <option [ngValue]="'Admin'">Admin</option>
-                        </ng-container>
-                        <option [ngValue]="'Employee'">Employee</option>
-                    </select>
-                </div>
-                <div class="col-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Create</button>
-                    <button type="button" class="btn btn-secondary" (click)="clearForm()">Clear</button>
-                </div>
+        <form (ngSubmit)="saveEmployee()" #taskForm="ngForm" novalidate>
+    <div class="row g-3">
+        <!-- NAME -->
+        <div class="col-md-6">
+            <label for="name" class="form-label">Name <span class="required" style="color: red;">*</span></label>
+            <input name="name" type="text" id="name" class="form-control"
+                [class.is-invalid]="name.invalid && (name.dirty || name.touched)"
+                [(ngModel)]="employee.name" #name="ngModel"
+                placeholder="Employee name"
+                required minlength="2" maxlength="50"
+                pattern="^[A-Za-z]+(?:[\s'-][A-Za-z]+)*$">
+            <div class="invalid-feedback" *ngIf="name.invalid && (name.dirty || name.touched)">
+                <span *ngIf="name.errors?.['required']">Name is required.</span>
+                <span *ngIf="name.errors?.['minlength']">Name must be at least 2 characters.</span>
+                <span *ngIf="name.errors?.['pattern']">Name can only contain letters, spaces, hyphens and apostrophes.</span>
             </div>
-        </form>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="col-md-6">
+            <label for="email" class="form-label">Email <span class="required" style="color: red;">*</span></label>
+            <input name="email" type="email" id="email" class="form-control"
+                [class.is-invalid]="email.invalid && (email.dirty || email.touched)"
+                [(ngModel)]="employee.email" #email="ngModel"
+                placeholder="example@careinsurance.ca"
+                required email
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$">
+            <div class="invalid-feedback" *ngIf="email.invalid && (email.dirty || email.touched)">
+                <span *ngIf="email.errors?.['required']">Email is required.</span>
+                <span *ngIf="email.errors?.['email'] || email.errors?.['pattern']">Enter a valid email address.</span>
+            </div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="col-md-6">
+            <label for="password" class="form-label">Password <span class="required" style="color: red;">*</span></label>
+            <input name="password" type="password" id="password" class="form-control"
+                [class.is-invalid]="password.invalid && (password.dirty || password.touched)"
+                [(ngModel)]="employee.password" #password="ngModel"
+                placeholder="Employee password"
+                required minlength="8"
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&amp;*()_+\-=\[\]{};:&quot;\\|,.&lt;&gt;\/?]).+$">
+            <div class="invalid-feedback" *ngIf="password.invalid && (password.dirty || password.touched)">
+                <span *ngIf="password.errors?.['required']">Password is required.</span>
+                <span *ngIf="password.errors?.['minlength']">Password must be at least 8 characters.</span>
+                <span *ngIf="password.errors?.['pattern']">Must include an uppercase, lowercase, number and special character.</span>
+            </div>
+        </div>
+
+        <!-- DATE -->
+        <div class="col-md-6">
+            <label for="Date" class="form-label">Date <span class="required" style="color: red;">*</span></label>
+            <input name="Date" type="date" id="Date" class="form-control"
+                [class.is-invalid]="joinDate.invalid && (joinDate.dirty || joinDate.touched)"
+                [(ngModel)]="employee.createdAt" #joinDate="ngModel"
+                [max]="maxDate"
+                required>
+            <div class="invalid-feedback" *ngIf="joinDate.invalid && (joinDate.dirty || joinDate.touched)">
+                <span *ngIf="joinDate.errors?.['required']">Date is required.</span>
+                <span *ngIf="joinDate.errors?.['maxDateExceeded'] || (employee.createdAt > maxDate)">Joining date cannot be in the future.</span>
+            </div>
+        </div>
+
+        <!-- ROLE -->
+        <div class="col-md-6">
+            <label for="role" class="form-label">Role <span class="required" style="color: red;">*</span></label>
+            <select name="role" id="role" class="form-select"
+                [class.is-invalid]="role.invalid && (role.dirty || role.touched)"
+                [(ngModel)]="employee.role" #role="ngModel"
+                required>
+                <option value="">Choose Role</option>
+                <ng-container *ngIf="currentUserRole === 'SuperAdmin'">
+                    <option [ngValue]="'Admin'">Admin</option>
+                </ng-container>
+                <option [ngValue]="'Employee'">Employee</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="role.invalid && (role.dirty || role.touched)">
+                <span *ngIf="role.errors?.['required']">Please select a role.</span>
+            </div>
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid">Create</button>
+            <button type="button" class="btn btn-secondary" (click)="clearForm()">Clear</button>
+        </div>
+    </div>
+</form>
 
         <!-- EDIT POP-UP  -->
         <div class="modal-backdrop" *ngIf="employeeToEdit">
-            <div class="modal-panel">
-                <h5 class="mb-3">
-                    Edit Employee
-                </h5>
-                <div class="mb-3">
-                    <label>Name</label>
-                    <input class="form-control" name="editname" [(ngModel)]="employeeToEdit.name">
-                </div>
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input class="form-control" name="editemail" [(ngModel)]="employeeToEdit.email">
-                </div>
-                <div class="d-flex justify-content-end gap-2">
-                    <button class="btn btn-secondary" (click)="cancelEdit()">
-                        Cancel
-                    </button>
-                    <button class="btn btn-primary" (click)="updateEmployee()">
-                        Update
-                    </button>
+    <div class="modal-panel">
+        <h5 class="mb-3">Edit Employee</h5>
+        <form #editForm="ngForm">
+            <div class="mb-3">
+                <label>Name <span class="required" style="color: red;">*</span></label>
+                <input class="form-control" name="editname"
+                    [class.is-invalid]="editName.invalid && (editName.dirty || editName.touched)"
+                    [(ngModel)]="employeeToEdit.name" #editName="ngModel"
+                    required minlength="2" maxlength="50"
+                    pattern="^[A-Za-z]+(?:[\s'-][A-Za-z]+)*$">
+                <div class="invalid-feedback" *ngIf="editName.invalid && (editName.dirty || editName.touched)">
+                    <span *ngIf="editName.errors?.['required']">Name is required.</span>
+                    <span *ngIf="editName.errors?.['minlength']">Name must be at least 2 characters.</span>
+                    <span *ngIf="editName.errors?.['pattern']">Name can only contain letters, spaces, hyphens and apostrophes.</span>
                 </div>
             </div>
-        </div>
+            <div class="mb-3">
+                <label>Email <span class="required" style="color: red;">*</span></label>
+                <input class="form-control" name="editemail"
+                    [class.is-invalid]="editEmail.invalid && (editEmail.dirty || editEmail.touched)"
+                    [(ngModel)]="employeeToEdit.email" #editEmail="ngModel"
+                    required email
+                    pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$">
+                <div class="invalid-feedback" *ngIf="editEmail.invalid && (editEmail.dirty || editEmail.touched)">
+                    <span *ngIf="editEmail.errors?.['required']">Email is required.</span>
+                    <span *ngIf="editEmail.errors?.['email'] || editEmail.errors?.['pattern']">Enter a valid email address.</span>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="editForm.invalid" (click)="updateEmployee()">Update</button>
+            </div>
+        </form>
     </div>
+</div>
     <div class="modal-backdrop" *ngIf="employeeToDelete">
         <div class="modal-panel">
             <h5 class="mb-3">Deactivate Employee</h5>
@@ -84,7 +141,7 @@
         </div>
     </div>
     <!-- DISPLAY TABLE FILTERSEXPORT AND CLEAR BUTTONS -->
-    <div class="card p-4 shadow">
+    <div class="card p-4 shadow mt-4">
         <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-3 align-items-center">
             <div class="d-flex flex-column flex-sm-row gap-2 w-100">
                 <input type="text" class="form-control" placeholder="Search name" [(ngModel)]="searchText"
