@@ -29,7 +29,7 @@ export const routes: Routes = [
       { path: 'profile', component: Profile },
       { path: 'create-task', component: Createtask, canActivate: [roleGuard(['Employee','Admin'])] },
       { path: 'task/:id', component: TaskDetail },
-      { path: 'task-history', component: TaskHistory },
+      { path: 'task-history', component: TaskHistory, canActivate: [roleGuard(['Employee','Admin'])]  },
       { path: 'addemployee', component: Addemployee, canActivate: [roleGuard(['SuperAdmin','Admin'])] },
       { path: 'clientlist', component: Clientlist },
       { path: 'task-report', component: TaskReportComponent, canActivate: [roleGuard(['SuperAdmin','Admin'])] }

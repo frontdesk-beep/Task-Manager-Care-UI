@@ -7,6 +7,7 @@ import { TaskService } from '../../services/task.service';
 import { Export } from '../../services/export';
 import { ChangeDetectorRef } from '@angular/core';
 import { BrowserStorageService } from '../../services/browser-storage.service';
+import { ExportColumn } from '../../services/export';
 
 @Component({
   selector: 'app-task-history',
@@ -39,12 +40,13 @@ export class TaskHistory implements OnInit {
   assignedPage = 1;
   createdPage = 1;
   readonly pageSize = 5;
+  
 
   constructor(
     private taskService: TaskService,
     private router: Router,
     private exportService: Export,
-    private ChangeDetectorRef: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef,
     private storage: BrowserStorageService
   ) { }
 
@@ -142,6 +144,7 @@ export class TaskHistory implements OnInit {
         );
 
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load task history', err);
@@ -298,27 +301,47 @@ export class TaskHistory implements OnInit {
     this.assignedPage = 1;
     this.createdPage = 1;
   }
+// shared column definitions so Excel/PDF exports stay clean and consistent
+private readonly assignedExportColumns: ExportColumn[] = [
+  { key: 'createdByName', label: 'Created By' },
+  { key: 'clientName', label: 'Client' },
+  { key: 'task_Description', label: 'Description' },
+  { key: 'dueDate', label: 'Due Date' },
+];
+
+private readonly createdExportColumns: ExportColumn[] = [
+  { key: 'clientName', label: 'Client' },
+  { key: 'task_Description', label: 'Description' },
+  { key: 'dueDate', label: 'Due Date' },
+];
+
+// format the due date the same way the table shows it, so exports match the UI
+private withFormattedDueDate(tasks: any[]): any[] {
+  return tasks.map(t => ({
+    ...t,
+    dueDate: t.dueDate ? new Date(t.dueDate).toLocaleDateString() : ''
+  }));
+}
 
   exportAssignedExcel() {
-    const tasks = this.getFilteredAndSortedAssignedTasks();
-    this.exportService.exportExcel(tasks, 'Completed_Assigned_Tasks_Export');
-  }
+  const tasks = this.withFormattedDueDate(this.getFilteredAndSortedAssignedTasks());
+  this.exportService.exportExcel(tasks, 'Completed_Assigned_Tasks_Export', this.assignedExportColumns);
+}
 
-  exportCreatedExcel() {
-    const tasks = this.getFilteredAndSortedCreatedTasks();
-    this.exportService.exportExcel(tasks, 'Completed_Created_Tasks_Export');
-  }
+exportCreatedExcel() {
+  const tasks = this.withFormattedDueDate(this.getFilteredAndSortedCreatedTasks());
+  this.exportService.exportExcel(tasks, 'Completed_Created_Tasks_Export', this.createdExportColumns);
+}
 
-  exportCreatedPdf() {
-    const tasks = this.getFilteredAndSortedCreatedTasks();
-    this.exportService.exportPdf(tasks, 'Completed_Created_Tasks_Export');
-  }
+exportCreatedPdf() {
+  const tasks = this.withFormattedDueDate(this.getFilteredAndSortedCreatedTasks());
+  this.exportService.exportPdf(tasks, 'Completed_Created_Tasks_Export', this.createdExportColumns);
+}
 
-  exportAssignedPdf() {
-    const tasks = this.getFilteredAndSortedAssignedTasks();
-    this.exportService.exportPdf(tasks, 'Completed_Assigned_Tasks_Export');
-  }
-
+exportAssignedPdf() {
+  const tasks = this.withFormattedDueDate(this.getFilteredAndSortedAssignedTasks());
+  this.exportService.exportPdf(tasks, 'Completed_Assigned_Tasks_Export', this.assignedExportColumns);
+}
   trackByUserId(index: number, item: any): any {
     return item.id;
   }

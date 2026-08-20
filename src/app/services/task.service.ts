@@ -126,7 +126,8 @@ export class TaskService {
   GetHistory(taskId: number) {
     return this.http.get(
 
-      this.api + '/Activity?taskId=' + taskId
+      `${this.api}/Activity?taskId=${taskId}`,
+      {headers: this.getAuthHeaders()}
 
     );
   }
