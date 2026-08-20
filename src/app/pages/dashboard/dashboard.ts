@@ -53,6 +53,8 @@ export class Dashboard implements OnInit, OnDestroy {
   allPage = 1;
   allTotalPages = 1;
   allItemPerPage = 5;
+  // filter state for the All Tasks table
+  serviceCategoryFilter: number | null = null;
 
   storeSubs = new Subscription();
 
@@ -298,6 +300,10 @@ export class Dashboard implements OnInit, OnDestroy {
         statusMap.get(Number(task.statusId)) ||
         task.statusName ||
         'Unknown',
+      // NOTE: serviceCategoryName is expected to already be present on the
+      // raw task from the API (matching the "Service Category" column shown
+      // in the UI). If it isn't, getUniqueServiceCategories() will show
+      // "Unknown" for every row - add a categoryMap lookup here if needed.
       showMenu: prevMenuState.get(task.id)?.showMenu || false,
       menuOpensUp: prevMenuState.get(task.id)?.menuOpensUp || false,
     }));
@@ -499,6 +505,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   clearAllTaskFilters() {
     this.searchAllClient = '';
+    this.serviceCategoryFilter = null;
     this.allPage = 1;
     this.refreshAllView();
   }
@@ -512,6 +519,23 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
     return Array.from(unique, ([id, name]) => ({ id, name }));
+  }
+
+  // used by the All Tasks category filter dropdown
+  getUniqueServiceCategories(): any[] {
+    const unique = new Map<number, string>();
+    this.alltasks.forEach(t => {
+      const id = Number(t.serviceCategoryId);
+      const name = t.serviceCategoryName || 'Unknown';
+      if (id && name) {
+        unique.set(id, name);
+      }
+    });
+    return Array.from(unique, ([id, name]) => ({ id, name }));
+  }
+
+  trackByCatId(index: number, item: any): any {
+    return item.id;
   }
 
   //FOR MY TASKS
@@ -547,6 +571,12 @@ export class Dashboard implements OnInit, OnDestroy {
   //FOR ALL TASKS
   refreshAllView() {
     let filtered: any[] = [...this.alltasks];
+
+    if (this.serviceCategoryFilter !== null && this.serviceCategoryFilter !== undefined) {
+      filtered = filtered.filter(task =>
+        Number(task.serviceCategoryId) === Number(this.serviceCategoryFilter)
+      );
+    }
 
     if (this.searchAllClient.trim()) {
       const search = this.searchAllClient.toLowerCase();
@@ -654,5 +684,4 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
   }
-
 }

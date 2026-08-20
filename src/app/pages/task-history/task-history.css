@@ -341,3 +341,24 @@
   color: #6b778c;
   font-size: 0.85rem;
 }
+.skeleton {
+  background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 37%, #e8e8e8 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.skeleton-title   { width: 140px; height: 20px; }
+.skeleton-pill    { width: 60px;  height: 20px; border-radius: 12px; }
+.skeleton-search  { width: 200px; height: 34px; }
+.skeleton-select  { width: 160px; height: 34px; }
+.skeleton-btn     { width: 90px;  height: 34px; }
+.skeleton-header  { width: 80%;   height: 14px; margin: 4px 0; }
+.skeleton-cell    { width: 90%;   height: 14px; margin: 6px 0; }
+
+.skeleton-wrapper .history-panel { margin-bottom: 24px; }

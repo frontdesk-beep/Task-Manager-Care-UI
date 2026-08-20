@@ -150,6 +150,7 @@ export class TaskHistory implements OnInit {
         console.error('Failed to load task history', err);
         this.error = 'Failed to load task history. Please try again.';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
