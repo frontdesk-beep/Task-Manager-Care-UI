@@ -1,8 +1,0 @@
-.comments-root { border:1px solid #e1e1e1; border-radius:6px; padding:8px; background:#fafafa }
-.messages { max-height:280px; overflow:auto; padding:6px }
-.message { padding:8px; border-bottom:1px solid #eee }
-.message .meta { font-size:12px; color:#333 }
-.message .body { margin-top:6px }
-.composer { display:flex; gap:8px; margin-top:8px }
-.composer textarea { flex:1; min-height:48px }
-.composer button { padding:8px 12px }

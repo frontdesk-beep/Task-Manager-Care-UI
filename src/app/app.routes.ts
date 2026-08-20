@@ -25,14 +25,25 @@ export const routes: Routes = [
   },
   // Putting canActivate on the parent main route protects every child in one place
   { path: 'main', component: MainLayout, canActivate: [authGuard], children: [
-      { path: 'dashboard', component: Dashboard },
+      { path: 'dashboard', 
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+      },
       { path: 'profile', component: Profile },
       { path: 'create-task', component: Createtask, canActivate: [roleGuard(['Employee','Admin'])] },
       { path: 'task/:id', component: TaskDetail },
-      { path: 'task-history', component: TaskHistory, canActivate: [roleGuard(['Employee','Admin'])]  },
+      { path: 'task-history', 
+        loadComponent: () => import('./pages/task-history/task-history').then(m => m.TaskHistory),
+        canActivate: [roleGuard(['Employee','Admin'])]  },
       { path: 'addemployee', component: Addemployee, canActivate: [roleGuard(['SuperAdmin','Admin'])] },
-      { path: 'clientlist', component: Clientlist },
-      { path: 'task-report', component: TaskReportComponent, canActivate: [roleGuard(['SuperAdmin','Admin'])] }
+      { path: 'clientlist',  
+        loadComponent: () => import('./pages/clientlist/clientlist').then(m => m.Clientlist) },
+      { path: 'task-report', 
+        loadComponent: () => import('./pages/task-report/task-report').then(m => m.TaskReportComponent), 
+        canActivate: [roleGuard(['SuperAdmin','Admin'])] }
     ]
+  },
+  {
+    path:'**', redirectTo:'login'
   }
+  
 ];
