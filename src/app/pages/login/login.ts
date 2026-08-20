@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { ToastrService } from 'ngx-toastr';
 import { BrowserStorageService } from '../../services/browser-storage.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,9 @@ export class Login {
   password: string = '';
   emailError: string = '';
   passwordError: string = '';
+  isSubmitting: boolean = false;
+
+  private readonly emailRegex = /^[A-Za-z0-9._%+-]+@careinsurance\.ca$/i;
 
   constructor(
     private auth: Auth,
@@ -28,40 +32,55 @@ export class Login {
     private toastr: ToastrService,
     private storage: BrowserStorageService) { }
 
-  validateEmail() {
-    this.emailError = '';
-    if (!this.email.trim()) {
+  validateEmail(): boolean {
+    const value = this.email.trim();
+    if (!value) {
       this.emailError = 'Email is required.';
-      return;
+      return false;
     }
+    if (value.length > 100) {
+      this.emailError = 'Email cannot exceed 100 characters.';
+      return false;
+    }
+    if (!this.emailRegex.test(value)) {
+      this.emailError = 'Email must be a valid @careinsurance.ca address';
+      return false;
+    }
+    this.emailError = '';
+    return true;
   }
 
-  validatePassword() {
-    this.passwordError = '';
-    if (!this.password.trim()) {
+  validatePassword(): boolean {
+    const value = this.password.trim();
+    if (!value) {
       this.passwordError = 'Password is required.';
-      return;
+      return false;
     }
-    if (this.password.length < 8) {
-      this.passwordError = 'Password must be at least 8 characters.';
-      return;
-    }
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-    if (!passwordRegex.test(this.password)) {
-      this.passwordError = 'Invalid password format.';
-      return;
-    }
+    
+    // Login only checks presence, not complexity — the account's real
+    // password may predate any complexity rule enforced at signup.
+    this.passwordError = '';
+    return true;
   }
 
   onSubmit() {
-    this.validateEmail();
-    this.validatePassword();
+    const emailValid = this.validateEmail();
+    const passwordValid = this.validatePassword();
 
-    if (this.emailError || this.passwordError) {
+    if (!emailValid || !passwordValid || this.isSubmitting) {
       return;
     }
 
-    this.auth.login({ email: this.email, password: this.password })
+    this.isSubmitting = true;
+
+    this.auth.login({ 
+      email: this.email.trim(), 
+      password: this.password
+     }).pipe(
+      finalize(()=>{
+        this.isSubmitting=false;
+      })
+     )
       .subscribe({
         next: (res: any) => {
           this.storage.setItem('token', res.token);
@@ -71,29 +90,36 @@ export class Login {
             email: res.email,
             role: res.role,
           }));
-          this.toastr.success('Login successful!');
           this.storage.setItem('name', res.name);
           this.storage.setItem('email', res.email);
           this.storage.setItem('role', res.role);
-          res.token ? this.storage.setItem('isLoggedIn', 'true') : this.storage.setItem('isLoggedIn', 'false');
+          this.storage.setItem('isLoggedIn', res.token ? 'true' : 'false');
+          
+          this.toastr.success('Login successful!');
           this.router.navigate(['/main/dashboard']);
         },
-
         error: (error) => {
+          this.isSubmitting = false;
+          const message = error?.error?.message;
+
           if (error.status === 403) {
-            this.toastr.error(
-              'This account has been deactivated. Contact admin.'
-            );
+            this.toastr.error(message || 'This account has been deactivated. Contact admin.');
             return;
           }
           if (error.status === 401) {
-            this.toastr.error(
-              'Invalid email or password.'
-            );
+            this.toastr.error(message || 'Invalid email or password.');
             return;
           }
-          this.toastr.error('Something went wrong.');
-
+          if (error.status === 400 && error?.error?.errors) {
+            const firstError = Object.values(error.error.errors)[0] as string[];
+            this.toastr.error(firstError?.[0] || 'Please check your input and try again.');
+            return;
+          }
+          if (error.status === 0) {
+            this.toastr.error('Unable to reach the server. Check your connection.');
+            return;
+          }
+          this.toastr.error(message || 'Something went wrong.');
         }
       });
   }

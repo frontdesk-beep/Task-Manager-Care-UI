@@ -7,41 +7,49 @@
     </p>
 
     <!-- Email -->
-    <div class="mb-3">
-        <input
-            type="email"
-            class="form-control"
-            [(ngModel)]="email"
-            (blur)="validateEmail()"
-            placeholder="employee@careinsurance.ca"
-            required>
+<div class="mb-3">
+    <input
+        type="email"
+        class="form-control"
+        [class.invalid]="emailError"
+        [(ngModel)]="email"
+        (blur)="validateEmail()"
+        placeholder="employee@careinsurance.ca"
+        maxlength="100"
+        autocomplete="username"
+        [attr.aria-invalid]="!!emailError"
+        required>
 
-        <span class="error-message" *ngIf="emailError">
-            {{ emailError }}
-        </span>
-    </div>
+    <span class="error-message" *ngIf="emailError">
+        {{ emailError }}
+    </span>
+</div>
 
-    <!-- Password -->
-    <div class="mb-2">
-        <input
-            type="password"
-            class="form-control"
-            [(ngModel)]="password"
-            (blur)="validatePassword()"
-            placeholder="Password"
-            required>
+<!-- Password -->
+<div class="mb-2">
+    <input
+        type="password"
+        class="form-control"
+        [class.invalid]="passwordError"
+        [(ngModel)]="password"
+        (blur)="validatePassword()"
+        autocomplete="current-password"
+        [attr.aria-invalid]="!!passwordError"
+        placeholder="Password"
+        required>
 
-        <span class="error-message" *ngIf="passwordError">
-            {{ passwordError }}
-        </span>
-    </div>
+    <span class="error-message" *ngIf="passwordError">
+        {{ passwordError }}
+    </span>
+</div>
 
     <!-- Login Button -->
     <button
         class="auth-btn"
+        [disabled]="isSubmitting"
         (click)="onSubmit()">
 
-        Login
+        {{ isSubmitting ? 'Signing in...' : 'Login' }}
 
     </button>
 

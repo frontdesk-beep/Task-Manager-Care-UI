@@ -117,17 +117,19 @@ export class Addemployee implements OnInit, AfterViewInit {
     this.auth.GetUsers().subscribe({
       next: (response: any) => {
         const data = this.extractArray(response);
-        this.employees = data.map((employee: any) => ({
-          id: Number(employee.id),
-          name: employee.name || '',
-          email: employee.email || '',
-          password: '',
-          role: employee.role || 'Employee',
-          createdAt: employee.createdAt
-            ? employee.createdAt.split('T')[0]
-            : '',
-          isActive: employee.isActive
-        }));
+        this.employees = data
+          .filter((employee: any) => employee.role !== 'SuperAdmin')
+          .map((employee: any) => ({
+            id: Number(employee.id),
+            name: employee.name || '',
+            email: employee.email || '',
+            password: '',
+            role: employee.role || 'Employee',
+            createdAt: employee.createdAt
+              ? employee.createdAt.split('T')[0]
+              : '',
+            isActive: employee.isActive
+          }));
         this.updateEmployeeView();
         this.cdr.markForCheck();
 
@@ -245,6 +247,10 @@ export class Addemployee implements OnInit, AfterViewInit {
   // prevent logged-in user from deleting themselves
   canDeleteEmployee(employee: Employee): boolean {
 
+    // Never allow SuperAdmin to appear/manage through this page
+    if (employee.role === 'SuperAdmin') {
+      return false;
+    }
     // cannot deactivate yourself
     if (employee.id === this.currentUserId) {
       return false;

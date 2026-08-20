@@ -21,6 +21,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
+      const isAuthEndpoint = req.url.includes('/auth/login')
+        || req.url.includes('/auth/forgot-password')
+        || req.url.includes('/auth/reset-password');
+        
       if (err.status === 401) {
         storage.removeItem('token');
         storage.removeItem('user');
