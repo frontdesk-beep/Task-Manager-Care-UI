@@ -100,11 +100,12 @@ export class Addemployee implements OnInit, AfterViewInit {
 
   private loadCurrentUser() {
     try {
-      this.currentUserRole = this.storage.getItem('role') || '';
       const user = JSON.parse(this.storage.getItem('user') || '{}');
       this.currentUserId = Number(user?.id || 0);
+      this.currentUserRole=user?.role || '';
     } catch {
       this.currentUserId = 0;
+      this.currentUserRole='';
     }
   }
   private extractArray(response: any): any[] {
