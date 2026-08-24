@@ -27,8 +27,9 @@ export const routes: Routes = [
   { path: 'main', component: MainLayout, canActivate: [authGuard], children: [
       { path: 'dashboard', 
         loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        
       },
-      { path: 'profile', component: Profile },
+      { path: 'profile', component: Profile, canActivate: [roleGuard(['Employee','Admin', 'SuperAdmin'])] },
       { path: 'create-task', component: Createtask, canActivate: [roleGuard(['Employee','Admin'])] },
       { path: 'task/:id', component: TaskDetail },
       { path: 'task-history', 

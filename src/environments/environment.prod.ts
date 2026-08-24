@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api.yourcompanydomain.com/api',
-    hubUrl: 'https://api.yourcompanydomain.com/taskHub'
+    apiUrl: 'http://localhost:8080/api',
+    hubUrl: 'http://localhost:8080/taskHub'
 };

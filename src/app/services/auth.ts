@@ -17,7 +17,7 @@ export class Auth {
     private storage: BrowserStorageService) { }
 
   login(data: any) {
-    return this.http.post(`${this.authapi = `${environment.apiUrl}/auth`}/login`, data).pipe(
+    return this.http.post(`${this.authapi}/login`, data).pipe(
       tap((response: any) => {
         this.storage.setItem('token', response.token);
         this.storage.setItem('user', JSON.stringify({

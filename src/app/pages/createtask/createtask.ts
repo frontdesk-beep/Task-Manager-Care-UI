@@ -311,6 +311,7 @@ export class Createtask implements OnInit {
         setTimeout(() => {
           this.resetTask();
         }, 0);
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Full Error:', error);
@@ -319,9 +320,10 @@ export class Createtask implements OnInit {
           : 'Error creating task. Please try again.';
 
         this.toastr.error(message);
+         this.cdr.markForCheck();
       }
     });
-    this.cdr.markForCheck();
+    // this.cdr.markForCheck();
   }
 
   resetTask() {

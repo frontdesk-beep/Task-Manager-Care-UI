@@ -2,11 +2,7 @@
   <div class="history-header">
     <!-- <h1>Task History</h1> -->
   </div>
-
-  <!-- <div *ngIf="loading" class="loading-state">
-  Loading task history...
-</div> -->
-  <div *ngIf="error" class="error-state">{{ error }}</div>
+<div *ngIf="error" class="error-state">{{ error }}</div>
 
   <div *ngIf="!loading && !error">
     <div class="history-panel">
@@ -54,9 +50,6 @@
               <th (click)="toggleSort('assigned', 'task_Description')" class="sortable">
                 Description <span class="sort-icon">{{ getSortIcon('assigned', 'task_Description') }}</span>
               </th>
-              <!-- <th (click)="toggleSort('assigned', 'statusName')" class="sortable">
-                Status <span class="sort-icon">{{ getSortIcon('assigned', 'statusName') }}</span>
-              </th> -->
               <th (click)="toggleSort('assigned', 'dueDate')" class="sortable">
                 Due <span class="sort-icon">{{ getSortIcon('assigned', 'dueDate') }}</span>
               </th>
@@ -135,9 +128,6 @@
               <th (click)="toggleSort('created', 'task_Description')" class="sortable">
                 Description <span class="sort-icon">{{ getSortIcon('created', 'task_Description') }}</span>
               </th>
-              <!-- <th (click)="toggleSort('created', 'statusName')" class="sortable">
-                Status <span class="sort-icon">{{ getSortIcon('created', 'statusName') }}</span>
-              </th> -->
               <th (click)="toggleSort('created', 'dueDate')" class="sortable">
                 Due <span class="sort-icon">{{ getSortIcon('created', 'dueDate') }}</span>
               </th>
@@ -156,9 +146,6 @@
                 </div>
               </td>
               <td>{{ task.task_Description }}</td>
-              <!-- <td>
-                <span class="status-badge" [ngClass]="getStatusClass(task.statusName)">{{ task.statusName }}</span>
-              </td> -->
               <td>{{ task.dueDate | date:'mediumDate' }}</td>
               <td><button type="button" class="action-link" (click)="openTask(task.id)">View</button></td>
             </tr>

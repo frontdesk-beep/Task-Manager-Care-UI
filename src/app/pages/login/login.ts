@@ -90,10 +90,10 @@ export class Login {
             email: res.email,
             role: res.role,
           }));
-          this.storage.setItem('name', res.name);
-          this.storage.setItem('email', res.email);
-          this.storage.setItem('role', res.role);
-          this.storage.setItem('isLoggedIn', res.token ? 'true' : 'false');
+          // this.storage.setItem('name', res.name);
+          // this.storage.setItem('email', res.email);
+          // this.storage.setItem('role', res.role);
+          // this.storage.setItem('isLoggedIn', res.token ? 'true' : 'false');
           
           this.toastr.success('Login successful!');
           this.router.navigate(['/main/dashboard']);

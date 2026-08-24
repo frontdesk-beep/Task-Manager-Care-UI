@@ -137,15 +137,14 @@ export class HeaderTop implements OnInit, OnDestroy {
     this.notificationOpen = false;
   }
   logout() {
-    this.storage.removeItem('name');
-    this.storage.removeItem('role');
-    this.storage.removeItem('user');
-    this.storage.removeItem('isLoggedIn');
-    this.taskStore.destroy();
-    this.storage.removeItem('token');
-    this.notificationService.clearNotifications();
-    this.notificationService.stopConnection();
-    this.toastr.success('Logged out successfully!');
-    this.router.navigate(['/login']);
-  }
+  this.storage.removeItem('token');
+  this.storage.removeItem('user');
+
+  this.taskStore.destroy();
+  this.notificationService.clearNotifications();
+  this.notificationService.stopConnection();
+
+  this.toastr.success('Logged out successfully!');
+  this.router.navigate(['/login']);
+}
 }

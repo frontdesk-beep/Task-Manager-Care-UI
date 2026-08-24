@@ -138,8 +138,10 @@ export class Dashboard implements OnInit, OnDestroy {
     }
 
     this.currentUserId = Number(user.id);
-    this.currentUserRole = this.storage.getItem('role') || '';
-
+    this.currentUserRole = (user?.role || '').trim();
+    if (this.currentUserRole.toLowerCase() === 'superadmin') {
+      this.activeTab = 'all';
+    }
 
     if (!user?.id || Number.isNaN(this.currentUserId)) {
       console.error('No valid user found in storage - redirecting to login');
