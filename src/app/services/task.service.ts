@@ -74,7 +74,17 @@ export class TaskService {
       headers: this.getAuthHeaders()
     });
   }
+GetCompletedAssignedTasks(userId: number) {
+  return this.http.get<any[]>(
+    `${this.api}/Tasks/history/assigned?userId=${userId}`
+  );
+}
 
+GetCompletedCreatedTasks(userId: number) {
+  return this.http.get<any[]>(
+    `${this.api}/Tasks/history/created?userId=${userId}`
+  );
+}
   GetAllTasks() {
     return this.http.get(`${this.api}/tasks`, {
       headers: this.getAuthHeaders()

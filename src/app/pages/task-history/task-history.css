@@ -2,11 +2,11 @@
   padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
-
+ 
 .history-header {
   margin-bottom: 18px;
 }
-
+ 
 .history-panel {
   margin-bottom: 24px;
   background: #ffffff;
@@ -15,21 +15,21 @@
   padding: 20px 24px 8px;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
-
+ 
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
 }
-
+ 
 .panel-header h2 {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
   color: #172b4d;
 }
-
+ 
 .item-count-pill {
   background: #f1f2f5;
   color: #5e6c84;
@@ -39,7 +39,7 @@
   font-weight: 600;
   white-space: nowrap;
 }
-
+ 
 .empty-state,
 .loading-state,
 .error-state {
@@ -48,7 +48,7 @@
   color: #5a4200;
   border-radius: 8px;
 }
-
+ 
 /* Filter row */
 .filter-controls {
   display: flex;
@@ -57,13 +57,13 @@
   gap: 10px;
   margin-bottom: 8px;
 }
-
+ 
 .search-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
-
+ 
 .search-wrapper .filter-icon {
   position: absolute;
   left: 11px;
@@ -71,11 +71,11 @@
   color: #97a0af;
   pointer-events: none;
 }
-
+ 
 .search-wrapper .filter-input {
   padding-left: 32px;
 }
-
+ 
 .filter-select,
 .filter-input {
   padding: 7px 12px;
@@ -86,20 +86,20 @@
   font-size: 0.85rem;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-
+ 
 .filter-input {
   min-width: 220px;
 }
-
+ 
 .filter-input::placeholder {
   color: #97a0af;
 }
-
+ 
 .filter-select:hover,
 .filter-input:hover {
   background: #f4f5f7;
 }
-
+ 
 .filter-select:focus,
 .filter-input:focus {
   outline: none;
@@ -107,7 +107,7 @@
   border-color: #4c9aff;
   box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.25);
 }
-
+ 
 .filter-actions {
   display: flex;
   flex-wrap: wrap;
@@ -115,7 +115,7 @@
   gap: 8px;
   margin-left: auto;
 }
-
+ 
 .btn,
 .btn-outline-success,
 .btn-outline-primary,
@@ -127,53 +127,53 @@
   cursor: pointer;
   transition: all 0.15s ease;
 }
-
+ 
 .btn {
   border: 1px solid transparent;
   background: #0052cc;
   color: #ffffff;
 }
-
+ 
 .btn-outline-success {
   background: #e3fcef;
   color: #006644;
   border: 1px solid transparent;
 }
-
+ 
 .btn-outline-success:hover {
   background: #abf5d1;
 }
-
+ 
 .btn-outline-primary {
   background: #deebff;
   color: #0052cc;
   border: 1px solid transparent;
 }
-
+ 
 .btn-outline-primary:hover {
   background: #b3d4ff;
 }
-
+ 
 .btn-clear-filters {
   background: #ffebe6;
   color: #bf2600;
   border: 1px solid transparent;
 }
-
+ 
 .btn-clear-filters:hover {
   background: #ffbdad;
 }
-
+ 
 /* Table */
 .history-table-wrapper {
   overflow-x: auto;
 }
-
+ 
 .history-table {
   width: 100%;
   border-collapse: collapse;
 }
-
+ 
 .history-table th {
   text-align: left;
   padding: 8px 12px;
@@ -185,7 +185,7 @@
   border-bottom: 2px solid #ebecf0;
   white-space: nowrap;
 }
-
+ 
 .history-table td {
   padding: 12px;
   border-bottom: 1px solid #f0f1f3;
@@ -193,26 +193,26 @@
   font-size: 0.88rem;
   vertical-align: middle;
 }
-
+ 
 .history-table tbody tr {
   transition: background-color 0.12s ease;
 }
-
+ 
 .history-table tbody tr:hover {
   background-color: #f7f8fa;
 }
-
+ 
 .history-table tbody tr:last-child td {
   border-bottom: none;
 }
-
+ 
 /* Avatar */
 .client-cell {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
+ 
 .avatar-circle {
   flex-shrink: 0;
   width: 26px;
@@ -225,7 +225,7 @@
   font-weight: 700;
   font-size: 0.68rem;
 }
-
+ 
 /* Status badge */
 .status-badge {
   display: inline-block;
@@ -236,58 +236,58 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
-
+ 
 .status-completed,
 .status-done,
 .status-closed {
   background: #e3fcef;
   color: #006644;
 }
-
+ 
 .status-in-progress,
 .status-inprogress {
   background: #deebff;
   color: #0052cc;
 }
-
+ 
 .status-pending,
 .status-todo,
 .status-open {
   background: #fff0b3;
   color: #7f5f01;
 }
-
+ 
 .status-overdue,
 .status-blocked {
   background: #ffebe6;
   color: #bf2600;
 }
-
+ 
 .status-default {
   background: #ebecf0;
   color: #42526e;
 }
-
+ 
 /* Sortable headers */
 .sortable {
   cursor: pointer;
   user-select: none;
 }
-
+ 
 .sortable:hover {
   color: #172b4d;
 }
-
+ 
 .sort-icon {
   margin-left: 4px;
   font-size: 10px;
   opacity: 0.55;
 }
-
+ 
 .sortable:hover .sort-icon {
   opacity: 1;
 }
-
+ 
 /* Action button - Jira-style pill */
 .action-link {
   display: inline-flex;
@@ -303,11 +303,11 @@
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
-
+ 
 .action-link:hover {
   background: #b3d4ff;
 }
-
+ 
 /* Pagination */
 .pagination {
   display: flex;
@@ -316,7 +316,7 @@
   gap: 10px;
   margin: 14px 0 4px;
 }
-
+ 
 .pagination-btn {
   padding: 6px 12px;
   border: 1px solid #dfe1e6;
@@ -326,17 +326,17 @@
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
-
+ 
 .pagination-btn:hover:not(:disabled) {
   background: #f4f5f7;
   border-color: #c1c7d0;
 }
-
+ 
 .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
+ 
 .pagination-info {
   color: #6b778c;
   font-size: 0.85rem;
@@ -347,12 +347,12 @@
   animation: skeleton-shimmer 1.4s ease infinite;
   border-radius: 4px;
 }
-
+ 
 @keyframes skeleton-shimmer {
   0% { background-position: 100% 50%; }
   100% { background-position: 0 50%; }
 }
-
+ 
 .skeleton-title   { width: 140px; height: 20px; }
 .skeleton-pill    { width: 60px;  height: 20px; border-radius: 12px; }
 .skeleton-search  { width: 200px; height: 34px; }
@@ -360,5 +360,6 @@
 .skeleton-btn     { width: 90px;  height: 34px; }
 .skeleton-header  { width: 80%;   height: 14px; margin: 4px 0; }
 .skeleton-cell    { width: 90%;   height: 14px; margin: 6px 0; }
-
+ 
 .skeleton-wrapper .history-panel { margin-bottom: 24px; }
+ 
