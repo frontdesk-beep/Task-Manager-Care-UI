@@ -106,8 +106,8 @@
         <h2>Assigned Tasks</h2>
  
         <span class="item-count-pill">
-          {{ getFilteredAndSortedAssignedTasks().length }}
-          item{{ getFilteredAndSortedAssignedTasks().length === 1 ? '' : 's' }}
+          {{ filteredAssignedTasks.length }}
+          item{{ filteredAssignedTasks.length === 1 ? '' : 's' }}
         </span>
       </div>
  
@@ -138,7 +138,7 @@
  
           <option
             *ngFor="
-              let user of getUniqueCreatedByNames(completedAssigned);
+              let user of uniqueAssignedCreators;
               trackBy: trackByUserId
             "
             [ngValue]="user.id"
@@ -179,7 +179,7 @@
       <!-- EMPTY STATE -->
  
       <div
-        *ngIf="getFilteredAndSortedAssignedTasks().length === 0"
+        *ngIf="filteredAssignedTasks.length === 0"
         class="empty-state"
       >
         No completed assigned tasks matching filters.
@@ -188,7 +188,7 @@
       <!-- TABLE -->
  
       <div
-        *ngIf="getFilteredAndSortedAssignedTasks().length > 0"
+        *ngIf="filteredAssignedTasks.length > 0"
         class="history-table-wrapper"
       >
  
@@ -248,7 +248,7 @@
  
             <tr
               *ngFor="
-                let task of getPaginatedAssignedTasks();
+                let task of paginatedAssignedTasks;
                 let i = index;
                 trackBy: trackByTaskId
               "
@@ -309,7 +309,7 @@
  
         <div
           class="pagination"
-          *ngIf="getAssignedTotalPages() > 1"
+          *ngIf="assignedTotalPages > 1"
         >
  
           <button
@@ -324,14 +324,14 @@
           <span class="pagination-info">
             Page {{ assignedPage }}
             of
-            {{ getAssignedTotalPages() }}
+            {{ assignedTotalPages }}
           </span>
  
           <button
             type="button"
             class="pagination-btn"
             (click)="goToAssignedPage(assignedPage + 1)"
-            [disabled]="assignedPage === getAssignedTotalPages()"
+            [disabled]="assignedPage === assignedTotalPages"
           >
             Next →
           </button>
@@ -354,8 +354,8 @@
         <h2>Created Tasks</h2>
  
         <span class="item-count-pill">
-          {{ getFilteredAndSortedCreatedTasks().length }}
-          item{{ getFilteredAndSortedCreatedTasks().length === 1 ? '' : 's' }}
+          {{ filteredCreatedTasks.length }}
+          item{{ filteredCreatedTasks.length === 1 ? '' : 's' }}
         </span>
  
       </div>
@@ -392,7 +392,7 @@
  
           <option
             *ngFor="
-              let user of getUniqueCreatedByNames(completedCreated);
+              let user of uniqueCreatedCreators;
               trackBy: trackByUserId
             "
             [ngValue]="user.id"
@@ -437,7 +437,7 @@
       <!-- EMPTY STATE -->
  
       <div
-        *ngIf="getFilteredAndSortedCreatedTasks().length === 0"
+        *ngIf="filteredCreatedTasks.length === 0"
         class="empty-state"
       >
         No completed created tasks matching filters.
@@ -447,7 +447,7 @@
       <!-- TABLE -->
  
       <div
-        *ngIf="getFilteredAndSortedCreatedTasks().length > 0"
+        *ngIf="filteredCreatedTasks.length > 0"
         class="history-table-wrapper"
       >
  
@@ -506,7 +506,7 @@
  
             <tr
               *ngFor="
-                let task of getPaginatedCreatedTasks();
+                let task of paginatedCreatedTasks;
                 let i = index;
                 trackBy: trackByTaskId
               "
@@ -568,7 +568,7 @@
  
         <div
           class="pagination"
-          *ngIf="getCreatedTotalPages() > 1"
+          *ngIf="createdTotalPages > 1"
         >
  
           <button
@@ -583,14 +583,14 @@
           <span class="pagination-info">
             Page {{ createdPage }}
             of
-            {{ getCreatedTotalPages() }}
+            {{ createdTotalPages }}
           </span>
  
           <button
             type="button"
             class="pagination-btn"
             (click)="goToCreatedPage(createdPage + 1)"
-            [disabled]="createdPage === getCreatedTotalPages()"
+            [disabled]="createdPage === createdTotalPages"
           >
             Next →
           </button>
@@ -604,4 +604,3 @@
   </div>
  
 </section>
- 

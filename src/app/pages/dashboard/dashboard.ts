@@ -92,6 +92,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   //instead of calling methods into html created variables
   uniqueCreatedUsers: any[] = [];
+  uniqueServiceCategories: any[] = [];
 
   today = new Date();
 
@@ -324,6 +325,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.refreshAssignedView();
     this.refreshAllView();
+    this.uniqueServiceCategories = this.getUniqueServiceCategories();
     this.cdr.markForCheck();
   }
 

@@ -189,7 +189,7 @@
         </div>
         <select [(ngModel)]="serviceCategoryFilter" (ngModelChange)="allPage=1; refreshAllView()" class="filter-select">
           <option [value]="null">All Categories</option>
-          <option *ngFor="let cat of getUniqueServiceCategories(); trackBy: trackByCatId" [value]="cat.id">{{ cat.name
+          <option *ngFor="let cat of uniqueServiceCategories; trackBy: trackByCatId" [value]="cat.id">{{ cat.name
             }}</option>
         </select>
         <button class="btn-clear-filters" (click)="clearAllTaskFilters()">

@@ -98,6 +98,25 @@ export class TaskHistory implements OnInit {
  
  
   // =========================================================
+  // CACHED VIEWS
+  // (recomputed only when filters/sort/page actually change,
+  // instead of on every Angular change-detection cycle - this
+  // is what was causing lag with real data volumes)
+  // =========================================================
+ 
+  filteredAssignedTasks: any[] = [];
+  paginatedAssignedTasks: any[] = [];
+  assignedTotalPages = 1;
+ 
+  filteredCreatedTasks: any[] = [];
+  paginatedCreatedTasks: any[] = [];
+  createdTotalPages = 1;
+ 
+  uniqueAssignedCreators: any[] = [];
+  uniqueCreatedCreators: any[] = [];
+ 
+ 
+  // =========================================================
   // CONSTRUCTOR
   // =========================================================
  
@@ -179,6 +198,11 @@ export class TaskHistory implements OnInit {
 
       this.assignedPage = 1;
       this.createdPage = 1;
+
+      this.uniqueAssignedCreators = this.getUniqueCreatedByNames(this.completedAssigned);
+      this.uniqueCreatedCreators = this.getUniqueCreatedByNames(this.completedCreated);
+      this.refreshAssignedView();
+      this.refreshCreatedView();
 
       this.loading = false;
       this.cdr.markForCheck();
@@ -274,6 +298,12 @@ export class TaskHistory implements OnInit {
  
         this.createdSortDir = 'asc';
       }
+    }
+
+    if (table === 'assigned') {
+      this.refreshAssignedView();
+    } else {
+      this.refreshCreatedView();
     }
   }
  
@@ -527,18 +557,49 @@ export class TaskHistory implements OnInit {
  
  
   // =========================================================
+  // CACHED VIEW REFRESH
+  // =========================================================
+ 
+  refreshAssignedView(): void {
+    this.filteredAssignedTasks = this.getFilteredAndSortedAssignedTasks();
+    this.assignedTotalPages = Math.max(1, Math.ceil(this.filteredAssignedTasks.length / this.pageSize));
+    this.assignedPage = Math.min(this.assignedPage, this.assignedTotalPages);
+    this.paginateAssigned();
+  }
+ 
+  refreshCreatedView(): void {
+    this.filteredCreatedTasks = this.getFilteredAndSortedCreatedTasks();
+    this.createdTotalPages = Math.max(1, Math.ceil(this.filteredCreatedTasks.length / this.pageSize));
+    this.createdPage = Math.min(this.createdPage, this.createdTotalPages);
+    this.paginateCreated();
+  }
+ 
+  private paginateAssigned(): void {
+    const start = (this.assignedPage - 1) * this.pageSize;
+    this.paginatedAssignedTasks = this.filteredAssignedTasks.slice(start, start + this.pageSize);
+  }
+ 
+  private paginateCreated(): void {
+    const start = (this.createdPage - 1) * this.pageSize;
+    this.paginatedCreatedTasks = this.filteredCreatedTasks.slice(start, start + this.pageSize);
+  }
+ 
+ 
+  // =========================================================
   // FILTER EVENTS
   // =========================================================
  
   onAssignedFilterChange(): void {
  
     this.assignedPage = 1;
+    this.refreshAssignedView();
   }
  
  
   onCreatedFilterChange(): void {
  
     this.createdPage = 1;
+    this.refreshCreatedView();
   }
  
  
@@ -620,6 +681,8 @@ export class TaskHistory implements OnInit {
           total
         )
       );
+
+    this.paginateAssigned();
   }
  
  
@@ -637,6 +700,8 @@ export class TaskHistory implements OnInit {
           total
         )
       );
+
+    this.paginateCreated();
   }
  
  
@@ -657,6 +722,9 @@ export class TaskHistory implements OnInit {
     this.assignedPage = 1;
  
     this.createdPage = 1;
+
+    this.refreshAssignedView();
+    this.refreshCreatedView();
   }
  
  
@@ -964,4 +1032,3 @@ export class TaskHistory implements OnInit {
   }
  
 }
- 
