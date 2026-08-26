@@ -69,7 +69,8 @@
 
         <div class="col-md-6">
           <label class="form-label" for="assignedTo">
-            Assign To <span class="required" style="color: red;">*</span>
+            Assign To 
+            <span class="required" style="color: red;">*</span>
           </label>
          
            <ng-select
@@ -82,7 +83,7 @@
               [typeahead]="userInput$"
               placeholder="Search employee..."
               [searchable]="true"
-              [clearable]="true"
+              [clearable]="false"
               [appendTo]="'body'"
               required
           >

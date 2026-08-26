@@ -114,10 +114,15 @@ export class Clientlist implements OnInit, OnDestroy {
     this.loadClients(1);
   }
   loadClients(page: number = this.currentPage) {
+      let showSkeletonTimer: any = null;
+
 
     // Show full skeleton ONLY on initial page load
     if (this.clients.length === 0 && !this.searchClientName) {
+        showSkeletonTimer = setTimeout(() => {
       this.loading = true;
+      this.cdr.markForCheck();
+        },200);
     }
 
     // Show small loading state when searching
@@ -137,7 +142,7 @@ export class Clientlist implements OnInit, OnDestroy {
 
     this.clientService.getClients(query).subscribe({
       next: (res: any) => {
-
+        clearTimeout(showSkeletonTimer);
         this.clients = res.data || [];
         this.totalRecords = res.totalRecords || 0;
         this.currentPage = page;
@@ -149,6 +154,7 @@ export class Clientlist implements OnInit, OnDestroy {
       },
 
       error: (err: any) => {
+      clearTimeout(showSkeletonTimer);
 
         console.error('GetClients error:', err);
 

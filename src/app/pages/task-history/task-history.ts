@@ -55,7 +55,7 @@ export class TaskHistory implements OnInit {
   // PAGE STATE
   // =========================================================
  
-  loading = false;
+  loading = true;
  
   error: string | null = null;
  
@@ -119,7 +119,7 @@ export class TaskHistory implements OnInit {
     const userData = this.storage.getItem('user');
  
     if (!userData) {
- 
+ this.loading=false;
       this.error =
         'User not found. Please login again.';
  
@@ -142,6 +142,7 @@ export class TaskHistory implements OnInit {
  
  
     if (!this.currentUserId) {
+      this.loading=false;
  
       this.error =
         'Unable to determine current user. Please login again.';
@@ -159,69 +160,40 @@ export class TaskHistory implements OnInit {
   // =========================================================
  
   private loadHistory(): void {
- 
+  this.error = null;
+
+  let showSkeletonTimer: any = setTimeout(() => {
     this.loading = true;
- 
-    this.error = null;
- 
- 
-    forkJoin({
- 
-      assigned:
-        this.taskService.GetCompletedAssignedTasks(
-          this.currentUserId
-        ),
- 
-      created:
-        this.taskService.GetCompletedCreatedTasks(
-          this.currentUserId
-        )
- 
-    }).subscribe({
- 
-      next: ({ assigned, created }) => {
- 
-        this.completedAssigned =
-          this.extractArray(assigned);
- 
-        this.completedCreated =
-          this.extractArray(created);
- 
- 
-        // Reset pagination
- 
-        this.assignedPage = 1;
- 
-        this.createdPage = 1;
- 
- 
-        this.loading = false;
- 
-        this.cdr.markForCheck();
-      },
- 
- 
-      error: (err) => {
- 
-        console.error(
-          'Failed to load task history',
-          err
-        );
- 
- 
-        this.error =
-          'Failed to load task history. Please try again.';
- 
- 
-        this.loading = false;
- 
-        this.cdr.markForCheck();
-      }
- 
-    });
-  }
- 
- 
+    this.cdr.markForCheck();
+  }, 200); // only shows if the request is still pending after 200ms
+
+  forkJoin({
+    assigned: this.taskService.GetCompletedAssignedTasks(this.currentUserId),
+    created: this.taskService.GetCompletedCreatedTasks(this.currentUserId)
+  }).subscribe({
+    next: ({ assigned, created }) => {
+      clearTimeout(showSkeletonTimer);
+
+      this.completedAssigned = this.extractArray(assigned);
+      this.completedCreated = this.extractArray(created);
+
+      this.assignedPage = 1;
+      this.createdPage = 1;
+
+      this.loading = false;
+      this.cdr.markForCheck();
+    },
+
+    error: (err) => {
+      clearTimeout(showSkeletonTimer);
+
+      console.error('Failed to load task history', err);
+      this.error = 'Failed to load task history. Please try again.';
+      this.loading = false;
+      this.cdr.markForCheck();
+    }
+  });
+}
   // =========================================================
   // HANDLE API RESPONSE
   // =========================================================
