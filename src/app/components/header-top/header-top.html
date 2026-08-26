@@ -1,53 +1,135 @@
 <header class="header-top" [class.sidebar-closed]="!sidebarOpen">
+
     <div class="left">
-        <button class="sidebar-button" type="button" (click)="sidebarToggle.emit()" aria-label="Toggle sidebar">
-            ☰
+
+        <button
+            class="sidebar-button"
+            type="button"
+            (click)="sidebarToggle.emit()"
+            aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
         </button>
+
         <h5>Welcome, {{name}}</h5>
+
     </div>
+
+
     <div class="right">
-        <div class="notification" *ngIf="!isSuperAdmin" (click)="toggleNotifications(); $event.stopPropagation()">
-            🔔
+
+        <!-- Notifications -->
+        <div
+            class="notification"
+            *ngIf="!isSuperAdmin"
+            (click)="toggleNotifications(); $event.stopPropagation()">
+
+            <i class="bi bi-bell"></i>
+
             <span class="badge" *ngIf="unreadCount > 0">
                 {{ unreadCount }}
             </span>
+
         </div>
-        <div class="notification-menu" *ngIf="notificationOpen && !isSuperAdmin" (click)="$event.stopPropagation()">
+
+
+        <!-- Notification menu -->
+        <div
+            class="notification-menu"
+            *ngIf="notificationOpen && !isSuperAdmin"
+            (click)="$event.stopPropagation()">
+
             <div class="notif-header">
+
                 <h4>Notifications</h4>
-                <button *ngIf="unreadCount > 0" class="mark-all-btn" (click)="markAllRead()">
+
+                <button
+                    *ngIf="unreadCount > 0"
+                    class="mark-all-btn"
+                    (click)="markAllRead()">
                     Mark all as read
                 </button>
+
             </div>
+
             <ul>
-                <li *ngFor="let n of notifications" [class.unread]="!n.isRead" (click)="openNotification(n)">
+
+                <li
+                    *ngFor="let n of notifications"
+                    [class.unread]="!n.isRead"
+                    (click)="openNotification(n)">
+
                     <div class="notif-icon">
-                        <i class="bi" [ngClass]="getIcon(n.type)"></i>
+                        <i
+                            class="bi"
+                            [ngClass]="getIcon(n.type)">
+                        </i>
                     </div>
+
                     <div class="notif-body">
+
                         <p>{{ n.message }}</p>
-                        <small>{{ n.createdOn | timeAgo }}</small>
+
+                        <small>
+                            {{ n.createdOn | timeAgo }}
+                        </small>
+
                     </div>
-                    <span class="unread-dot" *ngIf="!n.isRead"></span>
+
+                    <span
+                        class="unread-dot"
+                        *ngIf="!n.isRead">
+                    </span>
+
                 </li>
-                <li *ngIf="notifications.length === 0" class="notification-empty">
+
+                <li
+                    *ngIf="notifications.length === 0"
+                    class="notification-empty">
+
                     No notifications yet
+
                 </li>
+
             </ul>
+
         </div>
-        <div class="profile" (click)="toggleDropdown(); $event.stopPropagation()">
-            👤
-            {{name}}
-            <div class="dropdown" *ngIf="dropdownOpen">
-                <a routerLink="/main/profile" (click)="dropdownOpen = false">
-                    <i class="bi bi-person-circle" gap="2"></i>
+
+
+        <!-- Profile -->
+        <div
+            class="profile"
+            (click)="toggleDropdown(); $event.stopPropagation()">
+
+            <i class="bi bi-person-circle"></i>
+
+            <span class="profile-name">
+                {{name}}
+            </span>
+
+            <div
+                class="dropdown"
+                *ngIf="dropdownOpen">
+
+                <a
+                    routerLink="/main/profile"
+                    (click)="dropdownOpen = false">
+
+                    <i class="bi bi-person-circle"></i>
                     View Profile
+
                 </a>
+
                 <a (click)="logout()">
-                    <i class="bi bi-box-arrow-right" gap="2"></i>
+
+                    <i class="bi bi-box-arrow-right"></i>
                     Logout
+
                 </a>
+
             </div>
+
         </div>
+
     </div>
+
 </header>

@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://localhost:8080/api',
-    hubUrl: 'http://localhost:8080/taskHub'
+    apiUrl: 'https://your-app-name.azurewebsites.net/api',
+    hubUrl: 'https://your-app-name.azurewebsites.net/taskHub'
 };
